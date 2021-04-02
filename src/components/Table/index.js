@@ -1,0 +1,423 @@
+import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
+
+import {
+  makeStyles,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  LinearProgress,
+  Box,
+  Paper,
+  Typography,
+  Tooltip,
+  ButtonGroup,
+  Button,
+  Grid,
+  TextField,
+  InputAdornment,
+} from '@material-ui/core';
+
+import EditIcon from '@material-ui/icons/EditRounded';
+import DeleteIcon from '@material-ui/icons/DeleteRounded';
+import SearchIcon from '@material-ui/icons/SearchRounded';
+import CheckIcon from '@material-ui/icons/CheckCircleRounded';
+
+import {
+  SomenteNumeros,
+  StringToDouble,
+  FormatarStringToMoney,
+} from '../../util/functions';
+
+const useStyles = makeStyles((theme) => ({
+  themeError: {
+    backgroundColor: theme.palette.background.paper,
+  },
+  root: {
+    width: '100%',
+  },
+  head: {
+    minHeight: 100,
+  },
+  headerItems: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    margin: 10,
+  },
+  cell: {
+    padding: 6,
+    paddingLeft: 20,
+    paddingRight: 0,
+  },
+  contentCell: {
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    padding: 6,
+    paddingLeft: 20,
+    paddingRight: 0,
+  },
+  loading: {
+    height: 5,
+  },
+  noDataContainer: {
+    padding: 20,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  actionCell: {
+    width: 20,
+    position: 'sticky',
+    zIndex: 1,
+    // right: -18,
+    right: -10,
+  },
+  btnEdit: {
+    width: 16,
+    padding: 2,
+    color: theme.palette.primary.contrastText,
+    backgroundColor: theme.palette.primary.main,
+    '&:hover': {
+      backgroundColor: theme.palette.primary.main,
+    },
+  },
+  btnDelete: {
+    width: 16,
+    padding: 2,
+    color: theme.palette.error.contrastText,
+    backgroundColor: theme.palette.error.main,
+    '&:hover': {
+      backgroundColor: theme.palette.error.main,
+    },
+  },
+  btnIcon: {
+    margin: 0,
+    padding: 0,
+    width: 16,
+  },
+  searchInput: {
+    marginTop: 10,
+    paddingRight: 20,
+    width: '100%',
+  },
+  iconSearch: {
+    color: 'gray',
+  },
+}));
+
+export const getColumn = (id, label, minWidth, align, formatar, ocultar) => {
+  let func = formatar;
+  if (!func) {
+    func = (value) => value;
+  }
+
+  return { id, label, minWidth, align, formatar: func, ocultar };
+};
+
+getColumn.prototypes = {
+  label: PropTypes.string.isRequired,
+  minWidth: PropTypes.number.isRequired,
+  align: PropTypes.string.isRequired,
+  formatar: PropTypes.func,
+  ocultar: PropTypes.bool,
+};
+
+export const getRow = (rowItems, columnsList) => {
+  const row = {};
+
+  if (rowItems.length === columnsList.length) {
+    for (let i = 0; i < columnsList.length; i += 1) {
+      for (let y = 0; y < rowItems.length; y += 1) {
+        if (i === y) {
+          row[columnsList[i].id] = rowItems[y];
+        }
+      }
+    }
+    return row;
+  }
+  return null;
+};
+
+getRow.prototypes = {
+  rowItems: PropTypes.array.isRequired,
+  columnsList: PropTypes.array.isRequired,
+};
+
+function CustomTable({
+  isLoading,
+  columns,
+  rows,
+  editFunction,
+  deleteFunction,
+  selectFunction,
+  naoPreencherLinhasVazias,
+  naoPesquisar,
+}) {
+  const classes = useStyles();
+
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [pesquisa, setPesquisa] = useState('');
+  const [filteredRows, setFilteredRows] = useState([]);
+
+  let emptyRows =
+    rowsPerPage -
+    Math.min(rowsPerPage, filteredRows.length - page * rowsPerPage);
+
+  const filtrarLista = (consulta) => {
+    let newRows = [];
+    setPesquisa(consulta);
+
+    if (!consulta) {
+      newRows = rows;
+    } else {
+      rows.forEach((row) => {
+        let incluir = false;
+
+        columns.some((column, index) => {
+          if (index > 0) {
+            const value = row[column.id];
+
+            if (typeof value === 'string') {
+              incluir = value.toLowerCase().includes(consulta.toLowerCase());
+
+              if (!incluir && SomenteNumeros(value)) {
+                incluir = SomenteNumeros(value).includes(consulta);
+              }
+            } else if (typeof value === 'number') {
+              incluir = Number(consulta) === value;
+
+              if (!incluir) {
+                incluir = StringToDouble(SomenteNumeros(consulta)) === value;
+              }
+
+              if (!incluir) {
+                incluir = FormatarStringToMoney(consulta) === value;
+              }
+            }
+          }
+
+          return incluir;
+        });
+
+        if (incluir) {
+          newRows.push(row);
+        }
+      });
+    }
+
+    setFilteredRows(newRows);
+    emptyRows =
+      rowsPerPage - Math.min(rowsPerPage, newRows.length - page * rowsPerPage);
+  };
+
+  const handleChangePage = (evt, numPage) => {
+    setPage(numPage);
+  };
+
+  const handleChangeRowsPerPage = (evt) => {
+    setRowsPerPage(+evt.target.value);
+    handleChangePage(evt, 0);
+  };
+
+  const paginationRowsInfo = ({ from, to, count }) => {
+    return `Listando ${from} - ${to} de ${count}`;
+  };
+
+  const getPagination = () => {
+    return (
+      <TablePagination
+        rowsPerPageOptions={[]}
+        component="div"
+        count={filteredRows.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onChangePage={handleChangePage}
+        onChangeRowsPerPage={handleChangeRowsPerPage}
+        labelRowsPerPage="Exibir"
+        nextIconButtonText="Próxima página"
+        backIconButtonText="Página anterior"
+        labelDisplayedRows={paginationRowsInfo}
+      />
+    );
+  };
+
+  useEffect(() => {
+    if (rows) {
+      filtrarLista();
+    }
+  }, [rows]);
+
+  return (
+    <Paper className={classes.root}>
+      {naoPesquisar && getPagination()}
+      {!naoPesquisar && (
+        <Grid container className={classes.headerItems}>
+          <Grid item xs={12} sm={4}>
+            <TextField
+              margin="dense"
+              variant="outlined"
+              // label="Pesquisar"
+              placeholder="Pesquisar..."
+              name="pesquisar"
+              className={classes.searchInput}
+              values={pesquisa}
+              onChange={(event) => filtrarLista(event.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon className={classes.iconSearch} />
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Grid>
+          <Grid item xs={12} sm={naoPesquisar ? 12 : 8}>
+            {getPagination()}
+          </Grid>
+        </Grid>
+      )}
+      <Box className={classes.loading}>{isLoading && <LinearProgress />}</Box>
+      <TableContainer>
+        <Table stickyHeader size="small">
+          <TableHead>
+            <TableRow className={classes.head}>
+              {columns.map((column, key) => (
+                <TableCell
+                  // eslint-disable-next-line react/no-array-index-key
+                  key={key}
+                  align={column.align}
+                  className={classes.cell}
+                  style={{
+                    minWidth: column.minWidth,
+                    display: column.ocultar ? 'none' : '',
+                  }}
+                >
+                  {column.label}
+                </TableCell>
+              ))}
+              {(editFunction || deleteFunction || selectFunction) && (
+                <TableCell
+                  // eslint-disable-next-line react/no-array-index-key
+                  key="actions"
+                  align="right"
+                />
+              )}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filteredRows
+              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              .map((row, rowKey) => {
+                return (
+                  // eslint-disable-next-line react/no-array-index-key
+                  <TableRow hover role="checkbox" tabIndex={-1} key={rowKey}>
+                    {columns.map((column) => {
+                      const value = row[column.id];
+                      return (
+                        <TableCell
+                          key={column.id}
+                          align={column.align}
+                          className={classes.contentCell}
+                          style={{
+                            minWidth: column.minWidth,
+                            display: column.ocultar ? 'none' : '',
+                          }}
+                        >
+                          {column.formatar ? column.formatar(value) : value}
+                        </TableCell>
+                      );
+                    })}
+                    {(editFunction || deleteFunction || selectFunction) && (
+                      <TableCell
+                        // eslint-disable-next-line react/no-array-index-key
+                        key="actions"
+                        align="right"
+                        className={classes.actionCell}
+                      >
+                        <ButtonGroup size="small" variant="contained">
+                          {editFunction && (
+                            <Tooltip title="Editar" placement="top" arrow>
+                              <Button
+                                size="small"
+                                className={classes.btnEdit}
+                                onClick={() => {
+                                  editFunction(row);
+                                }}
+                              >
+                                <EditIcon className={classes.btnIcon} />
+                              </Button>
+                            </Tooltip>
+                          )}
+                          {deleteFunction && (
+                            <Tooltip title="Excluir" placement="top" arrow>
+                              <Button
+                                size="small"
+                                className={classes.btnDelete}
+                                onClick={() => {
+                                  deleteFunction(row);
+                                }}
+                              >
+                                <DeleteIcon className={classes.btnIcon} />
+                              </Button>
+                            </Tooltip>
+                          )}
+                          {selectFunction && (
+                            <Tooltip title="Selecionar" placement="top" arrow>
+                              <Button
+                                size="small"
+                                className={classes.btnEdit}
+                                onClick={() => {
+                                  selectFunction(row);
+                                }}
+                              >
+                                <CheckIcon className={classes.btnIcon} />
+                              </Button>
+                            </Tooltip>
+                          )}
+                        </ButtonGroup>
+                      </TableCell>
+                    )}
+                  </TableRow>
+                );
+              })}
+            {!naoPreencherLinhasVazias &&
+              emptyRows > 0 &&
+              filteredRows.length > 0 && (
+                <TableRow style={{ height: emptyRows * 35 }}>
+                  <TableCell colSpan={6} />
+                </TableRow>
+              )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      {!filteredRows.length && (
+        <Box className={classes.noDataContainer}>
+          <Typography variant="body2" className={classes.noData}>
+            Não há dados para exibir
+          </Typography>
+        </Box>
+      )}
+    </Paper>
+  );
+}
+
+CustomTable.prototypes = {
+  isLoading: PropTypes.bool,
+  columns: PropTypes.array.isRequired,
+  rows: PropTypes.array.isRequired,
+  maxHeight: PropTypes.string,
+  editFunction: PropTypes.func,
+  deleteFunction: PropTypes.func,
+  selectFunction: PropTypes.func,
+  naoPreencherLinhasVazias: PropTypes.bool,
+  naoPesquisar: PropTypes.bool,
+};
+
+export default CustomTable;
