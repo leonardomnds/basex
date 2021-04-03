@@ -262,9 +262,9 @@ function SignIn() {
                 )}
               </Button>
             </Box>
-            <Box className={classes.options}>
+            {/* <Box className={classes.options}>
               <Link href="/account/recover_password">Esqueceu sua senha?</Link>
-            </Box>
+            </Box> */}
           </form>
         </Paper>
       </Box>
