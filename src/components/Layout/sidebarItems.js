@@ -14,20 +14,22 @@ import CategoryIcon from '@material-ui/icons/CategoryRounded';
 const sidebarItems = [
   {
     label: 'Início',
-    path: 'home',
-    page: <h1>Home</h1>,
+    path: '/app/home',
     icon: HomeIcon,
     items: null,
   },
   {
     label: 'Cadastro',
-    path: 'cadastro',
-    page: null,
+    path: '/app/cadastro',
     icon: CategoryIcon,
-    // items: [
+    items: [
+      {
+        label: 'Clientes',
+        path: 'pessoas',
+      }
     //   {
     //     label: 'Empresa',
-    //     path: 'empresa',
+    //     path: '/app/empresa',
     //     page: <NewCompanyPage />,
     //   },
     //   {
@@ -45,7 +47,7 @@ const sidebarItems = [
     //       },
     //     ],
     //   },
-    // ],
+    ],
   },
 ];
 

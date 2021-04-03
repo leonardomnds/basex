@@ -1,8 +1,11 @@
 import { gql } from 'apollo-server-micro';
 
 export default gql`
+  scalar UUID
+  scalar Date
+
   type Usuario {
-    id: String!
+    id: ID!
     ativo: Boolean!
     nome: String!
     email: String
@@ -21,16 +24,61 @@ export default gql`
     descricao: String!
     uf: String!
   }
+  type DadosCEP {
+    cep: String!
+    logradouro: String
+    bairro: String
+    complemento: String
+    cidade: Cidade
+  }
+  type DadosCNPJ {
+    cnpj: String
+    razaoSocial: String
+    fantasia: String
+    endereco: DadosCEP
+  }
   type InfoEmpresa {
     fantasia: String
     logoBase64: String
+  }
+  type CategoriaPessoa {
+    id: ID!
+    descricao: String!
+  }
+  type GrupoPessoa {
+    id: ID!
+    descricao: String!
+  }
+  type Pessoa {
+    id: ID!
+    codigo: Int!
+    cpfCnpj: String!
+    nome: String!
+    fantasia: String
+    rgInscEstadual: String
+    inscMunicipal: String
+    telefone: String
+    celular: String
+    email: String
+    cep: String
+    logradouro: String
+    numeroLogradouro: String
+    bairro: String
+    complementoLogradouro: String
+    ativo: Boolean!
+    dataCadastro: Date!
   }
 
   type Query {
     estados: [Estado!]!
     cidades(uf: String!): [Cidade!]!
-
+    consultarCep(cep: String!): DadosCEP
+    consultarCnpj(cnpj: String!): DadosCNPJ
     infoEmpresa(identificadorEmpresa: String!): InfoEmpresa
+    categoriasPessoa: [CategoriaPessoa!]!
+    gruposPessoa: [GrupoPessoa!]!
+    pessoa(id: UUID): Pessoa
+    pessoas: [Pessoa!]!
   }
 
   type Mutation {
@@ -46,5 +94,53 @@ export default gql`
       nome: String!,
       email: String
     ) : Usuario
+
+    criarCategoriaPessoa(
+      descricao: String!
+    ) : CategoriaPessoa
+
+    alterarCategoriaPessoa(
+      id: UUID!
+      descricao: String!
+    ) : CategoriaPessoa
+
+    deletarCategoriaPessoa(
+      id: UUID!
+    ) : CategoriaPessoa
+
+    criarGrupoPessoa(
+      descricao: String!
+    ) : GrupoPessoa
+
+    alterarGrupoPessoa(
+      id: UUID!
+      descricao: String!
+    ) : GrupoPessoa
+
+    deletarGrupoPessoa(
+      id: UUID!
+    ) : GrupoPessoa
+
+    salvarPessoa(
+      id: UUID
+      cpfCnpj: String!
+      nome: String!
+      fantasia: String
+      rgInscEstadual: String
+      inscMunicipal: String
+      telefone: String
+      celular: String
+      email: String
+      cep: String
+      logradouro: String
+      numeroLogradouro: String
+      bairro: String
+      complementoLogradouro: String
+      cidadeId: UUID
+      grupoId: UUID
+      categoriaId: UUID
+      ativo: Boolean
+    ) : Pessoa
+
   }
 `

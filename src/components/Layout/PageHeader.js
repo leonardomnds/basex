@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-// import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/router';
 
 import {
   makeStyles,
@@ -50,7 +50,7 @@ function PageHeader({
   btnBack,
 }) {
   const classes = useStyles();
-  // const navigate = useNavigate();
+  const router = useRouter();
   return (
     <Box className={classes.root}>
       <Box className={classes.header}>
@@ -59,7 +59,7 @@ function PageHeader({
             <Tooltip title="Voltar" placement="top" arrow>
               <IconButton
                 onClick={() => {
-                  // navigate(-1);
+                  router.back();
                 }}
               >
                 <ArrowBackIcon />

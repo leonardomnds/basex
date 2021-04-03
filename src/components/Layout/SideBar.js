@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-// import { useNavigate, useLocation } from 'react-router-dom';
+import { useRouter } from "next/router";
 import { useSelector, useDispatch } from 'react-redux';
 
 import {
@@ -151,8 +151,7 @@ const useStyles = makeStyles((theme) => ({
 
 function Sidebar() {
   const classes = useStyles();
-  // const navigate = useNavigate();
-  // const location = useLocation();
+  const router = useRouter();
   const dispatch = useDispatch();
   const theme = useTheme();
   const size = useWindowSize();
@@ -162,8 +161,8 @@ function Sidebar() {
   const [descOpennedItem, setDescOpennedItem] = useState('');
   const [selectedItem, setSelectedItem] = useState('home');
 
-  const isCurrentPath = (/* path */) => {
-    // return location.pathname.includes(path.replace('//', '/'));
+  const isCurrentPath = (path) => {
+    return (router.pathname + '/').includes(path.replace('//','/'));
   };
 
   const isSelectedItem = (path) => {
@@ -171,17 +170,19 @@ function Sidebar() {
   };
 
   useEffect(() => {
-    const basePath = ''; // `${location.pathname}/`;
+    const basePath = router.pathname + '/';
 
     const item = basePath
-      .replace('/app/', '')
-      .substring(0, basePath.replace('/app/', '').indexOf('/'));
+      .substring(0, basePath.slice(5).indexOf('/')+5);
 
     const sub = basePath
-      .replace(`/app/${item}/`, '')
-      .substring(0, basePath.replace(`/app/${item}/`, '').indexOf('/'));
+      .replace(item, '')
+      .substring(0, basePath.replace(item, '').slice(5).indexOf('/')+5);
 
     setSelectedItem(item);
+
+    console.log(item);
+    console.log(sub);
 
     if (sub.length > 1) {
       setOpennedItem(true);
@@ -223,8 +224,7 @@ function Sidebar() {
                       if (size.width < theme.breakpoints.values.lg) {
                         dispatch(drawerClick(false));
                       }
-                      // setSelectedSubItem('');
-                      // navigate(item.path);
+                      router.push(item.path);
                     }
                   }}
                 >
@@ -268,8 +268,7 @@ function Sidebar() {
                             if (size.width < theme.breakpoints.values.lg) {
                               dispatch(drawerClick(false));
                             }
-                            // setSelectedSubItem(sub.path);
-                            // navigate(`${item.path}/${sub.path}`);
+                            router.push(`${item.path}/${sub.path}`);
                           }}
                         >
                           <ListItemIcon className={classes.listItemIcon}>

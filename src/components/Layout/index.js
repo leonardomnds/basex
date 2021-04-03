@@ -56,20 +56,20 @@ function Layout({ children }) {
   const router = useRouter();
   const isDrawerOpen = useSelector((state) => state.drawer.open);
 
-  const loginRedirect = () => {
-    const rotasLiberadas = ['/', '/[login]/login'];
-    return !rotasLiberadas.includes(router.pathname);
+  const needAuthInThisRoute = () => {
+    return (router.pathname + '/').startsWith('/app/')
   }
 
   useEffect(() => {
-    if (!authService.isAuthenticated() && loginRedirect()) {
-      router.push('/');
+    if (!authService.isAuthenticated() && needAuthInThisRoute()) {
+      const identificador = authService.getIdentificadorEmpresa();
+      router.replace(!identificador ? '/' : `/${identificador}/login`);
     }
   }, [])
 
   return (
 
-    loginRedirect()
+    needAuthInThisRoute()
     ?
     <div className={classes.root}>
       <TopBar />

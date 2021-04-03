@@ -17,6 +17,7 @@ import drawerClick from '../store/actions/drawerAction';
 
 import useApi from '../services/useApi';
 import authService from '../services/AuthService';
+import { route } from 'next/dist/next-server/server/router';
 
 const useStyles = makeStyles((theme) => ({
   themeError: {
@@ -166,7 +167,7 @@ function SignIn() {
           }
 
           dispatch(drawerClick(true));
-          router.replace('/app/cadastro');
+          router.replace('/app/home');
           return;
         }
         if (!response) {
@@ -183,6 +184,10 @@ function SignIn() {
 
   // Buscar empresa de Login
   useEffect(() => {
+    if (router.pathname != '/[login]/login') {
+      router.replace('/demo/login');
+    }
+
     setLoading(true);
     async function getData() {
       try {

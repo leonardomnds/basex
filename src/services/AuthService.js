@@ -35,7 +35,7 @@ class AuthService {
   }
 
   removeIdentificadorEmpresa() {
-    localStorage.removeItem('IDENTIFICADOR_EMPRESA');
+    //localStorage.removeItem('IDENTIFICADOR_EMPRESA');
   }
 
   setLogoEmpresa(logo) {

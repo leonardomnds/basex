@@ -6,8 +6,19 @@ const Estado = require('./models/Estado');
 const Cidade = require('./models/Cidade');
 const Empresa = require('./models/Empresa');
 const Usuario = require('./models/Usuario');
+const CategoriaPessoa = require('./models/CategoriaPessoa');
+const GrupoPessoa = require('./models/GrupoPessoa');
+const Pessoa = require('./models/Pessoa');
 
-const models = [Estado, Cidade, Empresa, Usuario];
+const models = [
+  Estado,
+  Cidade,
+  Empresa,
+  Usuario,
+  CategoriaPessoa,
+  GrupoPessoa,
+  Pessoa
+];
 
 class Database {
   constructor() {
