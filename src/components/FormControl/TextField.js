@@ -26,15 +26,13 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export const getEndItemIconButton = (icon, onClick, tooltip = '') => {
-  return (
-    <InputAdornment position="end">
-      <Tooltip title={tooltip} placement="top" arrow>
-        <IconButton onClick={onClick}>{icon}</IconButton>
-      </Tooltip>
-    </InputAdornment>
-  );
-};
+export const getEndItemIconButton = (icon, onClick, tooltip = '') => (
+  <InputAdornment position="end">
+    <Tooltip title={tooltip} placement="top" arrow>
+      <IconButton onClick={onClick}>{icon}</IconButton>
+    </Tooltip>
+  </InputAdornment>
+);
 
 getEndItemIconButton.prototypes = {
   icon: PropTypes.element.isRequired,
@@ -62,7 +60,7 @@ function CustomTextField({
         id={uuid}
         name={uuid}
         type={type}
-        value={value}
+        value={value || ''}
         autoComplete="off"
         disabled={disabled}
         autoFocus={autoFocus}

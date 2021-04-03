@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useRouter } from "next/router";
+import { useRouter } from 'next/router';
 import { useSelector } from 'react-redux';
 
 import { useTheme, makeStyles, Box } from '@material-ui/core';
@@ -57,20 +57,17 @@ function Layout({ children }) {
   const isDrawerOpen = useSelector((state) => state.drawer.open);
 
   const needAuthInThisRoute = () => {
-    return (router.pathname + '/').startsWith('/app/')
-  }
+    return `${router.pathname}/`.startsWith('/app/');
+  };
 
   useEffect(() => {
     if (!authService.isAuthenticated() && needAuthInThisRoute()) {
       const identificador = authService.getIdentificadorEmpresa();
       router.replace(!identificador ? '/' : `/${identificador}/login`);
     }
-  }, [])
+  }, []);
 
-  return (
-
-    needAuthInThisRoute()
-    ?
+  return needAuthInThisRoute() ? (
     <div className={classes.root}>
       <TopBar />
       <Sidebar />
@@ -86,7 +83,8 @@ function Layout({ children }) {
         </div>
       </div>
     </div>
-    : <Box>{children}</Box>
+  ) : (
+    <Box>{children}</Box>
   );
 }
 

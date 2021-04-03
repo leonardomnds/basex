@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useRouter } from "next/router";
+import { useRouter } from 'next/router';
 import { useSelector, useDispatch } from 'react-redux';
 
 import {
@@ -162,7 +162,7 @@ function Sidebar() {
   const [selectedItem, setSelectedItem] = useState('home');
 
   const isCurrentPath = (path) => {
-    return (router.pathname + '/').includes(path.replace('//','/'));
+    return `${router.pathname}/`.includes(path.replace('//', '/'));
   };
 
   const isSelectedItem = (path) => {
@@ -170,19 +170,15 @@ function Sidebar() {
   };
 
   useEffect(() => {
-    const basePath = router.pathname + '/';
+    const basePath = `${router.pathname}/`;
 
-    const item = basePath
-      .substring(0, basePath.slice(5).indexOf('/')+5);
+    const item = basePath.substring(0, basePath.slice(5).indexOf('/') + 5);
 
     const sub = basePath
       .replace(item, '')
-      .substring(0, basePath.replace(item, '').slice(5).indexOf('/')+5);
+      .substring(0, basePath.replace(item, '').slice(5).indexOf('/') + 5);
 
     setSelectedItem(item);
-
-    console.log(item);
-    console.log(sub);
 
     if (sub.length > 1) {
       setOpennedItem(true);

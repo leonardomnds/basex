@@ -17,7 +17,6 @@ import drawerClick from '../store/actions/drawerAction';
 
 import useApi from '../services/useApi';
 import authService from '../services/AuthService';
-import { route } from 'next/dist/next-server/server/router';
 
 const useStyles = makeStyles((theme) => ({
   themeError: {
@@ -155,11 +154,12 @@ function SignIn() {
       });
     } else {
       try {
-
         const response = await useApi.login(authEmpresa, usuario, senha);
 
-        if (!response.errors) {
-          await dispatch(signIn(response.data.login.usuario, response.data.login.token));
+        if (!response.error) {
+          await dispatch(
+            signIn(response.data.login.usuario, response.data.login.token),
+          );
           await authService.setIdentificadorEmpresa(authEmpresa);
 
           if (logoEmpresa) {
@@ -170,11 +170,7 @@ function SignIn() {
           router.replace('/app/home');
           return;
         }
-        if (!response) {
-          throw new Error('Não foi possível se conectar ao servidor de login!');
-        } else {
-          addToast(response.errors[0].detalhes, { appearance: 'error' });
-        }
+        throw new Error(response.error);
       } catch (err) {
         addToast(err.message, { appearance: 'error' });
       }
@@ -184,7 +180,7 @@ function SignIn() {
 
   // Buscar empresa de Login
   useEffect(() => {
-    if (router.pathname != '/[login]/login') {
+    if (router.pathname !== '/[login]/login') {
       router.replace('/demo/login');
     }
 
@@ -193,12 +189,14 @@ function SignIn() {
       try {
         const response = await useApi.findEmpresaById(authEmpresa);
 
-        if (!response.errors) {
+        if (!response.error) {
           const { infoEmpresa } = response.data;
           if (infoEmpresa) {
             setEmpresa(infoEmpresa.fantasia);
             setLogoEmpresa(infoEmpresa.logoBase64);
           }
+        } else {
+          throw new Error(response.error);
         }
       } catch (err) {
         addToast(err.message, { appearance: 'error' });

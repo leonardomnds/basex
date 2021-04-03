@@ -27,12 +27,9 @@ import CustomButton from '../../../../components/CustomButton';
 
 import EntityDialog from '../../../../components/CustomDialog/Entity';
 import CustomDialog from '../../../../components/CustomDialog';
-import CustomTable, {
-  getColumn /* , getRow */,
-} from '../../../../components/Table';
+import CustomTable, { getColumn, getRow } from '../../../../components/Table';
 // import SelectTags, { getTag } from '../../../../components/FormControl/SelectTags';
 
-import api from '../../../../util/Api';
 import useApi from '../../../../services/useApi';
 
 import {
@@ -40,6 +37,7 @@ import {
   FormatarCpfCnpj,
   FormatarCep,
   FormatarTelefone,
+  ZerosLeft,
 } from '../../../../util/functions';
 
 // import useWindowSize from '../../../../util/WindowSize';
@@ -210,68 +208,57 @@ function NewPeople() {
 
     const rows = [];
 
-    try {
-      const response = await api.post('/schema/contatos', contactJson);
+    if (!contEditId || contEditId.includes('POST-')) {
+      const rowsPost = [];
 
-      if (response.data.sucesso) {
-        // Se tem POST no ID, é contato novo
-        if (!contEditId || contEditId.includes('POST-')) {
-          const rowsPost = [];
-
-          // Cria um ID para possíveis edições antes de gravar
-          if (contEditId.length === 0) {
-            const uuid = `POST-${uuidv4()}`;
-            contactJson.id = uuid;
-          }
-
-          // Inclui na lista que será feito POST para API
-          rowsPost.push(contactJson);
-
-          // Inclui também os que já tinha
-          listaContatosPost.forEach((row) => {
-            if (row.id !== contactJson.id) {
-              rowsPost.push(row);
-            }
-          });
-
-          setListaContatosPost(rowsPost);
-        } else {
-          const rowsPut = [];
-          // Inclui na lista que será feito PUT na API
-          rowsPut.push(contactJson);
-
-          listaContatosPut.forEach((row) => {
-            // Inclui na lista apenas os demais itens
-            if (row.id !== contactJson.id) {
-              rowsPut.push(row);
-            }
-          });
-
-          setListaContatosPut(rowsPut);
-        }
-
-        rows.push(contactJson);
-
-        tableRows.forEach((row) => {
-          if (row.id !== contactJson.id) {
-            rows.push(row);
-          }
-        });
-
-        setTableRows(rows);
-
-        setContEnable(false);
-        limparCamposContatos();
-      } else {
-        addToast(response.error.errors[0].detalhes, { appearance: 'error' });
+      // Cria um ID para possíveis edições antes de gravar
+      if (contEditId.length === 0) {
+        const uuid = `POST-${uuidv4()}`;
+        contactJson.id = uuid;
       }
-    } catch (err) {
-      addToast(err.message, { appearance: 'error' });
+
+      // Inclui na lista que será feito POST para API
+      rowsPost.push(contactJson);
+
+      // Inclui também os que já tinha
+      listaContatosPost.forEach((row) => {
+        if (row.id !== contactJson.id) {
+          rowsPost.push(row);
+        }
+      });
+
+      setListaContatosPost(rowsPost);
+    } else {
+      const rowsPut = [];
+      // Inclui na lista que será feito PUT na API
+      rowsPut.push(contactJson);
+
+      listaContatosPut.forEach((row) => {
+        // Inclui na lista apenas os demais itens
+        if (row.id !== contactJson.id) {
+          rowsPut.push(row);
+        }
+      });
+
+      setListaContatosPut(rowsPut);
     }
+
+    rows.push(contactJson);
+
+    tableRows.forEach((row) => {
+      if (row.id !== contactJson.id) {
+        rows.push(row);
+      }
+    });
+
+    setTableRows(rows);
+
+    setContEnable(false);
+    limparCamposContatos();
 
     setSavingContact(false);
   };
-
+  /*
   const savePersonContacts = async (personId) => {
     const baseUrl = `/pessoas/${personId}/contatos`;
     let response;
@@ -308,7 +295,7 @@ function NewPeople() {
       return false;
     }
   };
-
+*/
   const handleSave = async () => {
     setSaving(true);
 
@@ -339,67 +326,56 @@ function NewPeople() {
       });
     } else {
       try {
-        let response;
+        const contatos = [];
+        tableRows.forEach((contato) => {
+          contatos.push({
+            nome: contato.nome,
+            descricao: contato.descricao,
+            telefone: contato.telefone,
+            celular: contato.celular,
+            email: contato.email,
+          });
+        });
 
-        const body = {
-          ativo: isAtivo,
-          cpfCnpj,
-          nome: nomeRazao,
-          fantasia,
-          rgInscEstadual: rgIe,
-          inscMunicipal: inscMun,
-          telefone,
-          celular,
-          email,
-          cep,
-          logradouro,
-          numeroLogradouro: numLogradouro,
-          bairro,
-          complementoLogradouro: complemento,
-          /*
-          tipoCliente: tiposCadastro.filter((tp) => tp.id === 'C').length > 0,
-          tipoFornecedor:
-            tiposCadastro.filter((tp) => tp.id === 'F').length > 0,
-          tipoVendedor: tiposCadastro.filter((tp) => tp.id === 'V').length > 0, */
-        };
+        const response = await useApi.salvarPessoa(
+          id || null,
+          cpfCnpj || null,
+          nomeRazao || null,
+          fantasia || null,
+          rgIe || null,
+          inscMun || null,
+          telefone || null,
+          celular || null,
+          email || null,
+          cep || null,
+          logradouro || null,
+          numLogradouro || null,
+          bairro || null,
+          complemento || null,
+          cidade || null,
+          grupo || null,
+          categoria || null,
+          isAtivo,
+          contatos,
+        );
 
-        if (cidade.length > 0) {
-          body.cidadeId = cidade;
-        }
-        if (grupo.length > 0) {
-          body.grupoId = grupo;
-        }
-        if (categoria.length > 0) {
-          body.categoriaId = categoria;
-        }
+        /*
+        tipoCliente: tiposCadastro.filter((tp) => tp.id === 'C').length > 0,
+        tipoFornecedor:
+          tiposCadastro.filter((tp) => tp.id === 'F').length > 0,
+        tipoVendedor: tiposCadastro.filter((tp) => tp.id === 'V').length > 0,
+        */
 
-        if (id) {
-          response = await api.put(`/pessoas/${id}`, body);
-        } else {
-          response = await api.post('/pessoas', body);
-        }
+        if (!response.error) {
+          // const contactOk = await savePersonContacts(response.data.dados.id);
 
-        if (response.data && response.data.sucesso) {
-          const contactOk = await savePersonContacts(response.data.dados.id);
-
-          addToast(
-            `Pessoa ${id ? 'alterada' : 'cadastrado'} com sucesso!${
-              contactOk
-                ? ''
-                : ' Mas ocorreram erros ao gravar os contatos. Verifique!'
-            }`,
-            {
-              appearance: contactOk ? 'success' : 'warning',
-            },
-          );
+          addToast(`Pessoa ${id ? 'alterada' : 'cadastrado'} com sucesso!`, {
+            appearance: 'success',
+          });
           router.push('/app/cadastro/pessoas');
           return;
         }
-        if (!response.data) {
-          throw new Error('Não foi possível se conectar ao servidor!');
-        } else {
-          addToast(response.error.errors[0].detalhes, { appearance: 'error' });
-        }
+        throw new Error(response.error);
       } catch (err) {
         addToast(err.message, { appearance: 'error' });
       }
@@ -448,10 +424,8 @@ function NewPeople() {
             }
           }
         }
-      } else if (!response.data) {
-        throw new Error('Não foi possível se conectar ao servidor!');
       } else {
-        addToast(response.error.errors[0].detalhes, { appearance: 'error' });
+        throw new Error(response.error);
       }
     } catch (err) {
       addToast(err.message, { appearance: 'error' });
@@ -489,10 +463,8 @@ function NewPeople() {
             setCidade('');
           }
         }
-      } else if (!response.data) {
-        throw new Error('Não foi possível se conectar ao servidor!');
       } else {
-        addToast(response.error.errors[0].detalhes, { appearance: 'error' });
+        throw new Error(response.error);
       }
     } catch (err) {
       addToast(err.message, { appearance: 'error' });
@@ -567,7 +539,7 @@ function NewPeople() {
           setListaGrupos(items);
         }
       } else {
-        addToast(response.error.errors[0].detalhes, { appearance: 'error' });
+        throw new Error(response.error);
       }
     } catch (err) {
       addToast(err.message, { appearance: 'error' });
@@ -588,7 +560,7 @@ function NewPeople() {
           setListaCategorias(items);
         }
       } else {
-        addToast(response.error.errors[0].detalhes, { appearance: 'error' });
+        throw new Error(response.error);
       }
     } catch (err) {
       addToast(err.message, { appearance: 'error' });
@@ -613,7 +585,7 @@ function NewPeople() {
             setListaEstados(estados);
           }
         } else {
-          addToast(response.error.errors[0].detalhes, { appearance: 'error' });
+          throw new Error(response.error);
         }
       } catch (err) {
         addToast(err.message, { appearance: 'error' });
@@ -639,7 +611,7 @@ function NewPeople() {
             setListaCidades(cidades);
           }
         } else {
-          addToast(response.error.errors[0].detalhes, { appearance: 'error' });
+          throw new Error(response.error);
         }
       } catch (err) {
         addToast(err.message, { appearance: 'error' });
@@ -660,22 +632,22 @@ function NewPeople() {
       try {
         const response = await useApi.getPessoa(id);
 
-        console.log(response);
-
         if (!response.error) {
           const dados = response.data.pessoa;
           if (dados) {
             // Dados Gerais
-            setCodigo(dados.codigo);
-            setCpfCnpj(dados.cpfCnpj);
+            setCodigo(
+              dados.codigo ? ZerosLeft(dados.codigo.toString(), 6) : '',
+            );
+            setCpfCnpj(dados.cpfCnpj || '');
             setAtivo(dados.ativo);
-            setNomeRazao(dados.nome);
-            setFantasia(dados.fantasia);
-            setRgIE(dados.rgInscEstadual);
-            setInscMun(dados.inscMunicipal);
-            setTelefone(dados.telefone);
-            setCelular(dados.celular);
-            setEmail(dados.email);
+            setNomeRazao(dados.nome || '');
+            setFantasia(dados.fantasia || '');
+            setRgIE(dados.rgInscEstadual || '');
+            setInscMun(dados.inscMunicipal || '');
+            setTelefone(dados.telefone || '');
+            setCelular(dados.celular || '');
+            setEmail(dados.email || '');
             if (dados.grupo) {
               setGrupo(dados.grupo.id);
             }
@@ -696,17 +668,17 @@ function NewPeople() {
             setTiposCadastro(tipos);
 */
             // Endereço
-            setCep(dados.cep);
-            setCepConsultado(dados.cep);
-            setLogradouro(dados.logradouro);
-            setNumLogradouro(dados.numeroLogradouro);
-            setBairro(dados.bairro);
-            setComplemento(dados.complementoLogradouro);
+            setCep(dados.cep || '');
+            setCepConsultado(dados.cep || '');
+            setLogradouro(dados.logradouro || '');
+            setNumLogradouro(dados.numeroLogradouro || '');
+            setBairro(dados.bairro || '');
+            setComplemento(dados.complementoLogradouro || '');
             if (dados.cidade) {
               setUF(dados.cidade.uf);
               setCidade(dados.cidade.id);
             }
-            /*
+
             // Contatos
             if (dados.contatos) {
               dados.contatos.forEach((con) => {
@@ -725,10 +697,15 @@ function NewPeople() {
                 );
               });
             }
-*/
+          } else {
+            router.push('/app/cadastro/pessoas');
           }
         } else {
-          addToast(response.error.errors[0].detalhes, { appearance: 'error' });
+          if (response.error.includes('Variable "$id" got invalid value')) {
+            router.push('/app/cadastro/pessoas');
+            return;
+          }
+          throw new Error(response.error);
         }
       } catch (err) {
         addToast(err.message, { appearance: 'error' });
@@ -1036,7 +1013,7 @@ function NewPeople() {
         >
           <Tab label="Dados gerais" />
           <Tab label="Endereço" />
-          {/* <Tab label="Contatos" /> */}
+          <Tab label="Contatos" />
         </Tabs>
         <Box className={classes.tab}>{TablePanel()}</Box>
       </Paper>

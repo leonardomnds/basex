@@ -49,6 +49,15 @@ export default gql`
     id: ID!
     descricao: String!
   }
+  type ContatoPessoa {
+    id: ID!
+    nome: String!
+    descricao: String
+    telefone: String
+    celular: String
+    email: String
+    dataCadastro: Date!
+  }
   type Pessoa {
     id: ID!
     codigo: Int!
@@ -67,6 +76,15 @@ export default gql`
     complementoLogradouro: String
     ativo: Boolean!
     dataCadastro: Date!
+    contatos: [ContatoPessoa!]
+  }
+
+  input ContatoPessoaInput {
+    nome: String!
+    descricao: String
+    telefone: String
+    celular: String
+    email: String
   }
 
   type Query {
@@ -82,44 +100,26 @@ export default gql`
   }
 
   type Mutation {
-    login(
-      identificadorEmpresa: String!,
-      usuario: String!,
-      senha: String!
-    ): Auth
+    login(identificadorEmpresa: String!, usuario: String!, senha: String!): Auth
 
     criarUsuario(
-      usuario: String!,
-      senha: String!,
-      nome: String!,
+      usuario: String!
+      senha: String!
+      nome: String!
       email: String
-    ) : Usuario
+    ): Usuario
 
-    criarCategoriaPessoa(
-      descricao: String!
-    ) : CategoriaPessoa
+    criarCategoriaPessoa(descricao: String!): CategoriaPessoa
 
-    alterarCategoriaPessoa(
-      id: UUID!
-      descricao: String!
-    ) : CategoriaPessoa
+    alterarCategoriaPessoa(id: UUID!, descricao: String!): CategoriaPessoa
 
-    deletarCategoriaPessoa(
-      id: UUID!
-    ) : CategoriaPessoa
+    deletarCategoriaPessoa(id: UUID!): CategoriaPessoa
 
-    criarGrupoPessoa(
-      descricao: String!
-    ) : GrupoPessoa
+    criarGrupoPessoa(descricao: String!): GrupoPessoa
 
-    alterarGrupoPessoa(
-      id: UUID!
-      descricao: String!
-    ) : GrupoPessoa
+    alterarGrupoPessoa(id: UUID!, descricao: String!): GrupoPessoa
 
-    deletarGrupoPessoa(
-      id: UUID!
-    ) : GrupoPessoa
+    deletarGrupoPessoa(id: UUID!): GrupoPessoa
 
     salvarPessoa(
       id: UUID
@@ -140,7 +140,7 @@ export default gql`
       grupoId: UUID
       categoriaId: UUID
       ativo: Boolean
-    ) : Pessoa
-
+      contatos: [ContatoPessoaInput!]
+    ): Pessoa
   }
-`
+`;

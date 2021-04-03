@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useRouter } from "next/router";
+import { useRouter } from 'next/router';
 import { useToasts } from 'react-toast-notifications';
 
 import { Box } from '@material-ui/core';
 import PageHeader from '../../../../components/Layout/PageHeader';
 
 import CustomTable, { getColumn, getRow } from '../../../../components/Table';
-import api from '../../../../services/useApi';
+import useApi from '../../../../services/useApi';
 import CustomDialog from '../../../../components/CustomDialog';
 import { ZerosLeft } from '../../../../util/functions';
 
@@ -40,9 +40,9 @@ function ProductList() {
   const [isLoading, setLoading] = useState([]);
   const [deletingPerson, setDeletingPerson] = useState(null);
 
-  const handleDeletePerson = (person) => {
-    setDeletingPerson(person);
-  };
+  // const handleDeletePerson = (person) => {
+  //   setDeletingPerson(person);
+  // };
 
   const handleCloseDialog = () => {
     setDeletingPerson(null);
@@ -50,7 +50,7 @@ function ProductList() {
 
   const confirmDeleteProduct = async () => {
     try {
-      const response = await api.delete(`/pessoas/${deletingPerson.id}`);
+      const response = null; // await useApi.delete(`/pessoas/${deletingPerson.id}`);
 
       const { sucesso, dados, erros } = response.data;
 
@@ -81,9 +81,7 @@ function ProductList() {
     const rows = [];
 
     try {
-      const response = await api.getListaPessoas();
-
-      console.log(response.data);
+      const response = await useApi.getListaPessoas();
 
       if (!response.error) {
         response.data.pessoas.forEach((pes) => {
@@ -103,7 +101,7 @@ function ProductList() {
           );
         });
       } else {
-        addToast(response.erros[0].detalhes, { appearance: 'error' });
+        throw new Error(response.error);
       }
     } catch (err) {
       addToast(err.message, { appearance: 'error' });
@@ -121,7 +119,7 @@ function ProductList() {
         columns={tableColumns}
         rows={tableRows}
         editFunction={handleEditPerson}
-        //deleteFunction={handleDeletePerson}
+        // deleteFunction={handleDeletePerson}
       />
       {deletingPerson && (
         <CustomDialog

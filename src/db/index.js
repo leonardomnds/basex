@@ -9,6 +9,7 @@ const Usuario = require('./models/Usuario');
 const CategoriaPessoa = require('./models/CategoriaPessoa');
 const GrupoPessoa = require('./models/GrupoPessoa');
 const Pessoa = require('./models/Pessoa');
+const ContatoPessoa = require('./models/ContatoPessoa');
 
 const models = [
   Estado,
@@ -17,7 +18,8 @@ const models = [
   Usuario,
   CategoriaPessoa,
   GrupoPessoa,
-  Pessoa
+  Pessoa,
+  ContatoPessoa,
 ];
 
 class Database {

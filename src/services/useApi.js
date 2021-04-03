@@ -2,19 +2,40 @@ import api from '../util/Api';
 
 const getResponseData = (response) => {
   try {
-    if (!response.data) {
-      return null;
+    const retorno = { data: null, error: null, extensions: null };
+
+    if (response.data && response.status !== 500) {
+      if (response.data.errors) {
+        retorno.error = response.data.errors;
+      }
+      if (response.data.error && response.data.error.errors) {
+        retorno.error = response.data.error.errors;
+      }
+      if (response.data.extensions) {
+        retorno.extensions = response.data.extensions;
+      }
+      if (retorno.error) {
+        retorno.error = retorno.error[0].detalhes;
+      }
+      if (response.data.data) {
+        retorno.data = response.data.data;
+        retorno.error = null;
+      }
+    } else {
+      retorno.error = 'Não foi possível se comunicar com o Servidor!';
     }
-    return response.data;
+
+    return retorno;
   } catch (error) {
     return error.message;
-  }  
-}
+  }
+};
 
 module.exports = {
   async login(authEmpresa, usuario, senha) {
-    return getResponseData(await api.post('', {
-      query: `
+    return getResponseData(
+      await api.post('', {
+        query: `
         mutation ($authEmpresa: String!, $usuario: String!, $senha: String!) {
           login(
             identificadorEmpresa: $authEmpresa,
@@ -30,12 +51,14 @@ module.exports = {
             }
           }
         }`,
-      variables: { authEmpresa, usuario, senha }
-    }));
+        variables: { authEmpresa, usuario, senha },
+      }),
+    );
   },
   async findEmpresaById(authEmpresa) {
-    return getResponseData(await api.post('', {
-      query: `
+    return getResponseData(
+      await api.post('', {
+        query: `
         query ($authEmpresa: String!) {
           infoEmpresa(
             identificadorEmpresa: $authEmpresa,
@@ -44,12 +67,14 @@ module.exports = {
             logoBase64
           }
         }`,
-      variables: { authEmpresa }
-    }));
+        variables: { authEmpresa },
+      }),
+    );
   },
   async getListaPessoas() {
-    return getResponseData(await api.post('', {
-      query: `
+    return getResponseData(
+      await api.post('', {
+        query: `
       query {
         pessoas {
           id
@@ -62,22 +87,26 @@ module.exports = {
           ativo
         }
       }`,
-    }));
+      }),
+    );
   },
   async getListaEstados() {
-    return getResponseData(await api.post('', {
-      query: `
+    return getResponseData(
+      await api.post('', {
+        query: `
       query {
         estados {
           uf
           descricao
         }
       }`,
-    }));
+      }),
+    );
   },
   async getCidadesByUF(uf) {
-    return getResponseData(await api.post('', {
-      query: `
+    return getResponseData(
+      await api.post('', {
+        query: `
       query ($uf: String!) {
         cidades(
           uf: $uf
@@ -86,34 +115,40 @@ module.exports = {
           descricao
         }
       }`,
-      variables: { uf }
-    }));
+        variables: { uf },
+      }),
+    );
   },
   async getGruposPessoas() {
-    return getResponseData(await api.post('', {
-      query: `
+    return getResponseData(
+      await api.post('', {
+        query: `
       query {
         gruposPessoa {
           id
           descricao
         }
-      }`
-    }));
+      }`,
+      }),
+    );
   },
   async getCategoriasPessoas() {
-    return getResponseData(await api.post('', {
-      query: `
+    return getResponseData(
+      await api.post('', {
+        query: `
       query {
         categoriasPessoa {
           id
           descricao
         }
-      }`
-    }));
+      }`,
+      }),
+    );
   },
   async consultarCEP(cep) {
-    return getResponseData(await api.post('', {
-      query: `
+    return getResponseData(
+      await api.post('', {
+        query: `
       query ($cep: String!) {
         consultarCep(cep: $cep) {
           cep
@@ -127,12 +162,14 @@ module.exports = {
           }
         }
       }`,
-      variables: { cep }
-    }));
+        variables: { cep },
+      }),
+    );
   },
   async consultarCNPJ(cnpj) {
-    return getResponseData(await api.post('', {
-      query: `
+    return getResponseData(
+      await api.post('', {
+        query: `
       query ($cnpj: String!) {
         consultarCnpj(cnpj: $cnpj) {
           cnpj
@@ -151,12 +188,14 @@ module.exports = {
           }
         }
       }`,
-      variables: { cnpj }
-    }));
+        variables: { cnpj },
+      }),
+    );
   },
   async getPessoa(id) {
-    return getResponseData(await api.post('', {
-      query: `
+    return getResponseData(
+      await api.post('', {
+        query: `
       query ($id: UUID!) {
         pessoa (
           id: $id
@@ -177,9 +216,111 @@ module.exports = {
           bairro
           complementoLogradouro
           ativo
+          contatos {
+            id
+            nome
+            descricao
+            telefone
+            celular
+            email
+          }
         }
       }`,
-      variables: { id }
-    }));
+        variables: { id },
+      }),
+    );
   },
-}
+  async salvarPessoa(
+    id,
+    cpfCnpj,
+    nome,
+    fantasia,
+    rgInscEstadual,
+    inscMunicipal,
+    telefone,
+    celular,
+    email,
+    cep,
+    logradouro,
+    numeroLogradouro,
+    bairro,
+    complementoLogradouro,
+    cidadeId,
+    grupoId,
+    categoriaId,
+    ativo,
+    contatos,
+  ) {
+    return getResponseData(
+      await api.post('', {
+        query: `
+      mutation (
+        $id: UUID
+        $cpfCnpj: String!
+        $nome: String!
+        $fantasia: String
+        $rgInscEstadual: String
+        $inscMunicipal: String
+        $telefone: String
+        $celular: String
+        $email: String
+        $cep: String
+        $logradouro: String
+        $numeroLogradouro: String
+        $bairro: String
+        $complementoLogradouro: String
+        $cidadeId: UUID
+        $grupoId: UUID
+        $categoriaId: UUID
+        $ativo: Boolean
+        $contatos: [ContatoPessoaInput!]
+      ) {
+        salvarPessoa (
+          id: $id,
+          cpfCnpj: $cpfCnpj,
+          nome: $nome,
+          fantasia: $fantasia,
+          rgInscEstadual: $rgInscEstadual,
+          inscMunicipal: $inscMunicipal,
+          telefone: $telefone,
+          celular: $celular,
+          email: $email,
+          cep: $cep,
+          logradouro: $logradouro,
+          numeroLogradouro: $numeroLogradouro,
+          bairro: $bairro,
+          complementoLogradouro: $complementoLogradouro,
+          cidadeId: $cidadeId,
+          grupoId: $grupoId,
+          categoriaId: $categoriaId,
+          ativo: $ativo,
+          contatos: $contatos
+        ) {
+          id
+        }
+      }`,
+        variables: {
+          id,
+          cpfCnpj,
+          nome,
+          fantasia,
+          rgInscEstadual,
+          inscMunicipal,
+          telefone,
+          celular,
+          email,
+          cep,
+          logradouro,
+          numeroLogradouro,
+          bairro,
+          complementoLogradouro,
+          cidadeId,
+          grupoId,
+          categoriaId,
+          ativo,
+          contatos,
+        },
+      }),
+    );
+  },
+};
