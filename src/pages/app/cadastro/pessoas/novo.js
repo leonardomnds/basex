@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { useToasts } from 'react-toast-notifications';
 
 import {
-  useTheme,
+  // useTheme,
   makeStyles,
   Box,
   Paper,
@@ -20,13 +20,17 @@ import PageHeader from '../../../../components/Layout/PageHeader';
 import TextField, {
   getEndItemIconButton,
 } from '../../../../components/FormControl/TextField';
-import Select, { getSelectItem } from '../../../../components/FormControl/Select';
+import Select, {
+  getSelectItem,
+} from '../../../../components/FormControl/Select';
 import CustomButton from '../../../../components/CustomButton';
 
 import EntityDialog from '../../../../components/CustomDialog/Entity';
 import CustomDialog from '../../../../components/CustomDialog';
-import CustomTable, { getColumn, getRow } from '../../../../components/Table';
-//import SelectTags, { getTag } from '../../../../components/FormControl/SelectTags';
+import CustomTable, {
+  getColumn /* , getRow */,
+} from '../../../../components/Table';
+// import SelectTags, { getTag } from '../../../../components/FormControl/SelectTags';
 
 import api from '../../../../util/Api';
 import useApi from '../../../../services/useApi';
@@ -38,7 +42,7 @@ import {
   FormatarTelefone,
 } from '../../../../util/functions';
 
-import useWindowSize from '../../../../util/WindowSize';
+// import useWindowSize from '../../../../util/WindowSize';
 
 const { v4: uuidv4 } = require('uuid');
 
@@ -70,11 +74,11 @@ const useStyles = makeStyles((theme) => ({
 
 function NewPeople() {
   const classes = useStyles();
-  const theme = useTheme();
-  const size = useWindowSize();
+  // const theme = useTheme();
+  // const size = useWindowSize();
   const router = useRouter();
   const { id } = router.query;
-  
+
   const { addToast } = useToasts();
 
   // Geral
@@ -104,7 +108,7 @@ function NewPeople() {
   const [telefone, setTelefone] = useState('');
   const [celular, setCelular] = useState('');
   const [email, setEmail] = useState('');
-  const [tiposCadastro, setTiposCadastro] = useState([]);
+  // const [tiposCadastro, setTiposCadastro] = useState([]);
 
   // Endereço
   const [listaEstados, setListaEstados] = useState([]);
@@ -321,10 +325,10 @@ function NewPeople() {
       addToast('O CPF/CNPJ está incompleto!', {
         appearance: 'warning',
       });
-    } else if (tiposCadastro.length < 1) {
-      addToast('Selecione pelo menos um tipo de cadastro!', {
-        appearance: 'warning',
-      });
+      // } else if (tiposCadastro.length < 1) {
+      //   addToast('Selecione pelo menos um tipo de cadastro!', {
+      //     appearance: 'warning',
+      //   });
     } else if (cep && cep.length !== 9) {
       addToast('O CEP está incompleto!', {
         appearance: 'warning',
@@ -352,10 +356,11 @@ function NewPeople() {
           numeroLogradouro: numLogradouro,
           bairro,
           complementoLogradouro: complemento,
+          /*
           tipoCliente: tiposCadastro.filter((tp) => tp.id === 'C').length > 0,
           tipoFornecedor:
             tiposCadastro.filter((tp) => tp.id === 'F').length > 0,
-          tipoVendedor: tiposCadastro.filter((tp) => tp.id === 'V').length > 0,
+          tipoVendedor: tiposCadastro.filter((tp) => tp.id === 'V').length > 0, */
         };
 
         if (cidade.length > 0) {
@@ -420,9 +425,18 @@ function NewPeople() {
             setBairro(dados.endereco.bairro);
             setComplemento(dados.endereco.complemento);
 
-            if (dados.endereco.logradouro.includes('|')){
-              setLogradouro(dados.endereco.logradouro.slice(dados.endereco.logradouro.indexOf('|')+1));
-              setNumLogradouro(dados.endereco.logradouro.substring(0, dados.endereco.logradouro.indexOf('|')));
+            if (dados.endereco.logradouro.includes('|')) {
+              setLogradouro(
+                dados.endereco.logradouro.slice(
+                  dados.endereco.logradouro.indexOf('|') + 1,
+                ),
+              );
+              setNumLogradouro(
+                dados.endereco.logradouro.substring(
+                  0,
+                  dados.endereco.logradouro.indexOf('|'),
+                ),
+              );
             } else {
               setLogradouro(dados.endereco.logradouro);
               setNumLogradouro('');
@@ -433,7 +447,6 @@ function NewPeople() {
               setCidade(dados.endereco.cidade.id);
             }
           }
-          
         }
       } else if (!response.data) {
         throw new Error('Não foi possível se conectar ao servidor!');
@@ -497,13 +510,11 @@ function NewPeople() {
     }
   };
 
-  const getEndItemCnpj = () => {
-    return getEndItemIconButton(<CachedIcon />, handleCnpjData);
-  };
+  const getEndItemCnpj = () =>
+    getEndItemIconButton(<CachedIcon />, handleCnpjData);
 
-  const getEndItemCep = () => {
-    return getEndItemIconButton(<CachedIcon />, handleCepData);
-  };
+  const getEndItemCep = () =>
+    getEndItemIconButton(<CachedIcon />, handleCepData);
 
   const maskCpfCnpj = (str) => {
     setCpfCnpj(FormatarCpfCnpj(str));
@@ -671,7 +682,7 @@ function NewPeople() {
             if (dados.categoria) {
               setCategoria(dados.categoria.id);
             }
-/*
+            /*
             const tipos = [];
             if (dados.tipoCliente) {
               tipos.push(getTag('C', 'Cliente'));
@@ -695,7 +706,7 @@ function NewPeople() {
               setUF(dados.cidade.uf);
               setCidade(dados.cidade.id);
             }
-/*
+            /*
             // Contatos
             if (dados.contatos) {
               dados.contatos.forEach((con) => {
