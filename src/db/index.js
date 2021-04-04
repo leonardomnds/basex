@@ -1,7 +1,3 @@
-import dotEnv from 'dotenv';
-
-dotEnv.config();
-
 const Sequelize = require('sequelize');
 const databaseConfig = require('./config/database');
 
