@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 module.exports = {
   username: process.env.DB_USER,
   password: process.env.DB_PASS,
@@ -6,6 +8,7 @@ module.exports = {
   dialect: 'postgres',
   dialectOptions: {
     decimalNumbers: true,
+    // SSL vai apenas em produção
     ssl: {
       rejectUnauthorized: false,
     },

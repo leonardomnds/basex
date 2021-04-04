@@ -30,6 +30,16 @@ class Database {
 
   init() {
     this.connection = new Sequelize(databaseConfig);
+
+    this.connection
+      .authenticate()
+      .then(() =>
+        // eslint-disable-next-line no-console
+        console.log('Database connection has been established successfully.'),
+      )
+      // eslint-disable-next-line no-console
+      .catch((err) => console.error('Unable to connect to the database', err));
+
     models
       .map((model) => model.init(this.connection))
       .map(
