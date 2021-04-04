@@ -609,12 +609,8 @@ function NewPeople() {
             setTelefone(dados.telefone || '');
             setCelular(dados.celular || '');
             setEmail(dados.email || '');
-            if (dados.grupo) {
-              setGrupo(dados.grupo.id);
-            }
-            if (dados.categoria) {
-              setCategoria(dados.categoria.id);
-            }
+            setGrupo(dados.grupoId || '');
+            setCategoria(dados.categoriaId || '');
             /*
             const tipos = [];
             if (dados.tipoCliente) {
@@ -712,6 +708,9 @@ function NewPeople() {
             <Grid item xs={12} sm={12} md={4}>
               <TextField label="Bairro" value={bairro} setValue={setBairro} />
             </Grid>
+            <Grid item xs={12} sm={9} md={5}>
+              <TextField label="Cidade" value={cidade} setValue={setCidade} />
+            </Grid>
             <Grid item xs={12} sm={3} md={3}>
               <Select
                 label="UF"
@@ -719,9 +718,6 @@ function NewPeople() {
                 setValue={setUF}
                 items={listaEstados}
               />
-            </Grid>
-            <Grid item xs={12} sm={9} md={5}>
-              <TextField label="Cidade" value={cidade} setValue={setCidade} />
             </Grid>
             <Grid item xs={12}>
               <TextField

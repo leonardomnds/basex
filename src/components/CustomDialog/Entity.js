@@ -15,7 +15,7 @@ import {
 } from '@material-ui/core';
 
 import CustomTable, { getColumn, getRow } from '../Table';
-import api from '../../util/Api';
+import useApi from '../../services/useApi';
 import CustomDialog from '.';
 import TextField from '../FormControl/TextField';
 
@@ -58,7 +58,7 @@ function EntityDialog({ entity, isOpen, onClose }) {
     }
   };
 
-  const getEndpoint = () => {
+  const getFunctionConsulta = () => {
     switch (entity) {
       case entMarcaProduto:
         return '/produtos/marcas';
@@ -67,13 +67,70 @@ function EntityDialog({ entity, isOpen, onClose }) {
       case entUnidadeMedida:
         return '/produtos/unidades';
       case entCategoriaPessoa:
-        return '/pessoas/categorias';
+        return useApi.getCategoriasPessoas;
       case entGrupoPessoa:
-        return '/pessoas/grupos';
+        return useApi.getGruposPessoas;
       case entCategoriaServico:
         return '/servicos/categorias';
       default:
-        return '';
+        return () => {};
+    }
+  };
+
+  const getFunctionSalvar = () => {
+    switch (entity) {
+      case entMarcaProduto:
+        return '/produtos/marcas';
+      case entCategoriaProduto:
+        return '/produtos/categorias';
+      case entUnidadeMedida:
+        return '/produtos/unidades';
+      case entCategoriaPessoa:
+        return useApi.salvarCategoriaPessoa;
+      case entGrupoPessoa:
+        return useApi.salvarGrupoPessoa;
+      case entCategoriaServico:
+        return '/servicos/categorias';
+      default:
+        return () => {};
+    }
+  };
+
+  const getFunctionDeletar = () => {
+    switch (entity) {
+      case entMarcaProduto:
+        return '/produtos/marcas';
+      case entCategoriaProduto:
+        return '/produtos/categorias';
+      case entUnidadeMedida:
+        return '/produtos/unidades';
+      case entCategoriaPessoa:
+        return useApi.deletarCategoriaPessoa;
+      case entGrupoPessoa:
+        return useApi.deletarGrupoPessoa;
+      case entCategoriaServico:
+        return '/servicos/categorias';
+      default:
+        return () => {};
+    }
+  };
+
+  const getResponseObject = () => {
+    switch (entity) {
+      case entMarcaProduto:
+        return null;
+      case entCategoriaProduto:
+        return null;
+      case entUnidadeMedida:
+        return null;
+      case entCategoriaPessoa:
+        return 'categoriasPessoa';
+      case entGrupoPessoa:
+        return 'gruposPessoa';
+      case entCategoriaServico:
+        return null;
+      default:
+        return null;
     }
   };
 
@@ -106,13 +163,6 @@ function EntityDialog({ entity, isOpen, onClose }) {
   const [campo1, setCampo1] = useState('');
   const [campo2, setCampo2] = useState('');
 
-  const getFieldsJson = () => {
-    if (entity === entUnidadeMedida) {
-      return { simbolo: campo1, descricao: campo2 };
-    }
-    return { descricao: campo2 };
-  };
-
   const clearFields = () => {
     setEditingEntity(null);
     setDeletingEntity(null);
@@ -122,17 +172,24 @@ function EntityDialog({ entity, isOpen, onClose }) {
 
   const handleSaveEntity = async () => {
     try {
+      const func = getFunctionSalvar();
+
       let response;
-      if (editingEntity) {
-        response = await api.put(
-          `${getEndpoint()}/${editingEntity.id}`,
-          getFieldsJson(),
+
+      if (entity === entUnidadeMedida) {
+        response = await func(
+          editingEntity ? editingEntity.id : null,
+          campo1,
+          campo2, // descricao
         );
       } else {
-        response = await api.post(getEndpoint(), getFieldsJson());
+        response = await func(
+          editingEntity ? editingEntity.id : null,
+          campo2, // descricao
+        );
       }
 
-      if (response.data && response.data.sucesso) {
+      if (!response.error) {
         clearFields();
         setFindAgain(!findAgain);
         addToast(
@@ -145,11 +202,7 @@ function EntityDialog({ entity, isOpen, onClose }) {
         );
         return;
       }
-      if (!response.data) {
-        throw new Error('Não foi possível se conectar ao servidor!');
-      } else {
-        addToast(response.data.erros, { appearance: 'error' });
-      }
+      throw new Error(response.error);
     } catch (err) {
       addToast(err.message, { appearance: 'error' });
     }
@@ -173,17 +226,17 @@ function EntityDialog({ entity, isOpen, onClose }) {
 
   const confirmDelete = async () => {
     try {
-      const response = await api.delete(
-        `${getEndpoint()}/${deletingEntity.id}`,
+      const func = getFunctionDeletar();
+      const response = await func(deletingEntity.id);
+
+      addToast(
+        !response.error ? 'Registro eliminado com sucesso!' : response.error,
+        {
+          appearance: !response.error ? 'success' : 'error',
+        },
       );
 
-      const { sucesso, dados, erros } = response.data;
-
-      addToast(sucesso ? dados : erros, {
-        appearance: sucesso ? 'success' : 'error',
-      });
-
-      if (sucesso) {
+      if (!response.error) {
         const rows = [];
 
         tableRows.forEach((row) => {
@@ -208,10 +261,11 @@ function EntityDialog({ entity, isOpen, onClose }) {
     const rows = [];
 
     try {
-      const response = await api.get(getEndpoint());
+      const func = getFunctionConsulta();
+      const response = await func();
 
-      if (response.data.sucesso) {
-        const { dados } = response.data;
+      if (!response.error) {
+        const dados = response.data[getResponseObject()];
         dados.forEach((item) => {
           if (entity === entUnidadeMedida) {
             rows.push(
@@ -222,7 +276,7 @@ function EntityDialog({ entity, isOpen, onClose }) {
           }
         });
       } else {
-        addToast(response.data.erros, { appearance: 'error' });
+        throw new Error(response.error);
       }
     } catch (err) {
       addToast(err.message, { appearance: 'error' });
@@ -245,6 +299,7 @@ function EntityDialog({ entity, isOpen, onClose }) {
               maxHeight={300}
               editFunction={handleEditEntity}
               deleteFunction={handleDeleteEntity}
+              linhasPorPagina={5}
             />
             <Paper className={classes.paper}>
               <Grid container spacing={2}>

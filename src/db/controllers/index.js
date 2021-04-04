@@ -34,11 +34,9 @@ export default {
   Mutation: {
     login: Usuario.login,
     criarUsuario: Usuario.insert,
-    criarCategoriaPessoa: CategoriaPessoa.insert,
-    alterarCategoriaPessoa: CategoriaPessoa.update,
+    salvarCategoriaPessoa: CategoriaPessoa.save,
     deletarCategoriaPessoa: CategoriaPessoa.delete,
-    criarGrupoPessoa: GrupoPessoa.insert,
-    alterarGrupoPessoa: GrupoPessoa.update,
+    salvarGrupoPessoa: GrupoPessoa.save,
     deletarGrupoPessoa: GrupoPessoa.delete,
     salvarPessoa: Pessoa.save,
   },

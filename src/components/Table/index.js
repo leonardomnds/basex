@@ -158,11 +158,12 @@ function CustomTable({
   selectFunction,
   naoPreencherLinhasVazias,
   naoPesquisar,
+  linhasPorPagina,
 }) {
   const classes = useStyles();
 
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(linhasPorPagina || 10);
   const [pesquisa, setPesquisa] = useState('');
   const [filteredRows, setFilteredRows] = useState([]);
 
@@ -418,6 +419,7 @@ CustomTable.prototypes = {
   selectFunction: PropTypes.func,
   naoPreencherLinhasVazias: PropTypes.bool,
   naoPesquisar: PropTypes.bool,
+  linhasPorPagina: PropTypes.int,
 };
 
 export default CustomTable;

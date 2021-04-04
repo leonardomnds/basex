@@ -72,6 +72,8 @@ export default gql`
     complementoLogradouro: String
     cidade: String
     uf: String
+    grupoId: UUID
+    categoriaId: UUID
     ativo: Boolean!
     dataCadastro: Date!
     contatos: [ContatoPessoa!]
@@ -106,17 +108,13 @@ export default gql`
       email: String
     ): Usuario
 
-    criarCategoriaPessoa(descricao: String!): CategoriaPessoa
+    salvarCategoriaPessoa(id: UUID, descricao: String!): CategoriaPessoa
 
-    alterarCategoriaPessoa(id: UUID!, descricao: String!): CategoriaPessoa
+    deletarCategoriaPessoa(id: UUID!): String
 
-    deletarCategoriaPessoa(id: UUID!): CategoriaPessoa
+    salvarGrupoPessoa(id: UUID, descricao: String!): GrupoPessoa
 
-    criarGrupoPessoa(descricao: String!): GrupoPessoa
-
-    alterarGrupoPessoa(id: UUID!, descricao: String!): GrupoPessoa
-
-    deletarGrupoPessoa(id: UUID!): GrupoPessoa
+    deletarGrupoPessoa(id: UUID!): String
 
     salvarPessoa(
       id: UUID

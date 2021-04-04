@@ -17,7 +17,7 @@ const getResponseData = (response) => {
       if (retorno.error) {
         retorno.error = retorno.error[0].detalhes;
       }
-      if (response.data.data) {
+      if (response.data.data && !retorno.error) {
         retorno.data = response.data.data;
         retorno.error = null;
       }
@@ -116,6 +116,45 @@ module.exports = {
       }),
     );
   },
+  async salvarGrupoPessoa(id, descricao) {
+    return getResponseData(
+      await api.post('', {
+        query: `
+      mutation (
+        $id: UUID
+        $descricao: String!
+      ) {
+        salvarGrupoPessoa (
+          id: $id,
+          descricao: $descricao
+        ) {
+          id
+        }
+      }`,
+        variables: {
+          id,
+          descricao,
+        },
+      }),
+    );
+  },
+  async deletarGrupoPessoa(id) {
+    return getResponseData(
+      await api.post('', {
+        query: `
+      mutation (
+        $id: UUID!
+      ) {
+        deletarGrupoPessoa (
+          id: $id
+        )
+      }`,
+        variables: {
+          id,
+        },
+      }),
+    );
+  },
   async getCategoriasPessoas() {
     return getResponseData(
       await api.post('', {
@@ -126,6 +165,45 @@ module.exports = {
           descricao
         }
       }`,
+      }),
+    );
+  },
+  async salvarCategoriaPessoa(id, descricao) {
+    return getResponseData(
+      await api.post('', {
+        query: `
+      mutation (
+        $id: UUID
+        $descricao: String!
+      ) {
+        salvarCategoriaPessoa (
+          id: $id,
+          descricao: $descricao
+        ) {
+          id
+        }
+      }`,
+        variables: {
+          id,
+          descricao,
+        },
+      }),
+    );
+  },
+  async deletarCategoriaPessoa(id) {
+    return getResponseData(
+      await api.post('', {
+        query: `
+      mutation (
+        $id: UUID!
+      ) {
+        deletarCategoriaPessoa (
+          id: $id
+        )
+      }`,
+        variables: {
+          id,
+        },
       }),
     );
   },
@@ -195,6 +273,8 @@ module.exports = {
           complementoLogradouro
           cidade
           uf
+          grupoId
+          categoriaId
           ativo
           contatos {
             id
