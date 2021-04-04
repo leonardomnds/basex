@@ -1,15 +1,12 @@
 import GraphQLUUID from 'graphql-type-uuid';
-import { GraphQLScalarType }  from "graphql";
-
-import Estado from '../../db/models/Estado';
-import Cidade from '../../db/models/Cidade';
+import { GraphQLScalarType } from 'graphql';
 
 import Usuario from './Usuario';
-import Empresa from './Empresa'
-import CategoriaPessoa from './CategoriaPessoa'
-import GrupoPessoa from './GrupoPessoa'
-import Pessoa from './Pessoa'
-import OutrosControllers from './OutrosControllers'
+import Empresa from './Empresa';
+import CategoriaPessoa from './CategoriaPessoa';
+import GrupoPessoa from './GrupoPessoa';
+import Pessoa from './Pessoa';
+import OutrosControllers from './OutrosControllers';
 
 export default {
   UUID: GraphQLUUID,
@@ -20,16 +17,11 @@ export default {
     },
     serialize(value) {
       return value.toISOString();
-    }
+    },
   }),
-  
+
   Query: {
-    estados() {
-      return Estado.findAll({ order: ['uf'] });
-    },
-    cidades(_, { uf }) {
-      return Cidade.findAll({where: { uf: uf.toUpperCase() }});
-    },
+    estados: OutrosControllers.findEstados,
     consultarCep: OutrosControllers.findCep,
     consultarCnpj: OutrosControllers.findCnpj,
     infoEmpresa: Empresa.getEmpresaById,
@@ -49,5 +41,5 @@ export default {
     alterarGrupoPessoa: GrupoPessoa.update,
     deletarGrupoPessoa: GrupoPessoa.delete,
     salvarPessoa: Pessoa.save,
-  }
-}
+  },
+};

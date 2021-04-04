@@ -65,15 +65,11 @@ module.exports = {
           complementoLogradouro: {
             type: Sequelize.STRING,
           },
-          cidadeId: {
-            type: Sequelize.UUID,
-            allowNull: true,
-            references: {
-              model: 'cidades',
-              key: 'id',
-            },
-            onUpdate: 'CASCADE',
-            onDelete: 'RESTRICT',
+          cidade: {
+            type: Sequelize.STRING,
+          },
+          uf: {
+            type: Sequelize.STRING(2),
           },
           grupoId: {
             type: Sequelize.UUID,

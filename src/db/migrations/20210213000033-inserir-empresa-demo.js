@@ -3,11 +3,13 @@ const values = {
   identificador: 'demo',
   cnpj: '00.000.000/0000-00',
   razaoSocial: 'RAZÃO SOCIAL DEMONSTRAÇÃO LTDA',
-  fantasia: 'FANTASIA DEMONSTRAÇÃO',
+  fantasia: 'EMPRESA DEMONSTRAÇÃO',
   cep: '85910-000',
   logradouro: 'AV. BARÃO DO RIO BRANCO',
   numeroLogradouro: '10',
   bairro: 'CENTRO',
+  cidade: 'TOLEDO',
+  uf: 'PR',
   complementoLogradouro: '',
 };
 

@@ -19,17 +19,13 @@ export default gql`
     uf: ID!
     descricao: String!
   }
-  type Cidade {
-    id: ID!
-    descricao: String!
-    uf: String!
-  }
   type DadosCEP {
     cep: String!
     logradouro: String
     bairro: String
     complemento: String
-    cidade: Cidade
+    cidade: String
+    uf: String
   }
   type DadosCNPJ {
     cnpj: String
@@ -74,6 +70,8 @@ export default gql`
     numeroLogradouro: String
     bairro: String
     complementoLogradouro: String
+    cidade: String
+    uf: String
     ativo: Boolean!
     dataCadastro: Date!
     contatos: [ContatoPessoa!]
@@ -89,7 +87,6 @@ export default gql`
 
   type Query {
     estados: [Estado!]!
-    cidades(uf: String!): [Cidade!]!
     consultarCep(cep: String!): DadosCEP
     consultarCnpj(cnpj: String!): DadosCNPJ
     infoEmpresa(identificadorEmpresa: String!): InfoEmpresa
@@ -136,7 +133,8 @@ export default gql`
       numeroLogradouro: String
       bairro: String
       complementoLogradouro: String
-      cidadeId: UUID
+      cidade: String
+      uf: String
       grupoId: UUID
       categoriaId: UUID
       ativo: Boolean

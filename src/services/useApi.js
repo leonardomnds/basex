@@ -103,22 +103,6 @@ module.exports = {
       }),
     );
   },
-  async getCidadesByUF(uf) {
-    return getResponseData(
-      await api.post('', {
-        query: `
-      query ($uf: String!) {
-        cidades(
-          uf: $uf
-        ) {
-          id
-          descricao
-        }
-      }`,
-        variables: { uf },
-      }),
-    );
-  },
   async getGruposPessoas() {
     return getResponseData(
       await api.post('', {
@@ -155,11 +139,8 @@ module.exports = {
           logradouro
           bairro
           complemento
-          cidade {
-            id
-            descricao
-            uf
-          }
+          cidade
+          uf
         }
       }`,
         variables: { cep },
@@ -180,11 +161,8 @@ module.exports = {
             logradouro
             bairro
             complemento
-            cidade {
-              id
-              descricao
-              uf
-            }
+            cidade
+            uf
           }
         }
       }`,
@@ -215,6 +193,8 @@ module.exports = {
           numeroLogradouro
           bairro
           complementoLogradouro
+          cidade
+          uf
           ativo
           contatos {
             id
@@ -245,7 +225,8 @@ module.exports = {
     numeroLogradouro,
     bairro,
     complementoLogradouro,
-    cidadeId,
+    cidade,
+    uf,
     grupoId,
     categoriaId,
     ativo,
@@ -269,7 +250,8 @@ module.exports = {
         $numeroLogradouro: String
         $bairro: String
         $complementoLogradouro: String
-        $cidadeId: UUID
+        $cidade: String
+        $uf: String
         $grupoId: UUID
         $categoriaId: UUID
         $ativo: Boolean
@@ -290,7 +272,8 @@ module.exports = {
           numeroLogradouro: $numeroLogradouro,
           bairro: $bairro,
           complementoLogradouro: $complementoLogradouro,
-          cidadeId: $cidadeId,
+          cidade: $cidade,
+          uf: $uf,
           grupoId: $grupoId,
           categoriaId: $categoriaId,
           ativo: $ativo,
@@ -314,7 +297,8 @@ module.exports = {
           numeroLogradouro,
           bairro,
           complementoLogradouro,
-          cidadeId,
+          cidade,
+          uf,
           grupoId,
           categoriaId,
           ativo,

@@ -6,5 +6,5 @@ module.exports = {
       attributes: ['fantasia', 'logoBase64'],
       where: { identificador: identificadorEmpresa },
     });
-  }
+  },
 };

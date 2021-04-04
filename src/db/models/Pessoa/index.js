@@ -19,13 +19,14 @@ class Pessoa extends Model {
         numeroLogradouro: DataTypes.STRING,
         bairro: DataTypes.STRING,
         complementoLogradouro: DataTypes.STRING,
-        cidadeId: DataTypes.UUID,
+        cidade: DataTypes.STRING,
+        uf: DataTypes.STRING(2),
         grupoId: DataTypes.UUID,
         categoriaId: DataTypes.UUID,
         ativo: DataTypes.BOOLEAN,
-        //tipoCliente: DataTypes.BOOLEAN,
-        //tipoFornecedor: DataTypes.BOOLEAN,
-        //tipoVendedor: DataTypes.BOOLEAN,
+        // tipoCliente: DataTypes.BOOLEAN,
+        // tipoFornecedor: DataTypes.BOOLEAN,
+        // tipoVendedor: DataTypes.BOOLEAN,
         dataCadastro: DataTypes.DATE,
       },
       {
@@ -42,10 +43,6 @@ class Pessoa extends Model {
       foreignKey: 'empresaId',
       as: 'empresa',
     });
-    this.belongsTo(models.Cidade, {
-      foreignKey: 'cidadeId',
-      as: 'cidade',
-    });
     this.belongsTo(models.GrupoPessoa, { foreignKey: 'grupoId', as: 'grupo' });
     this.belongsTo(models.CategoriaPessoa, {
       foreignKey: 'categoriaId',
@@ -55,7 +52,7 @@ class Pessoa extends Model {
     this.hasMany(models.ContatoPessoa, {
       foreignKey: 'pessoaId',
       as: 'contatos',
-    });*/
+    }); */
   }
 }
 

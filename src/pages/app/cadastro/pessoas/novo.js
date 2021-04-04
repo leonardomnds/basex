@@ -110,7 +110,6 @@ function NewPeople() {
 
   // Endereço
   const [listaEstados, setListaEstados] = useState([]);
-  const [listaCidades, setListaCidades] = useState([]);
 
   const [showConfirmCep, setShowConfirmCep] = useState(false);
   const [cep, setCep] = useState('');
@@ -353,6 +352,7 @@ function NewPeople() {
           bairro || null,
           complemento || null,
           cidade || null,
+          uf || null,
           grupo || null,
           categoria || null,
           isAtivo,
@@ -400,6 +400,8 @@ function NewPeople() {
             setCep(dados.endereco.cep);
             setBairro(dados.endereco.bairro);
             setComplemento(dados.endereco.complemento);
+            setUF(dados.endereco.uf);
+            setCidade(dados.endereco.cidade);
 
             if (dados.endereco.logradouro.includes('|')) {
               setLogradouro(
@@ -416,11 +418,6 @@ function NewPeople() {
             } else {
               setLogradouro(dados.endereco.logradouro);
               setNumLogradouro('');
-            }
-
-            if (dados.endereco.cidade) {
-              setUF(dados.endereco.cidade.uf);
-              setCidade(dados.endereco.cidade.id);
             }
           }
         }
@@ -454,14 +451,8 @@ function NewPeople() {
           setLogradouro(dados.logradouro);
           setBairro(dados.bairro);
           setComplemento(dados.complemento);
-
-          if (dados.cidade) {
-            setUF(dados.cidade.uf && dados.cidade.uf);
-            setCidade(dados.cidade.id && dados.cidade.id);
-          } else {
-            setUF('');
-            setCidade('');
-          }
+          setUF(dados.uf);
+          setCidade(dados.cidade);
         }
       } else {
         throw new Error(response.error);
@@ -595,36 +586,6 @@ function NewPeople() {
     getData();
   }, []);
 
-  // Lista de Cidades
-  useEffect(() => {
-    async function getData() {
-      try {
-        const response = await useApi.getCidadesByUF(uf);
-
-        if (!response.error) {
-          const dados = response.data.cidades;
-          if (dados) {
-            const cidades = [];
-            dados.forEach((cid) => {
-              cidades.push(getSelectItem(cid.id, cid.descricao));
-            });
-            setListaCidades(cidades);
-          }
-        } else {
-          throw new Error(response.error);
-        }
-      } catch (err) {
-        addToast(err.message, { appearance: 'error' });
-      }
-    }
-
-    if (uf && uf.length === 2) {
-      getData();
-    } else {
-      setListaCidades([]);
-    }
-  }, [uf]);
-
   useEffect(async () => {
     const rows = [];
 
@@ -674,10 +635,8 @@ function NewPeople() {
             setNumLogradouro(dados.numeroLogradouro || '');
             setBairro(dados.bairro || '');
             setComplemento(dados.complementoLogradouro || '');
-            if (dados.cidade) {
-              setUF(dados.cidade.uf);
-              setCidade(dados.cidade.id);
-            }
+            setUF(dados.uf);
+            setCidade(dados.cidade);
 
             // Contatos
             if (dados.contatos) {
@@ -762,12 +721,7 @@ function NewPeople() {
               />
             </Grid>
             <Grid item xs={12} sm={9} md={5}>
-              <Select
-                label="Cidade"
-                value={cidade}
-                setValue={setCidade}
-                items={listaCidades}
-              />
+              <TextField label="Cidade" value={cidade} setValue={setCidade} />
             </Grid>
             <Grid item xs={12}>
               <TextField

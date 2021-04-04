@@ -1,8 +1,10 @@
-import { SomenteNumeros, FormatarCep, FormatarCnpj } from '../../util/functions';
-import api from "../../util/ApiSemBase";
-import validateAuth from '../../db/config/validateAuth';
-
-import Cidade from "../models/Cidade";
+import {
+  SomenteNumeros,
+  FormatarCep,
+  FormatarCnpj,
+} from '../../util/functions';
+import api from '../../util/ApiSemBase';
+import validateAuth from '../config/validateAuth';
 
 const consultarCep = async (cep) => {
   const cepConsultar = SomenteNumeros(cep);
@@ -16,37 +18,33 @@ const consultarCep = async (cep) => {
 
     json = json.data;
 
-    const cidade = await Cidade.findOne({
-      where: {
-        uf: json.uf.toUpperCase(),
-        descricao: json.localidade.toUpperCase(),
-      },
-    });
-
     return {
       cep: FormatarCep(cep),
       logradouro: json.logradouro ? json.logradouro.toUpperCase() : null,
       numeroLogradouro: '',
       bairro: json.bairro ? json.bairro.toUpperCase() : null,
       complementoLogradouro: json.complemento,
-      cidade: cidade || null,
+      cidade: json.localidade ? json.localidade.toUpperCase() : null,
+      uf: json.uf ? json.uf.toUpperCase() : null,
     };
-
   }
   return null;
-}
+};
 
 module.exports = {
   async findCep(_, { cep }, { user }) {
     validateAuth(user);
-    return await consultarCep(cep);
+    const ret = await consultarCep(cep);
+    return ret;
   },
   async findCnpj(_, { cnpj }, { user }) {
     validateAuth(user);
     const cnpjConsultar = SomenteNumeros(cnpj);
 
     if (cnpjConsultar.length === 14) {
-      let json = await api.get(`https://www.receitaws.com.br/v1/cnpj/${cnpjConsultar}`);
+      let json = await api.get(
+        `https://www.receitaws.com.br/v1/cnpj/${cnpjConsultar}`,
+      );
 
       if (!json || !json.data || json.data.status === 'ERROR') {
         return null;
@@ -58,7 +56,7 @@ module.exports = {
       if (json.cep) {
         endereco = await consultarCep(json.cep);
         if (endereco && endereco.logradouro && json.numero) {
-          endereco.logradouro = json.numero+'|'+endereco.logradouro;
+          endereco.logradouro = `${json.numero}|${endereco.logradouro}`;
         }
       }
 
@@ -67,9 +65,40 @@ module.exports = {
         razaoSocial: json.nome ? json.nome.toUpperCase() : null,
         fantasia: json.fantasia ? json.fantasia.toUpperCase() : null,
         endereco: endereco || null,
-      }
-
+      };
     }
     return null;
-  }
-}
+  },
+  findEstados(_, args, { user }) {
+    validateAuth(user);
+    return [
+      { uf: 'AC', descricao: 'ACRE' },
+      { uf: 'AL', descricao: 'ALAGOAS' },
+      { uf: 'AM', descricao: 'AMAZONAS' },
+      { uf: 'AP', descricao: 'AMAPÁ' },
+      { uf: 'BA', descricao: 'BAHIA' },
+      { uf: 'CE', descricao: 'CEARÁ' },
+      { uf: 'DF', descricao: 'DISTRITO FEDERAL' },
+      { uf: 'ES', descricao: 'ESPÍRITO SANTO' },
+      { uf: 'GO', descricao: 'GOIÁS' },
+      { uf: 'MA', descricao: 'MARANHÃO' },
+      { uf: 'MG', descricao: 'MINAS GERAIS' },
+      { uf: 'MS', descricao: 'MATO GROSSO DO SUL' },
+      { uf: 'MT', descricao: 'MATO GROSSO' },
+      { uf: 'PA', descricao: 'PARÁ' },
+      { uf: 'PB', descricao: 'PARAÍBA' },
+      { uf: 'PE', descricao: 'PERNAMBUCO' },
+      { uf: 'PI', descricao: 'PIAUÍ' },
+      { uf: 'PR', descricao: 'PARANÁ' },
+      { uf: 'RJ', descricao: 'RIO DE JANEIRO' },
+      { uf: 'RN', descricao: 'RIO GRANDE DO NORTE' },
+      { uf: 'RO', descricao: 'RONDÔNIA' },
+      { uf: 'RR', descricao: 'RORAIMA' },
+      { uf: 'RS', descricao: 'RIO GRANDE DO SUL' },
+      { uf: 'SC', descricao: 'SANTA CATARINA' },
+      { uf: 'SE', descricao: 'SERJIPE' },
+      { uf: 'SP', descricao: 'SÃO PAULO' },
+      { uf: 'TO', descricao: 'TOCANTINS' },
+    ];
+  },
+};

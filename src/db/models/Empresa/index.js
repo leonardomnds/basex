@@ -13,7 +13,8 @@ class Empresa extends Model {
         numeroLogradouro: DataTypes.STRING,
         bairro: DataTypes.STRING,
         complementoLogradouro: DataTypes.STRING,
-        cidadeId: DataTypes.UUID,
+        cidade: DataTypes.STRING,
+        uf: DataTypes.STRING(2),
         dataCadastro: DataTypes.DATE,
         logoBase64: DataTypes.TEXT,
       },
@@ -27,10 +28,6 @@ class Empresa extends Model {
   }
 
   static associate(models) {
-    this.belongsTo(models.Cidade, {
-      foreignKey: 'cidadeId',
-      as: 'cidade',
-    });
     this.hasMany(models.Usuario, { foreignKey: 'empresaId', as: 'usuarios' });
   }
 }
