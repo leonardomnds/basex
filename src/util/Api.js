@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+require('dotenv').config();
+
 const api = axios.create({
-  baseURL: '/api/graphql',
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
 });
 
 api.interceptors.request.use(async (request) => {

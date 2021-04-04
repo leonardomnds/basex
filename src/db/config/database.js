@@ -7,7 +7,6 @@ module.exports = {
   host: process.env.DB_HOST,
   dialect: 'postgres',
   dialectOptions: {
-    ssl: true,
     decimalNumbers: true,
   },
   define: {
