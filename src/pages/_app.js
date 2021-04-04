@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import Head from 'next/head';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
@@ -24,10 +23,13 @@ export default function MyApp(props) {
   }, []);
 
   return (
-    <React.Fragment>
+    <>
       <Head>
         <title>BaseX</title>
-        <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
+        <meta
+          name="viewport"
+          content="minimum-scale=1, initial-scale=1, width=device-width"
+        />
       </Head>
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
@@ -35,21 +37,16 @@ export default function MyApp(props) {
             <ToastProvider
               autoDismiss
               placement="top-right"
-              components={{ Toast, ToastContainer }}          
+              components={{ Toast, ToastContainer }}
             >
               <CssBaseline />
               <Layout>
                 <Component {...pageProps} />
               </Layout>
-            </ToastProvider>        
+            </ToastProvider>
           </ThemeProvider>
         </PersistGate>
       </Provider>
-    </React.Fragment>
+    </>
   );
 }
-
-MyApp.propTypes = {
-  Component: PropTypes.elementType.isRequired,
-  pageProps: PropTypes.object.isRequired,
-};
