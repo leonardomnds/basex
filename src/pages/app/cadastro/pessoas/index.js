@@ -19,7 +19,7 @@ function ProductList() {
   };
 
   const handleEditPerson = (person) => {
-    router.push(`${router.pathname}/editar/${person.id}`);
+    router.push(`${router.pathname}/${person.id}`);
   };
 
   const getTableColumns = () => {
