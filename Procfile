@@ -1,1 +1,1 @@
-web: npx sequelize db:migrate
+npx sequelize db:migrate
