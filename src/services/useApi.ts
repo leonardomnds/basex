@@ -1,7 +1,7 @@
 import api from '../util/Api';
 
 interface LoginParameters {
-  authEmpresa: string | string[],
+  identificador: string | string[],
   usuario: string,
   senha: string
 }
