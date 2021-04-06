@@ -25,13 +25,13 @@ const apolloServer = new ApolloServer({
   formatError: (err) => {
     return {
       id: err.extensions.code.toUpperCase().replace(/ /g, '_'),
-      detalhes: err.message,
+      message: err.message,
     };
   },
-  formatResponse: (dados) => {
+  formatResponse: (respose) => {
     return {
-      data: dados.data,
-      errors: (dados.error ? dados.error.errors : dados.errors) || null,
+      data: respose.data,
+      errors: respose.errors || null,
       extensions: { serverDateTime: new Date(Date.now()).toISOString() },
     };
   },

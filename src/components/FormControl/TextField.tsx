@@ -1,5 +1,4 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React, { ReactNode } from 'react';
 
 import {
   makeStyles,
@@ -26,7 +25,11 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export const getEndItemIconButton = (icon, onClick, tooltip = '') => (
+export const getEndItemIconButton = (
+  icon: ReactNode,
+  onClick: () => void,
+  tooltip: string = ''
+) => (
   <InputAdornment position="end">
     <Tooltip title={tooltip} placement="top" arrow>
       <IconButton onClick={onClick}>{icon}</IconButton>
@@ -34,21 +37,25 @@ export const getEndItemIconButton = (icon, onClick, tooltip = '') => (
   </InputAdornment>
 );
 
-getEndItemIconButton.prototypes = {
-  icon: PropTypes.element.isRequired,
-  onClick: PropTypes.func.isRequired,
-  tooltip: PropTypes.string,
-};
+type Props = {
+  label: string,
+  type?: string,
+  disabled?: boolean,
+  value: string,
+  setValue?: (v: any) => void,
+  autoFocus?: boolean,
+  endItem?: ReactNode,
+}
 
 function CustomTextField({
   label,
-  type,
+  type = 'text',
   disabled,
   value,
-  setValue,
+  setValue = (v) => {},
   autoFocus,
   endItem,
-}) {
+}: Props) {
   const classes = useStyles();
 
   const uuid = uuidv4();
@@ -71,19 +78,5 @@ function CustomTextField({
     </FormControl>
   );
 }
-
-CustomTextField.prototypes = {
-  label: PropTypes.string.isRequired,
-  type: PropTypes.string,
-  disabled: PropTypes.bool,
-  value: PropTypes.string.isRequired,
-  setValue: PropTypes.func.isRequired,
-  autoFocus: PropTypes.bool,
-  endItem: PropTypes.node,
-};
-
-CustomTextField.defaultProps = {
-  type: 'text',
-};
 
 export default CustomTextField;

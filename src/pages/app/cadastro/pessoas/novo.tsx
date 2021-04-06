@@ -311,10 +311,6 @@ function NewPeople() {
       addToast('O CPF/CNPJ está incompleto!', {
         appearance: 'warning',
       });
-      // } else if (tiposCadastro.length < 1) {
-      //   addToast('Selecione pelo menos um tipo de cadastro!', {
-      //     appearance: 'warning',
-      //   });
     } else if (cep && cep.length !== 9) {
       addToast('O CEP está incompleto!', {
         appearance: 'warning',
@@ -325,9 +321,32 @@ function NewPeople() {
       });
     } else {
       try {
-        const contatos = [];
+
+        const pessoa = {
+          id: id || null,
+          cpfCnpj: cpfCnpj || null,
+          nome: nomeRazao || null,
+          fantasia: fantasia || null,
+          rgInscEstadual: rgIe || null,
+          inscMunicipal: inscMun || null,
+          telefone: telefone || null,
+          celular: celular || null,
+          email: email || null,
+          cep: cep || null,
+          logradouro: logradouro || null,
+          numeroLogradouro: numLogradouro || null,
+          bairro: bairro || null,
+          complementoLogradouro: complemento || null,
+          cidade: cidade || null,
+          uf: uf || null,
+          grupoId: grupo || null,
+          categoriaId: categoria || null,
+          ativo: isAtivo,
+          contatos: []
+        }
+
         tableRows.forEach((contato) => {
-          contatos.push({
+          pessoa.contatos.push({
             nome: contato.nome,
             descricao: contato.descricao,
             telefone: contato.telefone,
@@ -336,39 +355,9 @@ function NewPeople() {
           });
         });
 
-        const response = await useApi.salvarPessoa(
-          id || null,
-          cpfCnpj || null,
-          nomeRazao || null,
-          fantasia || null,
-          rgIe || null,
-          inscMun || null,
-          telefone || null,
-          celular || null,
-          email || null,
-          cep || null,
-          logradouro || null,
-          numLogradouro || null,
-          bairro || null,
-          complemento || null,
-          cidade || null,
-          uf || null,
-          grupo || null,
-          categoria || null,
-          isAtivo,
-          contatos,
-        );
-
-        /*
-        tipoCliente: tiposCadastro.filter((tp) => tp.id === 'C').length > 0,
-        tipoFornecedor:
-          tiposCadastro.filter((tp) => tp.id === 'F').length > 0,
-        tipoVendedor: tiposCadastro.filter((tp) => tp.id === 'V').length > 0,
-        */
+        const response = await useApi.salvarPessoa(pessoa);
 
         if (!response.error) {
-          // const contactOk = await savePersonContacts(response.data.dados.id);
-
           addToast(`Pessoa ${id ? 'alterada' : 'cadastrado'} com sucesso!`, {
             appearance: 'success',
           });
@@ -464,7 +453,7 @@ function NewPeople() {
   };
 
   const handleCepData = async () => {
-    if (SomenteNumeros(cep) === 8) {
+    if (SomenteNumeros(cep).length === 8) {
       addToast('Preencha o CEP para continuar!', { appearance: 'warning' });
     } else if (cep === cepConsultado) {
       setShowConfirmCep(true);
@@ -586,7 +575,7 @@ function NewPeople() {
     getData();
   }, []);
 
-  useEffect(async () => {
+  useEffect(() => {
     const rows = [];
 
     async function getData() {
@@ -735,7 +724,7 @@ function NewPeople() {
               {!contEnable && (
                 <Box className={classes.btn}>
                   <CustomButton
-                    className={classes.btn}
+                    //className={classes.btn}
                     label="Novo contato"
                     func={() => {
                       setContEnable(true);

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
 
 import {
   makeStyles,
@@ -111,24 +110,23 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export const getColumn = (id, label, minWidth, align, formatar, ocultar) => {
+export const getColumn = (
+  id: string,
+  label: string,
+  minWidth: number,
+  align: "center" | "left" | "right",
+  formatar?: (v: string | number) => string,
+  ocultar?: boolean
+) => {
   let func = formatar;
   if (!func) {
-    func = (value) => value;
+    func = (value) => value.toString();
   }
 
   return { id, label, minWidth, align, formatar: func, ocultar };
 };
 
-getColumn.prototypes = {
-  label: PropTypes.string.isRequired,
-  minWidth: PropTypes.number.isRequired,
-  align: PropTypes.string.isRequired,
-  formatar: PropTypes.func,
-  ocultar: PropTypes.bool,
-};
-
-export const getRow = (rowItems, columnsList) => {
+export const getRow = (rowItems: Array<any>, columnsList: Array<any>) => {
   const row = {};
 
   if (rowItems.length === columnsList.length) {
@@ -144,10 +142,17 @@ export const getRow = (rowItems, columnsList) => {
   return null;
 };
 
-getRow.prototypes = {
-  rowItems: PropTypes.array.isRequired,
-  columnsList: PropTypes.array.isRequired,
-};
+type Props = {
+  isLoading?: boolean,
+  columns: Array<any>,
+  rows: Array<any>,
+  editFunction?: (v: any) => void,
+  deleteFunction?: (v: any) => void,
+  selectFunction?: (v: any) => void,
+  naoPreencherLinhasVazias?: boolean,
+  naoPesquisar?: boolean,
+  linhasPorPagina?: number,
+}
 
 function CustomTable({
   isLoading,
@@ -158,12 +163,12 @@ function CustomTable({
   selectFunction,
   naoPreencherLinhasVazias,
   naoPesquisar,
-  linhasPorPagina,
-}) {
+  linhasPorPagina = 10,
+}: Props) {
   const classes = useStyles();
 
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(linhasPorPagina || 10);
+  const [rowsPerPage, setRowsPerPage] = useState(linhasPorPagina);
   const [pesquisa, setPesquisa] = useState('');
   const [filteredRows, setFilteredRows] = useState([]);
 
@@ -199,7 +204,7 @@ function CustomTable({
               }
 
               if (!incluir) {
-                incluir = FormatarStringToMoney(consulta) === value;
+                incluir = FormatarStringToMoney(consulta) === FormatarStringToMoney(value.toString());
               }
             }
           }
@@ -251,7 +256,7 @@ function CustomTable({
 
   useEffect(() => {
     if (rows) {
-      filtrarLista();
+      filtrarLista("");
     }
   }, [rows]);
 
@@ -268,7 +273,7 @@ function CustomTable({
               placeholder="Pesquisar..."
               name="pesquisar"
               className={classes.searchInput}
-              values={pesquisa}
+              value={pesquisa}
               onChange={(event) => filtrarLista(event.target.value)}
               InputProps={{
                 startAdornment: (
@@ -400,7 +405,7 @@ function CustomTable({
       </TableContainer>
       {!filteredRows.length && (
         <Box className={classes.noDataContainer}>
-          <Typography variant="body2" className={classes.noData}>
+          <Typography variant="body2">
             Não há dados para exibir
           </Typography>
         </Box>
@@ -408,18 +413,5 @@ function CustomTable({
     </Paper>
   );
 }
-
-CustomTable.prototypes = {
-  isLoading: PropTypes.bool,
-  columns: PropTypes.array.isRequired,
-  rows: PropTypes.array.isRequired,
-  maxHeight: PropTypes.string,
-  editFunction: PropTypes.func,
-  deleteFunction: PropTypes.func,
-  selectFunction: PropTypes.func,
-  naoPreencherLinhasVazias: PropTypes.bool,
-  naoPesquisar: PropTypes.bool,
-  linhasPorPagina: PropTypes.int,
-};
 
 export default CustomTable;

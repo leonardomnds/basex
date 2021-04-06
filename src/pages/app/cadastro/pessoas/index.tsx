@@ -35,9 +35,9 @@ function ProductList() {
     return columns;
   };
 
-  const [tableColumns] = useState(getTableColumns());
-  const [tableRows, setTableRows] = useState([]);
-  const [isLoading, setLoading] = useState([]);
+  const [tableColumns] = useState<Array<any>>(getTableColumns());
+  const [tableRows, setTableRows] = useState<Array<any>>([]);
+  const [isLoading, setLoading] = useState<boolean>(false);
   const [deletingPerson, setDeletingPerson] = useState(null);
 
   // const handleDeletePerson = (person) => {
@@ -76,39 +76,42 @@ function ProductList() {
     }
   };
 
-  useEffect(async () => {
+  useEffect(() => {
     setLoading(true);
     const rows = [];
 
-    try {
-      const response = await useApi.getListaPessoas();
-
-      if (!response.error) {
-        response.data.pessoas.forEach((pes) => {
-          rows.push(
-            getRow(
-              [
-                pes.id,
-                pes.codigo,
-                pes.cpfCnpj,
-                pes.nome,
-                pes.fantasia,
-                `${pes.logradouro || ''}, ${pes.numeroLogradouro || ''}`,
-                pes.ativo ? 'Ativo' : 'Inativo',
-              ],
-              tableColumns,
-            ),
-          );
-        });
-      } else {
-        throw new Error(response.error);
+    async function getData() {
+      try {
+        const response = await useApi.getListaPessoas();
+  
+        if (!response.error) {
+          response.data.pessoas.forEach((pes) => {
+            rows.push(
+              getRow(
+                [
+                  pes.id,
+                  pes.codigo,
+                  pes.cpfCnpj,
+                  pes.nome,
+                  pes.fantasia,
+                  `${pes.logradouro || ''}, ${pes.numeroLogradouro || ''}`,
+                  pes.ativo ? 'Ativo' : 'Inativo',
+                ],
+                tableColumns,
+              ),
+            );
+          });
+        } else {
+          throw new Error(response.error);
+        }
+        setTableRows(rows);
+      } catch (err) {
+        addToast(err.message, { appearance: 'error' });
       }
-    } catch (err) {
-      addToast(err.message, { appearance: 'error' });
+      setLoading(false);
     }
 
-    setTableRows(rows);
-    setLoading(false);
+    getData();
   }, []);
 
   return (

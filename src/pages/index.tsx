@@ -154,7 +154,7 @@ function SignIn() {
       });
     } else {
       try {
-        const response = await useApi.login(authEmpresa, usuario, senha);
+        const response = await useApi.login({authEmpresa, usuario, senha});
 
         if (!response.error) {
           await dispatch(

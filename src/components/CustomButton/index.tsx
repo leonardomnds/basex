@@ -1,5 +1,4 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React, { ReactNode } from 'react';
 
 import { makeStyles, Button, CircularProgress } from '@material-ui/core';
 
@@ -16,7 +15,15 @@ const useStyles = makeStyles({
   },
 });
 
-function CustomButton({ label, func, icon, isLoading, color }) {
+type Props = {
+  label: string,
+  func?: () => void,
+  icon?: ReactNode,
+  isLoading?: boolean,
+  color?: "inherit" | "primary" | "secondary",
+}
+
+function CustomButton({ label, func = ()=>{}, icon, isLoading, color='primary' }: Props) {
   const classes = useStyles();
   return (
     <Button
@@ -38,20 +45,5 @@ function CustomButton({ label, func, icon, isLoading, color }) {
     </Button>
   );
 }
-
-CustomButton.propTypes = {
-  label: PropTypes.string.isRequired,
-  func: PropTypes.func,
-  icon: PropTypes.element,
-  isLoading: PropTypes.bool,
-  color: PropTypes.string,
-};
-
-CustomButton.defaultProps = {
-  func: () => {},
-  icon: null,
-  isLoading: false,
-  color: 'primary',
-};
 
 export default CustomButton;

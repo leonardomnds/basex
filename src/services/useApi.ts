@@ -1,5 +1,47 @@
 import api from '../util/Api';
 
+interface LoginParameters {
+  authEmpresa: string | string[],
+  usuario: string,
+  senha: string
+}
+
+interface EntidadeWith2Fields {
+  id: string,
+  descricao: string
+}
+
+interface ContatosPessoa {
+  nome: string,
+  descricao: string,
+  telefone: string,
+  celular: string,
+  email: string
+}
+
+interface Pessoa {
+  id: string | string[],
+  cpfCnpj: string,
+  nome: string,
+  fantasia: string,
+  rgInscEstadual: string,
+  inscMunicipal: string,
+  telefone: string,
+  celular: string,
+  email: string,
+  cep: string,
+  logradouro: string,
+  numeroLogradouro: string,
+  bairro: string,
+  complementoLogradouro: string,
+  cidade: string,
+  uf: string,
+  grupoId: string | string[],
+  categoriaId: string | string[],
+  ativo: boolean,
+  contatos: Array<ContatosPessoa>
+}
+
 const getResponseData = (response) => {
   try {
     const retorno = { data: null, error: null, extensions: null };
@@ -15,7 +57,7 @@ const getResponseData = (response) => {
         retorno.extensions = response.data.extensions;
       }
       if (retorno.error) {
-        retorno.error = retorno.error[0].detalhes;
+        retorno.error = retorno.error[0].message;
       }
       if (response.data.data && !retorno.error) {
         retorno.data = response.data.data;
@@ -31,8 +73,8 @@ const getResponseData = (response) => {
   }
 };
 
-module.exports = {
-  async login(authEmpresa, usuario, senha) {
+export default {
+  async login(params: LoginParameters) {
     return getResponseData(
       await api.post('', {
         query: `
@@ -51,11 +93,11 @@ module.exports = {
             }
           }
         }`,
-        variables: { authEmpresa, usuario, senha },
+        variables: params,
       }),
     );
   },
-  async findEmpresaById(authEmpresa) {
+  async findEmpresaById(authEmpresa: string | string[]) {
     return getResponseData(
       await api.post('', {
         query: `
@@ -116,7 +158,7 @@ module.exports = {
       }),
     );
   },
-  async salvarGrupoPessoa(id, descricao) {
+  async salvarGrupoPessoa(params: EntidadeWith2Fields) {
     return getResponseData(
       await api.post('', {
         query: `
@@ -131,10 +173,7 @@ module.exports = {
           id
         }
       }`,
-        variables: {
-          id,
-          descricao,
-        },
+        variables: params,
       }),
     );
   },
@@ -168,7 +207,7 @@ module.exports = {
       }),
     );
   },
-  async salvarCategoriaPessoa(id, descricao) {
+  async salvarCategoriaPessoa(params: EntidadeWith2Fields) {
     return getResponseData(
       await api.post('', {
         query: `
@@ -183,10 +222,7 @@ module.exports = {
           id
         }
       }`,
-        variables: {
-          id,
-          descricao,
-        },
+        variables: params,
       }),
     );
   },
@@ -207,7 +243,7 @@ module.exports = {
       }),
     );
   },
-  async consultarCEP(cep) {
+  async consultarCEP(cep: string) {
     return getResponseData(
       await api.post('', {
         query: `
@@ -225,7 +261,7 @@ module.exports = {
       }),
     );
   },
-  async consultarCNPJ(cnpj) {
+  async consultarCNPJ(cnpj: string) {
     return getResponseData(
       await api.post('', {
         query: `
@@ -290,28 +326,7 @@ module.exports = {
       }),
     );
   },
-  async salvarPessoa(
-    id,
-    cpfCnpj,
-    nome,
-    fantasia,
-    rgInscEstadual,
-    inscMunicipal,
-    telefone,
-    celular,
-    email,
-    cep,
-    logradouro,
-    numeroLogradouro,
-    bairro,
-    complementoLogradouro,
-    cidade,
-    uf,
-    grupoId,
-    categoriaId,
-    ativo,
-    contatos,
-  ) {
+  async salvarPessoa(pessoa: Pessoa) {
     return getResponseData(
       await api.post('', {
         query: `
@@ -362,28 +377,7 @@ module.exports = {
           id
         }
       }`,
-        variables: {
-          id,
-          cpfCnpj,
-          nome,
-          fantasia,
-          rgInscEstadual,
-          inscMunicipal,
-          telefone,
-          celular,
-          email,
-          cep,
-          logradouro,
-          numeroLogradouro,
-          bairro,
-          complementoLogradouro,
-          cidade,
-          uf,
-          grupoId,
-          categoriaId,
-          ativo,
-          contatos,
-        },
+        variables: pessoa,
       }),
     );
   },

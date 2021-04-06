@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 
 import {
   makeStyles,
@@ -33,14 +32,25 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export const getSelectItem = (value, text) => {
+export const getSelectItem = (value: any, text: string) => {
   return { value, text };
 };
 
-getSelectItem.prototypes = {
-  value: PropTypes.string.isRequired,
-  text: PropTypes.string.isRequired,
-};
+type ItemList = {
+  value: any,
+  text: string,
+}
+
+type Props = {
+  label: string,
+  disabled?: boolean,
+  value: any,
+  setValue: (v: any) => void,
+  autoFocus?: boolean,
+  items: Array<ItemList>,
+  itemZero?: boolean,
+  btnAction?: (v: any) => void,
+}
 
 function CustomSelect({
   label,
@@ -48,10 +58,10 @@ function CustomSelect({
   value,
   setValue,
   autoFocus,
-  items,
-  itemZero,
+  items = [],
+  itemZero = true,
   btnAction,
-}) {
+}: Props) {
   const classes = useStyles();
   const uuid = uuidv4();
   return (
@@ -94,21 +104,5 @@ function CustomSelect({
     </Box>
   );
 }
-
-CustomSelect.prototypes = {
-  label: PropTypes.string.isRequired,
-  disabled: PropTypes.bool,
-  value: PropTypes.string.isRequired,
-  setValue: PropTypes.func.isRequired,
-  autoFocus: PropTypes.bool,
-  items: PropTypes.array,
-  itemZero: PropTypes.bool,
-  btnAction: PropTypes.func,
-};
-
-CustomSelect.defaultProps = {
-  items: [],
-  itemZero: true,
-};
 
 export default CustomSelect;
