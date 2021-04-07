@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import cookie from 'cookie';
 
 import { ApolloError, AuthenticationError } from 'apollo-server-micro';
 
@@ -43,7 +44,7 @@ module.exports = {
           },
           process.env.JWT_KEY,
           {
-            expiresIn: 86400, // 24 horas
+            expiresIn: '6h'
           },
         );
 

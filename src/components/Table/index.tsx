@@ -30,6 +30,7 @@ import {
   SomenteNumeros,
   StringToDouble,
   FormatarStringToMoney,
+  ZerosLeft,
 } from '../../util/functions';
 
 const useStyles = makeStyles((theme) => ({
@@ -115,15 +116,10 @@ export const getColumn = (
   label: string,
   minWidth: number,
   align: "center" | "left" | "right",
-  formatar?: (v: string | number) => string,
-  ocultar?: boolean
+  formatar?: "none" | "padleft",
+  ocultar: boolean = false
 ) => {
-  let func = formatar;
-  if (!func) {
-    func = (value) => value.toString();
-  }
-
-  return { id, label, minWidth, align, formatar: func, ocultar };
+  return { id, label, minWidth, align, formatar: formatar || "none", ocultar };
 };
 
 export const getRow = (rowItems: Array<any>, columnsList: Array<any>) => {
@@ -222,6 +218,15 @@ function CustomTable({
     emptyRows =
       rowsPerPage - Math.min(rowsPerPage, newRows.length - page * rowsPerPage);
   };
+
+  const formatarString = (value: any, type: string) => {
+    switch (type) {
+      case 'padleft':
+        return ZerosLeft(value, 6);    
+      default:
+        return value.toString();
+    }
+  }
 
   const handleChangePage = (evt, numPage) => {
     setPage(numPage);
@@ -336,7 +341,7 @@ function CustomTable({
                             display: column.ocultar ? 'none' : '',
                           }}
                         >
-                          {column.formatar ? column.formatar(value) : value}
+                          {formatarString(value, column.formatar)}
                         </TableCell>
                       );
                     })}

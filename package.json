@@ -21,6 +21,7 @@
     "graphql-type-uuid": "^0.2.0",
     "jsonwebtoken": "^8.5.1",
     "next": "10.1.2",
+    "next-cookie": "^2.6.0",
     "pg": "^8.5.1",
     "pg-hstore": "^2.3.3",
     "prop-types": "^15.7.2",

@@ -28,7 +28,6 @@ import CustomButton from '../../../../components/CustomButton';
 import EntityDialog from '../../../../components/CustomDialog/Entity';
 import CustomDialog from '../../../../components/CustomDialog';
 import CustomTable, { getColumn, getRow } from '../../../../components/Table';
-// import SelectTags, { getTag } from '../../../../components/FormControl/SelectTags';
 
 import useApi from '../../../../services/useApi';
 
@@ -39,8 +38,7 @@ import {
   FormatarTelefone,
   ZerosLeft,
 } from '../../../../util/functions';
-
-// import useWindowSize from '../../../../util/WindowSize';
+import { GetServerSideProps, NextPage } from 'next';
 
 const { v4: uuidv4 } = require('uuid');
 
@@ -70,12 +68,15 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function NewPeople() {
+type Props = {
+  pessoaId: string,
+  colunas: [],
+}
+
+const NewPeople: NextPage<Props> = (props) => {
   const classes = useStyles();
-  // const theme = useTheme();
-  // const size = useWindowSize();
   const router = useRouter();
-  const { id } = router.query;
+  const { pessoaId, colunas } = props;
 
   const { addToast } = useToasts();
 
@@ -134,18 +135,6 @@ function NewPeople() {
   const [contCelular, setContCelular] = useState('');
   const [contEmail, setContEmail] = useState('');
 
-  const getTableColumns = () => {
-    const columns = [];
-    columns.push(getColumn('id', 'Id', 0, 'center', null, true));
-    columns.push(getColumn('nome', 'Nome', 100, 'left'));
-    columns.push(getColumn('descricao', 'Descrição', 100, 'left'));
-    columns.push(getColumn('telefone', 'Telefone', 50, 'center'));
-    columns.push(getColumn('celular', 'Celular', 50, 'center'));
-    columns.push(getColumn('email', 'E-mail', 100, 'left'));
-    return columns;
-  };
-
-  const [tableColumns] = useState(getTableColumns());
   const [tableRows, setTableRows] = useState([]);
 
   const handleChangeTab = (event, newValue) => {
@@ -262,7 +251,6 @@ function NewPeople() {
     const baseUrl = `/pessoas/${personId}/contatos`;
     let response;
     let sucesso = true;
-
     try {
       const promissePost = listaContatosPost.map(async (con) => {
         response = await api.post(baseUrl, con);
@@ -270,25 +258,21 @@ function NewPeople() {
           sucesso = false;
         }
       });
-
       const promissePut = listaContatosPut.map(async (con) => {
         response = await api.put(`${baseUrl}/${con.id}`, con);
         if (!response || !response.data || !response.data.sucesso) {
           sucesso = false;
         }
       });
-
       const promisseDel = listaContatosDelete.map(async (con) => {
         response = await api.delete(`${baseUrl}/${con.id}`);
         if (!response || !response.data || !response.data.sucesso) {
           sucesso = false;
         }
       });
-
       await Promise.all(promissePost);
       await Promise.all(promissePut);
       await Promise.all(promisseDel);
-
       return sucesso;
     } catch (err) {
       return false;
@@ -323,7 +307,7 @@ function NewPeople() {
       try {
 
         const pessoa = {
-          id: id || null,
+          id: pessoaId || null,
           cpfCnpj: cpfCnpj || null,
           nome: nomeRazao || null,
           fantasia: fantasia || null,
@@ -357,14 +341,14 @@ function NewPeople() {
 
         const response = await useApi.salvarPessoa(pessoa);
 
-        if (!response.error) {
-          addToast(`Pessoa ${id ? 'alterada' : 'cadastrado'} com sucesso!`, {
+        if (!response?.data?.error) {
+          addToast(`Pessoa ${pessoaId ? 'alterada' : 'cadastrado'} com sucesso!`, {
             appearance: 'success',
           });
           router.push('/app/cadastro/pessoas');
           return;
         }
-        throw new Error(response.error);
+        throw new Error(response.data.error);
       } catch (err) {
         addToast(err.message, { appearance: 'error' });
       }
@@ -377,8 +361,8 @@ function NewPeople() {
     try {
       const response = await useApi.consultarCNPJ(cpfCnpj);
 
-      if (!response.error) {
-        const dados = response.data.consultarCnpj;
+      if (!response?.data?.error) {
+        const dados = response.data.data?.consultarCnpj;
         if (dados) {
           // Dados Gerais
           setNomeRazao(dados.razaoSocial);
@@ -411,7 +395,7 @@ function NewPeople() {
           }
         }
       } else {
-        throw new Error(response.error);
+        throw new Error(response.data.error);
       }
     } catch (err) {
       addToast(err.message, { appearance: 'error' });
@@ -433,8 +417,8 @@ function NewPeople() {
     try {
       const response = await useApi.consultarCEP(cep);
 
-      if (!response.error) {
-        const dados = response.data.consultarCep;
+      if (!response?.data?.error) {
+        const dados = response.data.data?.consultarCep;
         if (dados) {
           setCep(dados.cep);
           setLogradouro(dados.logradouro);
@@ -444,7 +428,7 @@ function NewPeople() {
           setCidade(dados.cidade);
         }
       } else {
-        throw new Error(response.error);
+        throw new Error(response.data.error);
       }
     } catch (err) {
       addToast(err.message, { appearance: 'error' });
@@ -453,7 +437,7 @@ function NewPeople() {
   };
 
   const handleCepData = async () => {
-    if (SomenteNumeros(cep).length === 8) {
+    if (SomenteNumeros(cep).length !== 8) {
       addToast('Preencha o CEP para continuar!', { appearance: 'warning' });
     } else if (cep === cepConsultado) {
       setShowConfirmCep(true);
@@ -509,8 +493,8 @@ function NewPeople() {
     try {
       const response = await useApi.getGruposPessoas();
 
-      if (!response.error) {
-        const dados = response.data.gruposPessoa;
+      if (!response?.data?.error) {
+        const dados = response.data.data?.gruposPessoa;
         if (dados) {
           const items = [];
           dados.forEach((item) => {
@@ -519,7 +503,7 @@ function NewPeople() {
           setListaGrupos(items);
         }
       } else {
-        throw new Error(response.error);
+        throw new Error(response.data.error);
       }
     } catch (err) {
       addToast(err.message, { appearance: 'error' });
@@ -530,8 +514,8 @@ function NewPeople() {
     try {
       const response = await useApi.getCategoriasPessoas();
 
-      if (!response.error) {
-        const dados = response.data.categoriasPessoa;
+      if (!response?.data?.error) {
+        const dados = response.data.data?.categoriasPessoa;
         if (dados) {
           const items = [];
           dados.forEach((item) => {
@@ -540,7 +524,7 @@ function NewPeople() {
           setListaCategorias(items);
         }
       } else {
-        throw new Error(response.error);
+        throw new Error(response.data.error);
       }
     } catch (err) {
       addToast(err.message, { appearance: 'error' });
@@ -553,8 +537,8 @@ function NewPeople() {
       try {
         const response = await useApi.getListaEstados();
 
-        if (!response.error) {
-          const dados = response.data.estados;
+        if (!response?.data?.error) {
+          const dados = response.data.data?.estados;
           if (dados) {
             const estados = [];
             dados.forEach((estado) => {
@@ -565,7 +549,7 @@ function NewPeople() {
             setListaEstados(estados);
           }
         } else {
-          throw new Error(response.error);
+          throw new Error(response.data.error);
         }
       } catch (err) {
         addToast(err.message, { appearance: 'error' });
@@ -580,10 +564,10 @@ function NewPeople() {
 
     async function getData() {
       try {
-        const response = await useApi.getPessoa(id);
+        const response = await useApi.getPessoa(pessoaId);
 
-        if (!response.error) {
-          const dados = response.data.pessoa;
+        if (!response?.data?.error) {
+          const dados = response.data.data?.pessoa;
           if (dados) {
             // Dados Gerais
             setCodigo(
@@ -636,7 +620,7 @@ function NewPeople() {
                       con.celular,
                       con.email,
                     ],
-                    tableColumns,
+                    colunas,
                   ),
                 );
               });
@@ -645,11 +629,11 @@ function NewPeople() {
             router.push('/app/cadastro/pessoas');
           }
         } else {
-          if (response.error.includes('Variable "$id" got invalid value')) {
+          if (response.data.error.includes('Variable "$id" got invalid value')) {
             router.push('/app/cadastro/pessoas');
             return;
           }
-          throw new Error(response.error);
+          throw new Error(response.data.error);
         }
       } catch (err) {
         addToast(err.message, { appearance: 'error' });
@@ -658,13 +642,13 @@ function NewPeople() {
 
     setTableRows(rows);
 
-    if (id) {
+    if (pessoaId) {
       getData();
     }
 
     getGrupos();
     getCategorias();
-  }, [id]);
+  }, []);
 
   const TablePanel = () => {
     switch (currentTab) {
@@ -759,7 +743,7 @@ function NewPeople() {
             </Box>
             {!contEnable && (
               <CustomTable
-                columns={tableColumns}
+                columns={colunas}
                 rows={tableRows}
                 editFunction={hadleEditContact}
                 deleteFunction={handleDeleteContact}
@@ -891,7 +875,7 @@ function NewPeople() {
   return (
     <Box>
       <PageHeader
-        title={`${id ? 'Editar' : 'Novo'} cliente`}
+        title={`${pessoaId ? 'Editar' : 'Novo'} cliente`}
         btnLabel="Salvar"
         btnIcon={<SaveRoundedIcon />}
         btnFunc={handleSave}
@@ -1008,3 +992,21 @@ function NewPeople() {
 }
 
 export default NewPeople;
+
+export const getServerSideProps : GetServerSideProps = async ({ params }) => {
+
+  const colunas = [];
+  colunas.push(getColumn('id', 'Id', 0, 'center', null, true));
+  colunas.push(getColumn('nome', 'Nome', 100, 'left'));
+  colunas.push(getColumn('descricao', 'Descrição', 100, 'left'));
+  colunas.push(getColumn('telefone', 'Telefone', 50, 'center'));
+  colunas.push(getColumn('celular', 'Celular', 50, 'center'));
+  colunas.push(getColumn('email', 'E-mail', 100, 'left'));
+
+  return {
+    props: {
+      pessoaId: params?.id || null,
+      colunas
+    }
+  }
+}

@@ -6,13 +6,22 @@ import { Box } from '@material-ui/core';
 import PageHeader from '../../../../components/Layout/PageHeader';
 
 import CustomTable, { getColumn, getRow } from '../../../../components/Table';
-import useApi from '../../../../services/useApi';
 import CustomDialog from '../../../../components/CustomDialog';
-import { ZerosLeft } from '../../../../util/functions';
+import { GetServerSideProps, NextPage } from 'next';
+import api from '../../../../util/Api';
 
-function ProductList() {
+type Props = {
+  colunas: [],
+}
+
+const PeopleList: NextPage<Props> = (props) => {
   const router = useRouter();
   const { addToast } = useToasts();
+  const { colunas } = props;
+
+  const [isLoading, setLoading] = useState<boolean>(false);
+  const [deletingPerson, setDeletingPerson] = useState(null);
+  const [linhas, setLinhas] = useState<Array<any>>([]);
 
   const handleNewPerson = () => {
     router.push(`${router.pathname}/novo`);
@@ -22,24 +31,6 @@ function ProductList() {
     router.push(`${router.pathname}/${person.id}`);
   };
 
-  const getTableColumns = () => {
-    const zerosLeft = (value) => ZerosLeft(value, 6);
-    const columns = [];
-    columns.push(getColumn('id', 'Id', 0, 'center', null, true));
-    columns.push(getColumn('codigo', 'Código', 30, 'center', zerosLeft));
-    columns.push(getColumn('cpfCnpj', 'CPF/CNPJ', 50, 'left'));
-    columns.push(getColumn('nome', 'Nome/Razão', 100, 'left'));
-    columns.push(getColumn('fantasia', 'Apelido/Fantasia', 100, 'left'));
-    columns.push(getColumn('endereco', 'Endereço', 100, 'left'));
-    columns.push(getColumn('ativo', 'Status', 30, 'center'));
-    return columns;
-  };
-
-  const [tableColumns] = useState<Array<any>>(getTableColumns());
-  const [tableRows, setTableRows] = useState<Array<any>>([]);
-  const [isLoading, setLoading] = useState<boolean>(false);
-  const [deletingPerson, setDeletingPerson] = useState(null);
-
   // const handleDeletePerson = (person) => {
   //   setDeletingPerson(person);
   // };
@@ -47,8 +38,8 @@ function ProductList() {
   const handleCloseDialog = () => {
     setDeletingPerson(null);
   };
-
-  const confirmDeleteProduct = async () => {
+/*
+  const confirmDeletePerson = async () => {
     try {
       const response = null; // await useApi.delete(`/pessoas/${deletingPerson.id}`);
 
@@ -75,18 +66,36 @@ function ProductList() {
       addToast(err.message, { appearance: 'error' });
     }
   };
+*/
 
   useEffect(() => {
-    setLoading(true);
-    const rows = [];
 
-    async function getData() {
+    const getData = async () => {
+      const pessoas = [];
+      setLoading(true);
+
+
       try {
-        const response = await useApi.getListaPessoas();
-  
-        if (!response.error) {
-          response.data.pessoas.forEach((pes) => {
-            rows.push(
+        const { data } = await api.post('', {
+          query: `
+            query {
+              pessoas {
+                id
+                codigo
+                cpfCnpj
+                nome
+                fantasia
+                logradouro
+                numeroLogradouro
+                ativo
+              }
+            }`,
+        });
+
+        if (!data?.error) {
+          const dados = data.data.pessoas;
+          dados.forEach((pes) => {
+            pessoas.push(
               getRow(
                 [
                   pes.id,
@@ -97,30 +106,31 @@ function ProductList() {
                   `${pes.logradouro || ''}, ${pes.numeroLogradouro || ''}`,
                   pes.ativo ? 'Ativo' : 'Inativo',
                 ],
-                tableColumns,
+                colunas,
               ),
             );
           });
         } else {
-          throw new Error(response.error);
+          throw new Error(data.error)
         }
-        setTableRows(rows);
       } catch (err) {
         addToast(err.message, { appearance: 'error' });
       }
+
+      setLinhas(pessoas);
       setLoading(false);
     }
 
     getData();
-  }, []);
+  }, [])
 
   return (
     <Box>
       <PageHeader title="Clientes" btnLabel="Novo" btnFunc={handleNewPerson} />
       <CustomTable
         isLoading={isLoading}
-        columns={tableColumns}
-        rows={tableRows}
+        columns={colunas}
+        rows={linhas}
         editFunction={handleEditPerson}
         // deleteFunction={handleDeletePerson}
       />
@@ -130,11 +140,29 @@ function ProductList() {
           text={`Confirma a exclusão da pessoa ${deletingPerson.nome}? Caso possua vínculos no sistema, ela será apenas inativada.`}
           isOpen={Boolean(deletingPerson)}
           onClose={handleCloseDialog}
-          onConfirm={confirmDeleteProduct}
+          onConfirm={()=>{}}// {confirmDeletePerson}
         />
       )}
     </Box>
   );
 }
 
-export default ProductList;
+export default PeopleList;
+
+export const getServerSideProps : GetServerSideProps = async () => {
+
+  const colunas = [];
+  colunas.push(getColumn('id', 'Id', 0, 'center', null, true));
+  colunas.push(getColumn('codigo', 'Código', 30, 'center', "padleft"));
+  colunas.push(getColumn('cpfCnpj', 'CPF/CNPJ', 50, 'left'));
+  colunas.push(getColumn('nome', 'Nome/Razão', 100, 'left'));
+  colunas.push(getColumn('fantasia', 'Apelido/Fantasia', 100, 'left'));
+  colunas.push(getColumn('endereco', 'Endereço', 100, 'left'));
+  colunas.push(getColumn('ativo', 'Status', 30, 'center'));
+
+  return {
+    props: {
+      colunas
+    }
+  }
+}

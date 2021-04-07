@@ -1,4 +1,4 @@
-import React, { useState/*, useEffect*/ } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useDispatch } from 'react-redux';
 import { useToasts } from 'react-toast-notifications';
@@ -15,9 +15,10 @@ import {
 import { signIn } from '../../store/actions/accountAction';
 import drawerClick from '../../store/actions/drawerAction';
 
-import useApi from '../../services/useApi';
+import api from '../../util/Api';
 import authService from '../../services/AuthService';
 import { GetServerSideProps, NextPage } from 'next';
+import { AxiosResponse } from 'axios';
 
 const useStyles = makeStyles((theme) => ({
   themeError: {
@@ -146,28 +147,50 @@ const SignIn: NextPage<Props> = (props) => {
   const [senha, setSenha] = useState('');
   const [loading, setLoading] = useState(false);
 
-  async function handleSignIn() {
+  const exibirMensagemURL = () => {
+    addToast(
+      'Você está tentando acessar uma empresa não localizada em nosso banco de dados. Confirme se está utilizando a URL correta!',
+      {
+        appearance: 'warning',
+      },
+    );
+  }
+
+  const handleSignIn = async () => {
     setLoading(true);
     removeAllToasts();
 
-    if (!identificador) {
-      addToast(
-        'Você está tentando acessar uma empresa não localizada em nosso banco de dados. Confirme se está utilizando a URL correta!',
-        {
-          appearance: 'warning',
-        },
-      );
+    if (!infoEmpresa) {
+      exibirMensagemURL();
     } else if (!usuario || !senha) {
       addToast('Informe usuário e senha para continuar!', {
         appearance: 'warning',
       });
     } else {
       try {
-        const response = await useApi.login({identificador, usuario, senha});
+        const response = await api.post('', {
+          query: `
+          mutation ($identificador: String!, $usuario: String!, $senha: String!) {
+            login(
+              identificadorEmpresa: $identificador,
+              usuario: $usuario,
+              senha: $senha
+            ) {
+              token,
+              usuario {
+                id,
+                nome,
+                usuario,
+                email
+              }
+            }
+          }`,
+          variables: {identificador, usuario, senha},
+        });
 
-        if (!response.error) {
+        if (!response.data.error) {
           await dispatch(
-            signIn(response.data.login.usuario, response.data.login.token),
+            signIn(response.data.data.login.usuario, response.data.data.login.token),
           );
           await authService.setIdentificadorEmpresa(identificador);
 
@@ -179,13 +202,19 @@ const SignIn: NextPage<Props> = (props) => {
           router.replace('/app/home');
           return;
         }
-        throw new Error(response.error);
+        throw new Error(response.data.error);
       } catch (err) {
         addToast(err.message, { appearance: 'error' });
       }
     }
     setLoading(false);
   }
+
+  useEffect(() => {
+    if (!infoEmpresa) {
+      exibirMensagemURL();
+    }
+  }, [])
 
   return (
     <Box className={classes.root}>
@@ -255,15 +284,26 @@ export const getServerSideProps : GetServerSideProps = async (context) => {
 
   const identificador = context.query && context.query.login ? context.query.login : '';
 
-  let response;
+  let response: AxiosResponse<any>;
   if (identificador) {
-    response = await useApi.findEmpresaById(identificador);
+    response = await api.post('', {
+      query: `
+      query ($identificador: String!) {
+        infoEmpresa(
+          identificadorEmpresa: $identificador,
+        ) {
+          fantasia,
+          logoBase64
+        }
+      }`,
+      variables: { identificador },
+    });
   }
 
   return {
     props: {
       identificador,
-      infoEmpresa: response && response.data ? response.data.infoEmpresa : {}
+      infoEmpresa: !response.data.error ? response.data.data.infoEmpresa : {}
     }
   }
 }

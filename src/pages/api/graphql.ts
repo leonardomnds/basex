@@ -11,7 +11,8 @@ const apolloServer = new ApolloServer({
   resolvers: apiController,
   debug: false,
   playground: true, // Exibir a interface de teste no /api/graphql
-  context: ({ req }) => {
+  context: ({req, res}) => {
+
     let user = null;
     const bearerLength = 'Bearer '.length;
     const token = req.headers.authorization || null;
@@ -20,7 +21,7 @@ const apolloServer = new ApolloServer({
       user = jwt.decode(token.slice(bearerLength), process.env.JWT_KEY);
     }
 
-    return { user };
+    return { user, res };
   },
   formatError: (err) => {
     return {
