@@ -17,6 +17,8 @@ module.exports = {
   async save(_, { id, descricao }, { user }) {
     validateAuth(user);
 
+    if ((descricao || '').length === 0) throw new ApolloError('A descrição precisa ser informada', 'bad request');
+
     if (
       await Grupo.findOne({
         where: {

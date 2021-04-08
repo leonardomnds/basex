@@ -11,7 +11,7 @@ import { GetServerSideProps, NextPage } from 'next';
 import api from '../../../../util/Api';
 
 type Props = {
-  colunas: [],
+  colunas: []
 }
 
 const PeopleList: NextPage<Props> = (props) => {
@@ -125,25 +125,25 @@ const PeopleList: NextPage<Props> = (props) => {
   }, [])
 
   return (
-    <Box>
-      <PageHeader title="Clientes" btnLabel="Novo" btnFunc={handleNewPerson} />
-      <CustomTable
-        isLoading={isLoading}
-        columns={colunas}
-        rows={linhas}
-        editFunction={handleEditPerson}
-        // deleteFunction={handleDeletePerson}
-      />
-      {deletingPerson && (
-        <CustomDialog
-          title="Excluir pessoa"
-          text={`Confirma a exclusão da pessoa ${deletingPerson.nome}? Caso possua vínculos no sistema, ela será apenas inativada.`}
-          isOpen={Boolean(deletingPerson)}
-          onClose={handleCloseDialog}
-          onConfirm={()=>{}}// {confirmDeletePerson}
+      <Box>
+        <PageHeader title="Clientes " btnLabel="Novo" btnFunc={handleNewPerson} />
+        <CustomTable
+          isLoading={isLoading}
+          columns={colunas}
+          rows={linhas}
+          editFunction={handleEditPerson}
+          // deleteFunction={handleDeletePerson}
         />
-      )}
-    </Box>
+        {deletingPerson && (
+          <CustomDialog
+            title="Excluir pessoa"
+            text={`Confirma a exclusão da pessoa ${deletingPerson.nome}? Caso possua vínculos no sistema, ela será apenas inativada.`}
+            isOpen={Boolean(deletingPerson)}
+            onClose={handleCloseDialog}
+            onConfirm={()=>{}}// {confirmDeletePerson}
+          />
+        )}
+      </Box>
   );
 }
 
@@ -162,7 +162,7 @@ export const getServerSideProps : GetServerSideProps = async () => {
 
   return {
     props: {
-      colunas 
+      colunas
     }
   }
 }

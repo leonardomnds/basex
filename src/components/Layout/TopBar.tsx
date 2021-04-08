@@ -1,5 +1,5 @@
+import cookie from 'js-cookie';
 import React, { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
 
 import {
   useTheme,
@@ -15,10 +15,7 @@ import MenuRoundedIcon from '@material-ui/icons/MenuRounded';
 
 import NotificationsRoundedIcon from '@material-ui/icons/NotificationsRounded';
 import Account from '../Account';
-import drawerClick from '../../store/actions/drawerAction';
 import useWindowSize from '../../util/WindowSize';
-
-import authService from '../../services/AuthService';
 
 const useStyles = makeStyles((theme) => ({
   appbar: {
@@ -53,23 +50,24 @@ const useStyles = makeStyles((theme) => ({
   icon: {},
 }));
 
-function TopBar() {
+type Props = {
+  isDrawerOpen: boolean,
+  setDrawerOpen: () => void,
+}
+
+function TopBar(props: Props) {
   const classes = useStyles();
-  const dispatch = useDispatch();
   const size = useWindowSize();
   const theme = useTheme();
-  const isDrawerOpen = useSelector((state) => state.drawer.open);
 
-  const handleDrawer = () => {
-    dispatch(drawerClick(!isDrawerOpen));
-  };
+  const { isDrawerOpen, setDrawerOpen } = props;
 
   useEffect(() => {
     if (
       (isDrawerOpen && size.width < theme.breakpoints.values.lg) ||
       (!isDrawerOpen && size.width >= theme.breakpoints.values.lg)
     ) {
-      handleDrawer();
+      setDrawerOpen();
     }
   }, [size]);
 
@@ -84,14 +82,14 @@ function TopBar() {
           >
             <MenuRoundedIcon
               className={classes.menuIcon}
-              onClick={handleDrawer}
+              onClick={() => setDrawerOpen()}
             />
           </Tooltip>
           <img
-            src={authService.getLogoEmpresa() || '/assets/images/logo.svg'}
+            src={'/assets/images/logo.svg'}
             alt="logo"
             className={classes.logo}
-            style={{ height: authService.getLogoEmpresa() ? 25 : 18 }}
+            style={{ height: 18 }}
           />
         </Box>
         <Box className={classes.accountSection}>
@@ -100,7 +98,7 @@ function TopBar() {
               <NotificationsRoundedIcon />
             </IconButton>
           </Tooltip>
-          <Account />
+          <Account user={cookie.get('user') || null} />
         </Box>
       </Toolbar>
     </AppBar>

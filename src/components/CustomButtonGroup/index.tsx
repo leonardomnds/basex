@@ -11,11 +11,13 @@ import {
   Popper,
   MenuItem,
   MenuList,
+  SvgIconTypeMap,
 } from '@material-ui/core';
 
 import EditIcon from '@material-ui/icons/EditRounded';
 import DeleteIcon from '@material-ui/icons/DeleteRounded';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDownRounded';
+import { OverridableComponent } from '@material-ui/core/OverridableComponent';
 
 const { v4: uuidv4 } = require('uuid');
 
@@ -35,11 +37,16 @@ const useStyles = makeStyles((theme) => ({
 
 function CustomButtonGroup({ editFunction, deleteFunction }) {
   const classes = useStyles();
-  const [open, setOpen] = useState('');
+  const [open, setOpen] = useState<boolean>(false);
   const anchorRef = useRef(uuidv4());
   const [selectedIndex, setSelectedIndex] = useState(0);
 
-  const actions = [
+  const actions: Array<{
+    label: string,
+    icon: OverridableComponent<SvgIconTypeMap<{}, "svg">>,
+    color: 'primary' | 'secondary',
+    func: () => void,
+  }> = [
     {
       label: 'Editar',
       icon: EditIcon,
@@ -73,7 +80,6 @@ function CustomButtonGroup({ editFunction, deleteFunction }) {
 
   const getIcon = () => {
     const Icon = actions[selectedIndex].icon;
-
     return <Icon className={classes.icon} />;
   };
 

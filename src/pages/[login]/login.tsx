@@ -1,6 +1,7 @@
+import cookie from 'js-cookie';
+
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { useDispatch } from 'react-redux';
 import { useToasts } from 'react-toast-notifications';
 import {
   makeStyles,
@@ -12,11 +13,8 @@ import {
   Button,
   CircularProgress,
 } from '@material-ui/core';
-import { signIn } from '../../store/actions/accountAction';
-import drawerClick from '../../store/actions/drawerAction';
 
 import api from '../../util/Api';
-import authService from '../../services/AuthService';
 import { GetServerSideProps, NextPage } from 'next';
 import { AxiosResponse } from 'axios';
 
@@ -140,7 +138,6 @@ const SignIn: NextPage<Props> = (props) => {
   const router = useRouter();
   const { identificador, infoEmpresa } = props;
 
-  const dispatch = useDispatch();
   const { addToast, removeAllToasts } = useToasts();
 
   const [usuario, setUsuario] = useState('');
@@ -189,16 +186,9 @@ const SignIn: NextPage<Props> = (props) => {
         });
 
         if (!response.data.error) {
-          await dispatch(
-            signIn(response.data.data.login.usuario, response.data.data.login.token),
-          );
-          await authService.setIdentificadorEmpresa(identificador);
-
-          if (infoEmpresa && infoEmpresa.logoBase64) {
-            await authService.setLogoEmpresa(infoEmpresa.logoBase64);
-          }
-
-          dispatch(drawerClick(true));
+          await cookie.set('identificador', identificador, { expires: 1/24*6 }); // 6 horas
+          await cookie.set('user', response.data.data?.login?.usuario || null, { expires: 1/24*6 });
+          await cookie.set('token', response.data.data?.login?.token || null, { expires: 1/24*6 });
           router.replace('/app/home');
           return;
         }

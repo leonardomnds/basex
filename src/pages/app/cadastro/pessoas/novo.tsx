@@ -37,6 +37,7 @@ import {
   FormatarCep,
   FormatarTelefone,
   ZerosLeft,
+  GetAxiosConfig,
 } from '../../../../util/functions';
 import { GetServerSideProps, NextPage } from 'next';
 
@@ -873,121 +874,121 @@ const NewPeople: NextPage<Props> = (props) => {
   };
 
   return (
-    <Box>
-      <PageHeader
-        title={`${pessoaId ? 'Editar' : 'Novo'} cliente`}
-        btnLabel="Salvar"
-        btnIcon={<SaveRoundedIcon />}
-        btnFunc={handleSave}
-        btnLoading={isSaving}
-        btnBack
-      />
-      <Paper className={classes.paper}>
-        <Grid container spacing={2}>
-          <Grid item xs={2} sm={2} md={2}>
-            <TextField label="Código" value={codigo} disabled />
-          </Grid>
-          <Grid item xs={7} sm={6} md={4}>
-            <TextField
-              label="CPF / CNPJ"
-              value={cpfCnpj}
-              setValue={maskCpfCnpj}
-              endItem={cpfCnpj.length === 18 ? getEndItemCnpj() : null}
-            />
-          </Grid>
-          <Hidden xsDown>
-            <Grid item xs={1} sm={1} md={4} />
-          </Hidden>
-          <Grid item xs={3} sm={3} md={2}>
-            <Select
-              label="Situação"
-              value={isAtivo}
-              setValue={setAtivo}
-              itemZero={false}
-              items={[
-                { value: true, text: 'Ativo' },
-                { value: false, text: 'Inativo' },
-              ]}
-            />
-          </Grid>
-          <Grid item xs={12} sm={12} md={6} lg={6}>
-            <TextField
-              label={cpfCnpj.length > 14 ? 'Razão Social' : 'Nome'}
-              value={nomeRazao}
-              setValue={setNomeRazao}
-            />
-          </Grid>
-          <Grid item xs={12} sm={12} md={6} lg={6}>
-            <TextField
-              label={cpfCnpj.length > 14 ? 'Nome Fantasia' : 'Apelido'}
-              value={fantasia}
-              setValue={setFantasia}
-            />
-          </Grid>
-        </Grid>
-        <Tabs
-          value={currentTab}
-          onChange={handleChangeTab}
-          indicatorColor="primary"
-          textColor="primary"
-          className={classes.tabs}
-          variant="scrollable"
-          scrollButtons="auto"
-        >
-          <Tab label="Dados gerais" />
-          <Tab label="Endereço" />
-          <Tab label="Contatos" />
-        </Tabs>
-        <Box className={classes.tab}>{TablePanel()}</Box>
-      </Paper>
-      {showConfirmCnpj && (
-        <CustomDialog
-          title="Consultar CNPJ"
-          text="O CNPJ não foi alterado desde a última consulta. Continuar mesmo assim?"
-          isOpen={showConfirmCnpj}
-          onClose={() => {
-            setShowConfirmCnpj(false);
-          }}
-          onConfirm={() => {
-            setShowConfirmCnpj(false);
-            findCnpjData();
-          }}
+      <Box>
+        <PageHeader
+          title={`${pessoaId ? 'Editar' : 'Novo'} cliente`}
+          btnLabel="Salvar"
+          btnIcon={<SaveRoundedIcon />}
+          btnFunc={handleSave}
+          btnLoading={isSaving}
+          btnBack
         />
-      )}
-      {showConfirmCep && (
-        <CustomDialog
-          title="Consultar CEP"
-          text="O CEP não foi alterado desde a última consulta. Continuar mesmo assim?"
-          isOpen={showConfirmCep}
-          onClose={() => {
-            setShowConfirmCep(false);
-          }}
-          onConfirm={() => {
-            setShowConfirmCep(false);
-            findCepData();
-          }}
-        />
-      )}
-      {newEntity && (
-        <EntityDialog
-          entity={newEntity}
-          isOpen={Boolean(newEntity)}
-          onClose={() => {
-            switch (newEntity) {
-              case 'grupoPessoa':
-                getGrupos();
-                break;
-              case 'categoriaPessoa':
-                getCategorias();
-                break;
-              default:
-                break;
-            }
-            setNewEntity('');
-          }}
-        />
-      )}
-    </Box>
+        <Paper className={classes.paper}>
+          <Grid container spacing={2}>
+            <Grid item xs={2} sm={2} md={2}>
+              <TextField label="Código" value={codigo} disabled />
+            </Grid>
+            <Grid item xs={7} sm={6} md={4}>
+              <TextField
+                label="CPF / CNPJ"
+                value={cpfCnpj}
+                setValue={maskCpfCnpj}
+                endItem={cpfCnpj.length === 18 ? getEndItemCnpj() : null}
+              />
+            </Grid>
+            <Hidden xsDown>
+              <Grid item xs={1} sm={1} md={4} />
+            </Hidden>
+            <Grid item xs={3} sm={3} md={2}>
+              <Select
+                label="Situação"
+                value={isAtivo}
+                setValue={setAtivo}
+                itemZero={false}
+                items={[
+                  { value: true, text: 'Ativo' },
+                  { value: false, text: 'Inativo' },
+                ]}
+              />
+            </Grid>
+            <Grid item xs={12} sm={12} md={6} lg={6}>
+              <TextField
+                label={cpfCnpj.length > 14 ? 'Razão Social' : 'Nome'}
+                value={nomeRazao}
+                setValue={setNomeRazao}
+              />
+            </Grid>
+            <Grid item xs={12} sm={12} md={6} lg={6}>
+              <TextField
+                label={cpfCnpj.length > 14 ? 'Nome Fantasia' : 'Apelido'}
+                value={fantasia}
+                setValue={setFantasia}
+              />
+            </Grid>
+          </Grid>
+          <Tabs
+            value={currentTab}
+            onChange={handleChangeTab}
+            indicatorColor="primary"
+            textColor="primary"
+            className={classes.tabs}
+            variant="scrollable"
+            scrollButtons="auto"
+          >
+            <Tab label="Dados gerais" />
+            <Tab label="Endereço" />
+            <Tab label="Contatos" />
+          </Tabs>
+          <Box className={classes.tab}>{TablePanel()}</Box>
+        </Paper>
+        {showConfirmCnpj && (
+          <CustomDialog
+            title="Consultar CNPJ"
+            text="O CNPJ não foi alterado desde a última consulta. Continuar mesmo assim?"
+            isOpen={showConfirmCnpj}
+            onClose={() => {
+              setShowConfirmCnpj(false);
+            }}
+            onConfirm={() => {
+              setShowConfirmCnpj(false);
+              findCnpjData();
+            }}
+          />
+        )}
+        {showConfirmCep && (
+          <CustomDialog
+            title="Consultar CEP"
+            text="O CEP não foi alterado desde a última consulta. Continuar mesmo assim?"
+            isOpen={showConfirmCep}
+            onClose={() => {
+              setShowConfirmCep(false);
+            }}
+            onConfirm={() => {
+              setShowConfirmCep(false);
+              findCepData();
+            }}
+          />
+        )}
+        {newEntity && (
+          <EntityDialog
+            entity={newEntity}
+            isOpen={Boolean(newEntity)}
+            onClose={() => {
+              switch (newEntity) {
+                case 'grupoPessoa':
+                  getGrupos();
+                  break;
+                case 'categoriaPessoa':
+                  getCategorias();
+                  break;
+                default:
+                  break;
+              }
+              setNewEntity('');
+            }}
+          />
+        )}
+      </Box>
   );
 }
 

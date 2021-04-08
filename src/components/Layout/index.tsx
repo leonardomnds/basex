@@ -1,14 +1,13 @@
-import React, { useEffect } from 'react';
+import cookie from 'js-cookie';
+
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import { useSelector } from 'react-redux';
 
 import { useTheme, makeStyles, Box } from '@material-ui/core';
 
 import TopBar from './TopBar';
 import Sidebar from './SideBar';
 import useWindowSize from '../../util/WindowSize';
-
-import authService from '../../services/AuthService';
 
 const useStyles = makeStyles((theme) => ({
   themeError: {
@@ -54,28 +53,39 @@ function Layout({ children }) {
   const size = useWindowSize();
   const theme = useTheme();
   const router = useRouter();
-  const isDrawerOpen = useSelector((state) => state.drawer.open);
+
+  const [isDrawerOpen, setDrawerOpen] = useState(true);
 
   const needAuthInThisRoute = () => {
     return `${router.pathname}/`.startsWith('/app/');
   };
 
+  const handleDrawer = () => {
+    setDrawerOpen(!isDrawerOpen);
+  }
+
   useEffect(() => {
-    if (!authService.isAuthenticated() && needAuthInThisRoute()) {
-      const identificador = authService.getIdentificadorEmpresa();
+
+    const auth = cookie.get('token') || null;
+
+    console.log(auth);
+
+    if (!auth && needAuthInThisRoute()) {
+      const identificador = cookie.get('identificador') || null;
       router.replace(!identificador ? '/' : `/${identificador}/login`);
     }
   }, []);
 
-  return needAuthInThisRoute() ? (
+  return needAuthInThisRoute() ?
+  (
     <div className={classes.root}>
-      <TopBar />
-      <Sidebar />
+      <TopBar isDrawerOpen={isDrawerOpen} setDrawerOpen={handleDrawer} />
+      <Sidebar isDrawerOpen={isDrawerOpen} setDrawerOpen={handleDrawer} />
       <div
         className={classes.wrapper}
         style={{
           paddingLeft:
-            isDrawerOpen && size.width >= theme.breakpoints.values.lg ? 240 : 0,
+          isDrawerOpen && size.width >= theme.breakpoints.values.lg ? 240 : 0,
         }}
       >
         <div className={classes.contentContainer}>
@@ -83,9 +93,7 @@ function Layout({ children }) {
         </div>
       </div>
     </div>
-  ) : (
-    <Box>{children}</Box>
-  );
+  ) : <Box>{children}</Box>;
 }
 
 export default Layout;

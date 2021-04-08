@@ -1,11 +1,9 @@
+import cookie from 'js-cookie';
+
 import React, { useState, useRef } from 'react';
 import { useRouter } from "next/router";
-import { useSelector, useDispatch } from 'react-redux';
 
 import { makeStyles, Avatar, Menu, MenuItem } from '@material-ui/core';
-
-import { signOut } from '../../store/actions/accountAction';
-import authService from '../../services/AuthService';
 
 const useStyles = makeStyles((theme) => ({
   avatar: {
@@ -17,15 +15,19 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function Account() {
+type Props = {
+  user: string,
+}
+
+function Account(props: Props) {
   const classes = useStyles();
   const ref = useRef();
   const router = useRouter()
-  const dispatch = useDispatch();
-  const account = useSelector((state) => state.account);
   const [isOpen, setOpen] = useState(false);
 
-  const isAuthenticated = !!account.user;
+  const { user } = props;
+
+  const isAuthenticated = Boolean(cookie.get('token'));
 
   const handleOpen = () => {
     setOpen(true);
@@ -36,10 +38,11 @@ function Account() {
   };
 
   const handleSignOut = () => {
-    const identificador = authService.getIdentificadorEmpresa();
     handleClose();
-    dispatch(signOut());
-    router.replace(`/${identificador}/login`);
+    cookie.remove('user');
+    cookie.remove('token');
+    const identificador = cookie.get('identificador') || '';    
+    router.replace(identificador ? `/${identificador}/login` : '/');
   };
 
   const handleSignIn = () => {
@@ -81,7 +84,7 @@ function Account() {
         style={{ cursor: 'pointer' }}
         className={classes.avatar}
         onClick={handleOpen}
-        alt={account.user ? account.user.nome : ''}
+        alt={user ? JSON.parse(user).nome : null}
         src="/"
       />
       <Menu

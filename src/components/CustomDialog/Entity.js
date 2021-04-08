@@ -177,19 +177,19 @@ function EntityDialog({ entity, isOpen, onClose }) {
       let response;
 
       if (entity === entUnidadeMedida) {
-        response = await func(
-          editingEntity ? editingEntity.id : null,
-          campo1,
-          campo2, // descricao
-        );
+        response = await func({
+          id: editingEntity ? editingEntity.id : null,
+          simbolo: campo1,
+          descricao: campo2, // descricao
+        });
       } else {
-        response = await func(
-          editingEntity ? editingEntity.id : null,
-          campo2, // descricao
-        );
+        response = await func({
+          id: editingEntity ? editingEntity.id : null,
+          descricao: campo2, // descricao
+        });
       }
 
-      if (!response.error) {
+      if (!response?.data?.error) {
         clearFields();
         setFindAgain(!findAgain);
         addToast(
@@ -202,7 +202,7 @@ function EntityDialog({ entity, isOpen, onClose }) {
         );
         return;
       }
-      throw new Error(response.error);
+      throw new Error(response.data.error);
     } catch (err) {
       addToast(err.message, { appearance: 'error' });
     }
@@ -230,13 +230,13 @@ function EntityDialog({ entity, isOpen, onClose }) {
       const response = await func(deletingEntity.id);
 
       addToast(
-        !response.error ? 'Registro eliminado com sucesso!' : response.error,
+        !response?.data?.error ? 'Registro eliminado com sucesso!' : response.data.error,
         {
-          appearance: !response.error ? 'success' : 'error',
+          appearance: !response?.data?.error ? 'success' : 'error',
         },
       );
 
-      if (!response.error) {
+      if (!response?.data?.error) {
         const rows = [];
 
         tableRows.forEach((row) => {
@@ -264,8 +264,8 @@ function EntityDialog({ entity, isOpen, onClose }) {
       const func = getFunctionConsulta();
       const response = await func();
 
-      if (!response.error) {
-        const dados = response.data[getResponseObject()];
+      if (!response?.data?.error) {
+        const dados = response.data.data?.[getResponseObject()];
         dados.forEach((item) => {
           if (entity === entUnidadeMedida) {
             rows.push(
@@ -276,7 +276,7 @@ function EntityDialog({ entity, isOpen, onClose }) {
           }
         });
       } else {
-        throw new Error(response.error);
+        throw new Error(response.data.error);
       }
     } catch (err) {
       addToast(err.message, { appearance: 'error' });

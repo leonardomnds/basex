@@ -1,6 +1,7 @@
+import cookie from 'js-cookie';
+
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { useSelector, useDispatch } from 'react-redux';
 
 import {
   useTheme,
@@ -22,7 +23,6 @@ import DotIcon from '@material-ui/icons/FiberManualRecordRounded';
 import MenuRoundedIcon from '@material-ui/icons/MenuRounded';
 
 import sidebarItems from './sidebarItems';
-import drawerClick from '../../store/actions/drawerAction';
 import useWindowSize from '../../util/WindowSize';
 
 const useStyles = makeStyles((theme) => ({
@@ -149,13 +149,13 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function Sidebar() {
+function Sidebar(props) {
   const classes = useStyles();
   const router = useRouter();
-  const dispatch = useDispatch();
   const theme = useTheme();
   const size = useWindowSize();
-  const isDrawerOpen = useSelector((state) => state.drawer.open);
+
+  const { isDrawerOpen, setDrawerOpen } = props;
 
   const [opennedItem, setOpennedItem] = useState(false);
   const [descOpennedItem, setDescOpennedItem] = useState('');
@@ -218,7 +218,7 @@ function Sidebar() {
                     setSelectedItem(item.path);
                     if (!item.items) {
                       if (size.width < theme.breakpoints.values.lg) {
-                        dispatch(drawerClick(false));
+                        setDrawerOpen();
                       }
                       router.push(item.path);
                     }
@@ -262,7 +262,7 @@ function Sidebar() {
                           className={classes.listItem}
                           onClick={() => {
                             if (size.width < theme.breakpoints.values.lg) {
-                              dispatch(drawerClick(false));
+                              setDrawerOpen();
                             }
                             router.push(`${item.path}/${sub.path}`);
                           }}
@@ -305,7 +305,7 @@ function Sidebar() {
       variant={
         size.width >= theme.breakpoints.values.lg ? 'persistent' : 'temporary'
       }
-      onClose={() => dispatch(drawerClick(false))}
+      onClose={setDrawerOpen}
       classes={{
         paper:
           size.width >= theme.breakpoints.values.lg
@@ -322,9 +322,7 @@ function Sidebar() {
           >
             <MenuRoundedIcon
               className={classes.menuIcon}
-              onClick={() => {
-                dispatch(drawerClick(false));
-              }}
+              onClick={setDrawerOpen}
             />
           </Tooltip>
           <img

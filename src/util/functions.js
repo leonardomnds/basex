@@ -1,3 +1,5 @@
+import cookie from 'js-cookie';
+
 export const SomenteNumeros = (str) => {
   let onlyNumbers = '';
   const value = str || '';
@@ -192,3 +194,17 @@ export const ToBase64 = (value) =>
     reader.onload = () => resolve(reader.result);
     reader.onerror = (error) => reject(error);
   });
+
+export const GetTokenFromCookie = () => {
+  const token = cookie.get('token');
+  return token;
+}
+
+export const GetAxiosConfig = () => {
+  const token = GetTokenFromCookie();
+  return {
+    headers: {
+      Authotization: 'Bearer '+token
+    }
+  }
+}
