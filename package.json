@@ -10,7 +10,8 @@
     "build": "next build",
     "start": "next start -p $PORT",
     "migrate": "npx prisma migrate dev --schema ./src/prisma/schema.prisma",
-    "heroku-postbuild": "npm run build && prisma generate"
+    "generate": "npx prisma generate --schema ./src/prisma/schema.prisma",
+    "heroku-postbuild": "npm run build && npm run generate"
   },
   "dependencies": {
     "@material-ui/core": "^4.11.3",
