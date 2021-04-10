@@ -1,38 +1,5 @@
-import { ValidationError } from 'apollo-server-errors';
-import Pessoa from '../models/Pessoa';
-import ContatoPessoa from '../models/ContatoPessoa';
-import validateAuth from '../config/validateAuth';
-import Functions from '../../util/ApiFunctions';
-
+/*
 module.exports = {
-  selectAll(_, args, { user }) {
-    validateAuth(user);
-    return Pessoa.findAll({
-      where: { empresaId: user.empresaId },
-      order: ['codigo'],
-    });
-  },
-  async selectOne(_, { id }, { user }) {
-    validateAuth(user);
-    let retorno = null;
-
-    const pessoa = await Pessoa.findOne({
-      where: { id, empresaId: user.empresaId },
-    });
-
-    const contatos = await ContatoPessoa.findAll({
-      where: { pessoaId: id },
-    });
-
-    retorno = pessoa.dataValues;
-    retorno.contatos = [];
-
-    contatos.forEach((contato) => {
-      retorno.contatos.push(contato.dataValues);
-    });
-
-    return retorno;
-  },
   async save(
     _,
     {
@@ -164,3 +131,4 @@ module.exports = {
     return Pessoa.findByPk(id || json.dataValues.id);
   },
 };
+*/
