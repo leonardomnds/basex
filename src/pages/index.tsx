@@ -6,7 +6,7 @@ function index() {
 
   useEffect(() => {
     if (router.pathname === '/') {
-      router.replace('/demo/login');
+      router.replace('/login');
     }
   }, [])
 

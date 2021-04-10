@@ -1,6 +1,6 @@
 import cookie from 'js-cookie';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { useToasts } from 'react-toast-notifications';
 import {
@@ -14,9 +14,8 @@ import {
   CircularProgress,
 } from '@material-ui/core';
 
-import api from '../../util/Api';
+import api from '../util/Api';
 import { GetServerSideProps, NextPage } from 'next';
-import { AxiosResponse } from 'axios';
 
 const useStyles = makeStyles((theme) => ({
   themeError: {
@@ -75,13 +74,6 @@ const useStyles = makeStyles((theme) => ({
     lineHeight: 1.2,
     textAlign: 'center',
   },
-  loginCompany: {
-    fontSize: 18,
-    color: '#FFFFFF',
-    textTransform: 'uppercase',
-    lineHeight: 1.2,
-    textAlign: 'center',
-  },
   form: {
     width: '100%',
     display: 'flex',
@@ -123,20 +115,12 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-interface InfoEmpresa {
-  fantasia?: string,
-  logoBase64?: string,
-}
-
 type Props = {
-  identificador: string,
-  infoEmpresa: InfoEmpresa
 }
 
 const SignIn: NextPage<Props> = (props) => {
   const classes = useStyles();
   const router = useRouter();
-  const { identificador, infoEmpresa } = props;
 
   const { addToast, removeAllToasts } = useToasts();
 
@@ -144,54 +128,25 @@ const SignIn: NextPage<Props> = (props) => {
   const [senha, setSenha] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const exibirMensagemURL = () => {
-    addToast(
-      'Você está tentando acessar uma empresa não localizada em nosso banco de dados. Confirme se está utilizando a URL correta!',
-      {
-        appearance: 'warning',
-      },
-    );
-  }
-
   const handleSignIn = async () => {
     setLoading(true);
     removeAllToasts();
 
-    if (!infoEmpresa) {
-      exibirMensagemURL();
-    } else if (!usuario || !senha) {
+    if (!usuario || !senha) {
       addToast('Informe usuário e senha para continuar!', {
         appearance: 'warning',
       });
     } else {
       try {
-        const response = await api.post('', {
-          query: `
-          mutation ($identificador: String!, $usuario: String!, $senha: String!) {
-            login(
-              identificadorEmpresa: $identificador,
-              usuario: $usuario,
-              senha: $senha
-            ) {
-              token,
-              usuario {
-                id,
-                nome,
-                usuario,
-                email
-              }
-            }
-          }`,
-          variables: {identificador, usuario, senha},
-        });
+        const response = await api.post('/login', { usuario, senha });
 
-        if (!response.data.error) {
-          await cookie.set('identificador', identificador, { expires: 1/24*6 }); // 6 horas
-          await cookie.set('user', response.data.data?.login?.usuario || null, { expires: 1/24*6 });
-          await cookie.set('token', response.data.data?.login?.token || null, { expires: 1/24*6 });
+        if (response.status === 200) {
+          await cookie.set('user', response.data.usuario || null, { expires: 1/24*6 }); // 6 horas
+          await cookie.set('token', response.data.token || null, { expires: 1/24*6 });
           router.replace('/app/home');
           return;
         }
+
         throw new Error(response.data.error);
       } catch (err) {
         addToast(err.message, { appearance: 'error' });
@@ -200,12 +155,6 @@ const SignIn: NextPage<Props> = (props) => {
     setLoading(false);
   }
 
-  useEffect(() => {
-    if (!infoEmpresa) {
-      exibirMensagemURL();
-    }
-  }, [])
-
   return (
     <Box className={classes.root}>
       <Box className={classes.loginContainer}>
@@ -213,9 +162,6 @@ const SignIn: NextPage<Props> = (props) => {
           <Box className={classes.loginTitleBackground}>
             <Typography variant="body2" className={classes.loginTitle}>
               CONECTE-SE
-            </Typography>
-            <Typography variant="body2" className={classes.loginCompany}>
-              {infoEmpresa ? infoEmpresa.fantasia : ''}
             </Typography>
           </Box>
           <form className={classes.form}>
@@ -270,30 +216,8 @@ const SignIn: NextPage<Props> = (props) => {
 
 export default SignIn;
 
-export const getServerSideProps : GetServerSideProps = async (context) => {
-
-  const identificador = context.query && context.query.login ? context.query.login : '';
-
-  let response: AxiosResponse<any>;
-  if (identificador) {
-    response = await api.post('', {
-      query: `
-      query ($identificador: String!) {
-        infoEmpresa(
-          identificadorEmpresa: $identificador,
-        ) {
-          fantasia,
-          logoBase64
-        }
-      }`,
-      variables: { identificador },
-    });
-  }
-
+export const getServerSideProps : GetServerSideProps = async () => {
   return {
-    props: {
-      identificador,
-      infoEmpresa: !response.data.error ? response.data.data.infoEmpresa : {}
-    }
+    props: {}
   }
 }

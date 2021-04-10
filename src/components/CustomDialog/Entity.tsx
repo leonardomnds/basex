@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useToasts } from 'react-toast-notifications';
-import PropTypes from 'prop-types';
 
 import {
   makeStyles,
@@ -15,7 +14,7 @@ import {
 } from '@material-ui/core';
 
 import CustomTable, { getColumn, getRow } from '../Table';
-import useApi from '../../services/useApi';
+import api from '../../util/Api';
 import CustomDialog from '.';
 import TextField from '../FormControl/TextField';
 
@@ -30,124 +29,75 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const entMarcaProduto = 'marcaProduto';
-const entCategoriaProduto = 'categoriaProduto';
-const entUnidadeMedida = 'unidadeMedida';
-const entGrupoPessoa = 'grupoPessoa';
-const entCategoriaPessoa = 'categoriaPessoa';
-const entCategoriaServico = 'categoriaServico';
+export enum Entity {
+  marcaProduto,
+  categoriaProduto,
+  unidadeMedida,
+  grupoPessoa,
+  categoriaPessoa,
+  categoriaServico,
+}
 
-function EntityDialog({ entity, isOpen, onClose }) {
+type Props = {
+  entity: Entity,
+  isOpen: boolean,
+  onClose: () => void,
+}
+
+function EntityDialog(props: Props) {
   const classes = useStyles();
   const { addToast } = useToasts();
 
+  const { entity, isOpen, onClose } = props;
+
   const getTitle = () => {
     switch (entity) {
-      case entMarcaProduto:
+      case Entity.marcaProduto:
         return 'Marcas';
-      case entCategoriaPessoa:
-      case entCategoriaProduto:
-      case entCategoriaServico:
+      case Entity.categoriaPessoa:
+      case Entity.categoriaProduto:
+      case Entity.categoriaServico:
         return 'Categorias';
-      case entUnidadeMedida:
+      case Entity.unidadeMedida:
         return 'Unidades de Medida';
-      case entGrupoPessoa:
+      case Entity.grupoPessoa:
         return 'Grupos';
       default:
         return 'Entidades';
     }
   };
 
-  const getFunctionConsulta = () => {
+  const getEndpoint = () => {
     switch (entity) {
-      case entMarcaProduto:
+      case Entity.marcaProduto:
         return '/produtos/marcas';
-      case entCategoriaProduto:
+      case Entity.categoriaProduto:
         return '/produtos/categorias';
-      case entUnidadeMedida:
+      case Entity.unidadeMedida:
         return '/produtos/unidades';
-      case entCategoriaPessoa:
-        return useApi.getCategoriasPessoas;
-      case entGrupoPessoa:
-        return useApi.getGruposPessoas;
-      case entCategoriaServico:
+      case Entity.categoriaPessoa:
+        return '/pessoas/categorias';
+      case Entity.grupoPessoa:
+        return '/pessoas/grupos';
+      case Entity.categoriaServico:
         return '/servicos/categorias';
       default:
-        return () => {};
-    }
-  };
-
-  const getFunctionSalvar = () => {
-    switch (entity) {
-      case entMarcaProduto:
-        return '/produtos/marcas';
-      case entCategoriaProduto:
-        return '/produtos/categorias';
-      case entUnidadeMedida:
-        return '/produtos/unidades';
-      case entCategoriaPessoa:
-        return useApi.salvarCategoriaPessoa;
-      case entGrupoPessoa:
-        return useApi.salvarGrupoPessoa;
-      case entCategoriaServico:
-        return '/servicos/categorias';
-      default:
-        return () => {};
-    }
-  };
-
-  const getFunctionDeletar = () => {
-    switch (entity) {
-      case entMarcaProduto:
-        return '/produtos/marcas';
-      case entCategoriaProduto:
-        return '/produtos/categorias';
-      case entUnidadeMedida:
-        return '/produtos/unidades';
-      case entCategoriaPessoa:
-        return useApi.deletarCategoriaPessoa;
-      case entGrupoPessoa:
-        return useApi.deletarGrupoPessoa;
-      case entCategoriaServico:
-        return '/servicos/categorias';
-      default:
-        return () => {};
-    }
-  };
-
-  const getResponseObject = () => {
-    switch (entity) {
-      case entMarcaProduto:
-        return null;
-      case entCategoriaProduto:
-        return null;
-      case entUnidadeMedida:
-        return null;
-      case entCategoriaPessoa:
-        return 'categoriasPessoa';
-      case entGrupoPessoa:
-        return 'gruposPessoa';
-      case entCategoriaServico:
-        return null;
-      default:
-        return null;
+        ''
     }
   };
 
   const getNumberFields = () => {
-    if (entity === entUnidadeMedida) {
+    if (entity === Entity.unidadeMedida) {
       return 2;
     }
     return 1;
   };
 
   const getTableColumns = () => {
-    const upperFormat = (value) => value.toUpperCase();
-
     const columns = [];
     columns.push(getColumn('id', 'Id', 0, 'center', null, true));
-    if (entity === entUnidadeMedida) {
-      columns.push(getColumn('simbolo', 'Símbolo', 50, 'center', upperFormat));
+    if (entity === Entity.unidadeMedida) {
+      columns.push(getColumn('simbolo', 'Símbolo', 50, 'center', 'upper'));
     }
     columns.push(getColumn('descricao', 'Descrição', 200, 'left'));
     return columns;
@@ -155,8 +105,8 @@ function EntityDialog({ entity, isOpen, onClose }) {
 
   const [tableColumns] = useState(getTableColumns());
   const [tableRows, setTableRows] = useState([]);
-  const [isLoading, setLoading] = useState([]);
-  const [findAgain, setFindAgain] = useState([]);
+  const [isLoading, setLoading] = useState<boolean>(false);
+  const [findAgain, setFindAgain] = useState<boolean>(false);
   const [editingEntity, setEditingEntity] = useState(null);
   const [deletingEntity, setDeletingEntity] = useState(null);
 
@@ -172,21 +122,19 @@ function EntityDialog({ entity, isOpen, onClose }) {
 
   const handleSaveEntity = async () => {
     try {
-      const func = getFunctionSalvar();
+      
+      const jsonBody = { simbolo: campo1, descricao: campo2 };
 
       let response;
 
-      if (entity === entUnidadeMedida) {
-        response = await func({
-          id: editingEntity ? editingEntity.id : null,
-          simbolo: campo1,
-          descricao: campo2, // descricao
-        });
+      if (entity !== Entity.unidadeMedida) {
+        delete jsonBody.simbolo;
+      }
+
+      if (editingEntity) {
+        response = await api.put(getEndpoint()+'/'+editingEntity.id, jsonBody)
       } else {
-        response = await func({
-          id: editingEntity ? editingEntity.id : null,
-          descricao: campo2, // descricao
-        });
+        response = await api.post(getEndpoint(), jsonBody);
       }
 
       if (!response?.data?.error) {
@@ -226,8 +174,7 @@ function EntityDialog({ entity, isOpen, onClose }) {
 
   const confirmDelete = async () => {
     try {
-      const func = getFunctionDeletar();
-      const response = await func(deletingEntity.id);
+      const response = await api.delete(getEndpoint()+'/'+deletingEntity.id);
 
       addToast(
         !response?.data?.error ? 'Registro eliminado com sucesso!' : response.data.error,
@@ -256,47 +203,47 @@ function EntityDialog({ entity, isOpen, onClose }) {
     }
   };
 
-  useEffect(async () => {
-    setLoading(true);
-    const rows = [];
+  useEffect(() => {
+    setLoading(true);    
 
-    try {
-      const func = getFunctionConsulta();
-      const response = await func();
-
-      if (!response?.data?.error) {
-        const dados = response.data.data?.[getResponseObject()];
-        dados.forEach((item) => {
-          if (entity === entUnidadeMedida) {
-            rows.push(
-              getRow([item.id, item.simbolo, item.descricao], tableColumns),
-            );
-          } else {
-            rows.push(getRow([item.id, item.descricao], tableColumns));
-          }
-        });
-      } else {
-        throw new Error(response.data.error);
+    const getData = async () => {
+      const rows = [];
+      try {
+        const response = await api.get(getEndpoint());
+  
+        if (!response?.data?.error) {
+          response.data.forEach((item) => {
+            if (entity === Entity.unidadeMedida) {
+              rows.push(
+                getRow([item.id, item.simbolo, item.descricao], tableColumns),
+              );
+            } else {
+              rows.push(getRow([item.id, item.descricao], tableColumns));
+            }
+          });
+        } else {
+          throw new Error(response.data.error);
+        }
+      } catch (err) {
+        addToast(err.message, { appearance: 'error' });
       }
-    } catch (err) {
-      addToast(err.message, { appearance: 'error' });
+      setTableRows(rows);
     }
 
-    setTableRows(rows);
+    getData();    
     setLoading(false);
   }, [findAgain]);
 
   return (
     <Box>
       <Dialog open={isOpen} onClose={onClose}>
-        <DialogTitle onClose={onClose}>Cadastro de {getTitle()}</DialogTitle>
-        <DialogContent className={classes.box}>
+        <DialogTitle>Cadastro de {getTitle()}</DialogTitle>
+        <DialogContent>
           <Box>
             <CustomTable
               isLoading={isLoading}
               columns={tableColumns}
               rows={tableRows}
-              maxHeight={300}
               editFunction={handleEditEntity}
               deleteFunction={handleDeleteEntity}
               linhasPorPagina={5}
@@ -307,8 +254,6 @@ function EntityDialog({ entity, isOpen, onClose }) {
                   <Grid item xs={3}>
                     <TextField
                       label="Símbolo"
-                      type="text"
-                      name="campo1"
                       value={campo1}
                       setValue={setCampo1}
                     />
@@ -317,8 +262,6 @@ function EntityDialog({ entity, isOpen, onClose }) {
                 <Grid item xs={getNumberFields() > 1 ? 9 : 12}>
                   <TextField
                     label="Descrição"
-                    type="text"
-                    name="campo2"
                     value={campo2}
                     setValue={setCampo2}
                   />
@@ -349,18 +292,5 @@ function EntityDialog({ entity, isOpen, onClose }) {
     </Box>
   );
 }
-
-EntityDialog.prototypes = {
-  entity: PropTypes.oneOf([
-    entMarcaProduto,
-    entCategoriaProduto,
-    entUnidadeMedida,
-    entGrupoPessoa,
-    entCategoriaPessoa,
-    entCategoriaServico,
-  ]),
-  isOpen: PropTypes.bool,
-  onClose: PropTypes.func.isRequired,
-};
 
 export default EntityDialog;

@@ -41,8 +41,7 @@ function Account(props: Props) {
     handleClose();
     cookie.remove('user');
     cookie.remove('token');
-    const identificador = cookie.get('identificador') || '';    
-    router.replace(identificador ? `/${identificador}/login` : '/');
+    router.replace('/login');
   };
 
   const handleSignIn = () => {

@@ -76,25 +76,13 @@ const PeopleList: NextPage<Props> = (props) => {
 
 
       try {
-        const { data } = await api.post('', {
-          query: `
-            query {
-              pessoas {
-                id
-                codigo
-                cpfCnpj
-                nome
-                fantasia
-                logradouro
-                numeroLogradouro
-                ativo
-              }
-            }`,
-        });
 
-        if (!data?.error) {
-          const dados = data.data.pessoas;
-          dados.forEach((pes) => {
+        const response = await api.get('/pessoas');
+
+        console.log(response.data);
+
+        if (!response?.data?.error) {
+          response.data.forEach((pes) => {
             pessoas.push(
               getRow(
                 [
@@ -103,7 +91,7 @@ const PeopleList: NextPage<Props> = (props) => {
                   pes.cpfCnpj,
                   pes.nome,
                   pes.fantasia,
-                  `${pes.logradouro || ''}, ${pes.numeroLogradouro || ''}`,
+                  `${pes.logradouro || ''}, ${pes.numero || ''}`,
                   pes.ativo ? 'Ativo' : 'Inativo',
                 ],
                 colunas,
@@ -111,7 +99,7 @@ const PeopleList: NextPage<Props> = (props) => {
             );
           });
         } else {
-          throw new Error(data.error)
+          throw new Error(response.data.error)
         }
       } catch (err) {
         addToast(err.message, { appearance: 'error' });
@@ -136,8 +124,8 @@ const PeopleList: NextPage<Props> = (props) => {
         />
         {deletingPerson && (
           <CustomDialog
-            title="Excluir pessoa"
-            text={`Confirma a exclusão da pessoa ${deletingPerson.nome}? Caso possua vínculos no sistema, ela será apenas inativada.`}
+            title="Excluir cliente"
+            text={`Confirma a exclusão do cliente ${deletingPerson.nome}?`}
             isOpen={Boolean(deletingPerson)}
             onClose={handleCloseDialog}
             onConfirm={()=>{}}// {confirmDeletePerson}

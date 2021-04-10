@@ -1,0 +1,75 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Usuario {
+  id String @id @default(uuid()) @db.VarChar(100)
+  usuario String @unique @db.VarChar(100)
+  senha String @db.VarChar(100)
+  nome String @db.VarChar(100)
+  ativo Boolean @default(true)
+  dataCadastro DateTime @default(now())
+  pessoas Pessoa[]
+  @@map("Usuarios")
+}
+
+model CategoriaPessoa {  
+  id String @id @default(uuid()) @db.VarChar(100)
+  descricao String @unique @db.VarChar(100)
+  pessoas Pessoa[]
+  @@map("CategoriasPessoa")
+}
+
+model GrupoPessoa {
+  id String @id @default(uuid()) @db.VarChar(100)
+  descricao String @unique @db.VarChar(100)
+  pessoas Pessoa[]
+  @@map("GruposPessoa")
+}
+
+model Pessoa {
+  id String @id @default(uuid()) @db.VarChar(100)
+  codigo Int @unique
+  cpfCnpj String @db.VarChar(18)
+  nome String @db.VarChar(100)
+  fantasia String? @db.VarChar(100)
+  rgInscEstadual String? @db.VarChar(50)
+  inscMunicipal String? @db.VarChar(50)
+  telefone String? @db.VarChar(20)
+  celular String? @db.VarChar(20)
+  email String? @db.VarChar(255)
+  cep String? @db.VarChar(9)
+  logradouro String? @db.VarChar(255)
+  numero String? @db.VarChar(50)
+  bairro String? @db.VarChar(255)
+  cidade String? @db.VarChar(255)
+  uf String? @db.VarChar(2)
+  complemento String? @db.VarChar(255)
+  grupoId String? @db.VarChar(100)
+  grupo GrupoPessoa? @relation(fields: [grupoId], references: [id])
+  categoriaId String? @db.VarChar(100)
+  categoria CategoriaPessoa? @relation(fields: [categoriaId], references: [id])
+  ativo Boolean @default(true)
+  dataCadastro DateTime @default(now())  
+  usuarioId String @db.VarChar(100)
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
+  contatos ContatoPessoa[]
+  @@map("Pessoas")
+}
+
+model ContatoPessoa {
+  id String @id @default(uuid()) @db.VarChar(100)
+  pessoaId String @db.VarChar(100)
+  pessoa Pessoa @relation(fields: [pessoaId], references: [id])
+  nome String @db.VarChar(100)
+  descricao String @db.VarChar(100)
+  telefone String? @db.VarChar(20)
+  email String? @db.VarChar(255)
+  dataCadastro DateTime @default(now())  
+  @@map("ContatosPessoas")
+}

@@ -1,4 +1,5 @@
 import cookie from 'js-cookie';
+import jwt from 'jsonwebtoken';
 
 export const SomenteNumeros = (str) => {
   let onlyNumbers = '';
@@ -182,7 +183,7 @@ export const DoubleToCurrency = (value, digits = 2) => {
 };
 
 export const ZerosLeft = (value, digits = 0) => {
-  const str = value.toString();
+  const str = value ? value.toString() : '';
   const pad = Array(digits + 1).join('0');
   return pad.substring(0, pad.length - str.length) + str;
 };
@@ -207,4 +208,14 @@ export const GetAxiosConfig = () => {
       Authotization: 'Bearer '+token
     }
   }
+}
+
+export const GetDataFromJwtToken = (req) => {
+  const bearerLength = 'Bearer '.length;
+  const token = req.headers.authorization || null;
+
+  if (token && token.length > bearerLength) {
+    return jwt.decode(token.slice(bearerLength), process.env.JWT_KEY);
+  }
+  return null;
 }

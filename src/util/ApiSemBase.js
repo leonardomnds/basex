@@ -15,4 +15,4 @@ api.interceptors.response.use(
     }),
 );
 
-module.exports = api;
+export default api;

@@ -25,11 +25,11 @@ import Select, {
 } from '../../../../components/FormControl/Select';
 import CustomButton from '../../../../components/CustomButton';
 
-import EntityDialog from '../../../../components/CustomDialog/Entity';
+import EntityDialog, { Entity } from '../../../../components/CustomDialog/Entity';
 import CustomDialog from '../../../../components/CustomDialog';
 import CustomTable, { getColumn, getRow } from '../../../../components/Table';
 
-import useApi from '../../../../services/useApi';
+import api from '../../../../util/Api';
 
 import {
   SomenteNumeros,
@@ -37,9 +37,9 @@ import {
   FormatarCep,
   FormatarTelefone,
   ZerosLeft,
-  GetAxiosConfig,
 } from '../../../../util/functions';
 import { GetServerSideProps, NextPage } from 'next';
+import { CategoriaPessoa, GrupoPessoa, Pessoa } from '.prisma/client';
 
 const { v4: uuidv4 } = require('uuid');
 
@@ -85,13 +85,13 @@ const NewPeople: NextPage<Props> = (props) => {
   const [isSaving, setSaving] = useState(false);
   const [isSavingContact, setSavingContact] = useState(false);
   const [currentTab, setCurrentTab] = useState(0);
-  const [newEntity, setNewEntity] = useState('');
+  const [newEntity, setNewEntity] = useState<Entity>(null);
 
   const [showConfirmCnpj, setShowConfirmCnpj] = useState(false);
   const [cnpjConsultado, setCnpjConsultado] = useState('');
 
   // Principal
-  const [codigo, setCodigo] = useState('');
+  const [codigo, setCodigo] = useState<number>(null);
   const [cpfCnpj, setCpfCnpj] = useState('');
   const [nomeRazao, setNomeRazao] = useState('');
   const [fantasia, setFantasia] = useState('');
@@ -108,7 +108,6 @@ const NewPeople: NextPage<Props> = (props) => {
   const [telefone, setTelefone] = useState('');
   const [celular, setCelular] = useState('');
   const [email, setEmail] = useState('');
-  // const [tiposCadastro, setTiposCadastro] = useState([]);
 
   // Endereço
   const [listaEstados, setListaEstados] = useState([]);
@@ -307,8 +306,9 @@ const NewPeople: NextPage<Props> = (props) => {
     } else {
       try {
 
-        const pessoa = {
+        const person : Pessoa = {
           id: pessoaId || null,
+          codigo: codigo || null,
           cpfCnpj: cpfCnpj || null,
           nome: nomeRazao || null,
           fantasia: fantasia || null,
@@ -319,28 +319,24 @@ const NewPeople: NextPage<Props> = (props) => {
           email: email || null,
           cep: cep || null,
           logradouro: logradouro || null,
-          numeroLogradouro: numLogradouro || null,
+          numero: numLogradouro || null,
           bairro: bairro || null,
-          complementoLogradouro: complemento || null,
+          complemento: complemento || null,
           cidade: cidade || null,
           uf: uf || null,
           grupoId: grupo || null,
           categoriaId: categoria || null,
           ativo: isAtivo,
-          contatos: []
+          dataCadastro: null,
+          usuarioId: null,
+        };
+
+        let response;
+        if (person.id) {
+          response = await api.put('/pessoas/'+person.id, person);
+        } else {
+          response = await api.post('/pessoas', person);
         }
-
-        tableRows.forEach((contato) => {
-          pessoa.contatos.push({
-            nome: contato.nome,
-            descricao: contato.descricao,
-            telefone: contato.telefone,
-            celular: contato.celular,
-            email: contato.email,
-          });
-        });
-
-        const response = await useApi.salvarPessoa(pessoa);
 
         if (!response?.data?.error) {
           addToast(`Pessoa ${pessoaId ? 'alterada' : 'cadastrado'} com sucesso!`, {
@@ -360,10 +356,10 @@ const NewPeople: NextPage<Props> = (props) => {
 
   const findCnpjData = async () => {
     try {
-      const response = await useApi.consultarCNPJ(cpfCnpj);
+      const response = await api.get('/cnpj/'+SomenteNumeros(cpfCnpj));
 
       if (!response?.data?.error) {
-        const dados = response.data.data?.consultarCnpj;
+        const dados = response.data;
         if (dados) {
           // Dados Gerais
           setNomeRazao(dados.razaoSocial);
@@ -416,10 +412,10 @@ const NewPeople: NextPage<Props> = (props) => {
 
   const findCepData = async () => {
     try {
-      const response = await useApi.consultarCEP(cep);
+      const response = await api.get('/cep/'+cep);
 
       if (!response?.data?.error) {
-        const dados = response.data.data?.consultarCep;
+        const dados = response.data;
         if (dados) {
           setCep(dados.cep);
           setLogradouro(dados.logradouro);
@@ -492,10 +488,10 @@ const NewPeople: NextPage<Props> = (props) => {
 
   const getGrupos = async () => {
     try {
-      const response = await useApi.getGruposPessoas();
+      const response = await api.get('/pessoas/grupos');
 
       if (!response?.data?.error) {
-        const dados = response.data.data?.gruposPessoa;
+        const dados : GrupoPessoa[] = response.data;
         if (dados) {
           const items = [];
           dados.forEach((item) => {
@@ -513,10 +509,10 @@ const NewPeople: NextPage<Props> = (props) => {
 
   const getCategorias = async () => {
     try {
-      const response = await useApi.getCategoriasPessoas();
+      const response = await api.get('/pessoas/categorias');
 
       if (!response?.data?.error) {
-        const dados = response.data.data?.categoriasPessoa;
+        const dados : CategoriaPessoa[] = response.data;
         if (dados) {
           const items = [];
           dados.forEach((item) => {
@@ -536,10 +532,10 @@ const NewPeople: NextPage<Props> = (props) => {
   useEffect(() => {
     async function getData() {
       try {
-        const response = await useApi.getListaEstados();
+        const response = await api.get('/estados');
 
         if (!response?.data?.error) {
-          const dados = response.data.data?.estados;
+          const dados = response.data;
           if (dados) {
             const estados = [];
             dados.forEach((estado) => {
@@ -565,15 +561,13 @@ const NewPeople: NextPage<Props> = (props) => {
 
     async function getData() {
       try {
-        const response = await useApi.getPessoa(pessoaId);
+        const response = await api.get('/pessoas/'+pessoaId);
 
         if (!response?.data?.error) {
-          const dados = response.data.data?.pessoa;
+          const dados = response.data;
           if (dados) {
             // Dados Gerais
-            setCodigo(
-              dados.codigo ? ZerosLeft(dados.codigo.toString(), 6) : '',
-            );
+            setCodigo(dados.codigo);
             setCpfCnpj(dados.cpfCnpj || '');
             setAtivo(dados.ativo);
             setNomeRazao(dados.nome || '');
@@ -819,7 +813,7 @@ const NewPeople: NextPage<Props> = (props) => {
                 setValue={setGrupo}
                 items={listaGrupos}
                 btnAction={() => {
-                  setNewEntity('grupoPessoa');
+                  setNewEntity(Entity.grupoPessoa);
                 }}
               />
             </Grid>
@@ -830,7 +824,7 @@ const NewPeople: NextPage<Props> = (props) => {
                 setValue={setCategoria}
                 items={listaCategorias}
                 btnAction={() => {
-                  setNewEntity('categoriaPessoa');
+                  setNewEntity(Entity.categoriaPessoa);
                 }}
               />
             </Grid>
@@ -886,7 +880,7 @@ const NewPeople: NextPage<Props> = (props) => {
         <Paper className={classes.paper}>
           <Grid container spacing={2}>
             <Grid item xs={2} sm={2} md={2}>
-              <TextField label="Código" value={codigo} disabled />
+              <TextField label="Código" value={ZerosLeft(codigo, 4)} disabled />
             </Grid>
             <Grid item xs={7} sm={6} md={4}>
               <TextField
@@ -937,7 +931,7 @@ const NewPeople: NextPage<Props> = (props) => {
           >
             <Tab label="Dados gerais" />
             <Tab label="Endereço" />
-            <Tab label="Contatos" />
+            {/* <Tab label="Contatos" /> */}
           </Tabs>
           <Box className={classes.tab}>{TablePanel()}</Box>
         </Paper>
@@ -975,16 +969,16 @@ const NewPeople: NextPage<Props> = (props) => {
             isOpen={Boolean(newEntity)}
             onClose={() => {
               switch (newEntity) {
-                case 'grupoPessoa':
+                case Entity.grupoPessoa:
                   getGrupos();
                   break;
-                case 'categoriaPessoa':
+                case Entity.categoriaPessoa:
                   getCategorias();
                   break;
                 default:
                   break;
               }
-              setNewEntity('');
+              setNewEntity(null);
             }}
           />
         )}

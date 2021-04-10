@@ -1,6 +1,5 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import cookie from 'cookie';
 
 import { ApolloError, AuthenticationError } from 'apollo-server-micro';
 
