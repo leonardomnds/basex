@@ -1,8 +1,8 @@
-import { CategoriaPessoa } from '.prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 import prisma from '../../../../prisma/PrismaInstance';
 import { salvarCategoria } from '.';
+import { CategoriaPessoa } from '.prisma/client';
 
 export default async function Categoria(req: NextApiRequest, res: NextApiResponse) {
   try {
