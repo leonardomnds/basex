@@ -116,7 +116,7 @@ export const getColumn = (
   label: string,
   minWidth: number,
   align: "center" | "left" | "right",
-  formatar?: "none" | "padleft" | "upper",
+  formatar?: "none" | "upper" | "padleft4" ,
   ocultar: boolean = false
 ) => {
   return { id, label, minWidth, align, formatar: formatar || "none", ocultar };
@@ -221,8 +221,8 @@ function CustomTable({
 
   const formatarString = (value: any, type: string) => {
     switch (type) {
-      case 'padleft':
-        return ZerosLeft(value || '0', 6);
+      case 'padleft4':
+        return ZerosLeft(value || '0', 4);
       case 'upper':
         return (value || '').toString().toUpperCase();
       default:

@@ -46,8 +46,8 @@ type Props = {
   btnLabel?: string,
   btnFunc?: () => void,
   btnIcon?: any,
-  btnLoading: boolean,
-  btnBack: boolean,
+  btnLoading?: boolean,
+  btnBack?: boolean,
 }
 
 const PageHeader = (props: Props) => {

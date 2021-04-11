@@ -139,7 +139,7 @@ export const getServerSideProps : GetServerSideProps = async () => {
 
   const colunas = [];
   colunas.push(getColumn('id', 'Id', 0, 'center', null, true));
-  colunas.push(getColumn('codigo', 'Código', 30, 'center', "padleft"));
+  colunas.push(getColumn('codigo', 'Código', 30, 'center', "padleft4"));
   colunas.push(getColumn('cpfCnpj', 'CPF/CNPJ', 50, 'left'));
   colunas.push(getColumn('nome', 'Nome/Razão', 100, 'left'));
   colunas.push(getColumn('fantasia', 'Apelido/Fantasia', 100, 'left'));
