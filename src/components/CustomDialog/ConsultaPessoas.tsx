@@ -38,7 +38,7 @@ function ConsultaPessoas(props: Props) {
   const getTableColumns = () => {
     const columns = [];
     columns.push(getColumn('id', 'Id', 0, 'center', null, true));
-    columns.push(getColumn('codigo', 'Código', 30, 'center', 'padleft'));
+    columns.push(getColumn('codigo', 'Código', 30, 'center', 'padleft4'));
     columns.push(getColumn('cpfCnpj', 'CPF/CNPJ', 50, 'left'));
     columns.push(getColumn('nome', 'Nome/Razão', 100, 'left'));
     columns.push(getColumn('fantasia', 'Apelido/Fantasia', 100, 'left'));
