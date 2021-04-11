@@ -42,9 +42,17 @@ const useStyles = makeStyles({
   },
 });
 
-function CardUploadMedia({ title, image, setValue }) {
+type Props = {
+  image?: string,
+  title: string
+  setValue: (v: any) => void,
+}
+
+const CardUploadMedia = (props: Props) => {
   const classes = useStyles();
   const uuid = uuidv4();
+
+  const { title, image, setValue } = props;
 
   return (
     <Card className={classes.root}>
@@ -78,8 +86,8 @@ function CardUploadMedia({ title, image, setValue }) {
             name={uuid}
             type="file"
             className={classes.input}
-            onChange={async (evt) => {
-              if (evt.target.files.length > 0) {
+            onChange={async (evt: any) => {
+              if (evt?.target?.files?.length > 0) {
                 const imgbase64 = await ToBase64(evt.target.files[0]);
                 setValue(imgbase64);
               }
@@ -93,15 +101,5 @@ function CardUploadMedia({ title, image, setValue }) {
     </Card>
   );
 }
-
-CardUploadMedia.prototypes = {
-  image: PropTypes.string,
-  title: PropTypes.string.isRequired,
-  setValue: PropTypes.func.isRequired,
-};
-
-CardUploadMedia.defaultProps = {
-  image: null,
-};
 
 export default CardUploadMedia;

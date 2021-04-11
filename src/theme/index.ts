@@ -5,9 +5,8 @@ import { colors } from '@material-ui/core';
 const theme = createMuiTheme({
   palette: {
     type: 'light',
-    background: {
+    background: {      
       default: '#E9EBEF',
-      dark: '#E9EBEF',
       paper: colors.common.white,
     },
     primary: {

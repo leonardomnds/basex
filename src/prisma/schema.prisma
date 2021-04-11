@@ -69,6 +69,7 @@ model ContatoPessoa {
   nome String @db.VarChar(100)
   descricao String @db.VarChar(100)
   telefone String? @db.VarChar(20)
+  celular String? @db.VarChar(20)
   email String? @db.VarChar(255)
   dataCadastro DateTime @default(now())  
   @@map("ContatosPessoas")

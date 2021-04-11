@@ -1,9 +1,13 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 
 import prisma from '../../../prisma/PrismaInstance';
+import cors from '../../../util/Cors';
 
 export default async function Login(req: NextApiRequest, res: NextApiResponse) {
   try {
+
+    await cors(req, res);
+
     const sql = await prisma.$queryRaw('SELECT current_database() as database, current_timestamp as datetime');
 
     if (sql && sql[0].database && sql[0].datetime) {

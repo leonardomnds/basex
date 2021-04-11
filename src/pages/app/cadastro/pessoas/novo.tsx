@@ -3,7 +3,6 @@ import { useRouter } from 'next/router';
 import { useToasts } from 'react-toast-notifications';
 
 import {
-  // useTheme,
   makeStyles,
   Box,
   Paper,
@@ -39,7 +38,7 @@ import {
   ZerosLeft,
 } from '../../../../util/functions';
 import { GetServerSideProps, NextPage } from 'next';
-import { CategoriaPessoa, GrupoPessoa, Pessoa } from '.prisma/client';
+import { CategoriaPessoa, ContatoPessoa, GrupoPessoa, Pessoa } from '.prisma/client';
 
 const { v4: uuidv4 } = require('uuid');
 
@@ -122,11 +121,6 @@ const NewPeople: NextPage<Props> = (props) => {
   const [cidade, setCidade] = useState('');
   const [complemento, setComplemento] = useState('');
 
-  // Contatos
-  const [listaContatosPost, setListaContatosPost] = useState([]);
-  const [listaContatosPut, setListaContatosPut] = useState([]);
-  const [listaContatosDelete, setListaContatosDelete] = useState([]);
-
   const [contEnable, setContEnable] = useState(false);
   const [contEditId, setContEditId] = useState('');
   const [contNome, setContNome] = useState('');
@@ -164,73 +158,30 @@ const NewPeople: NextPage<Props> = (props) => {
 
   const handleDeleteContact = (person) => {
     const rows = [];
-    const rowsDel = [];
-
-    listaContatosDelete.forEach((row) => {
-      rowsDel.push(row);
-    });
-
     tableRows.forEach((row) => {
       if (row.id !== person.id) {
         rows.push(row);
-      } else if (!person.id.includes('POST')) {
-        // Se id tem POST, não precisa deletar na Api pois é novo
-        rowsDel.push(row);
       }
     });
 
-    setListaContatosDelete(rowsDel);
     setTableRows(rows);
   };
 
   const handleSaveContact = async () => {
     setSavingContact(true);
-    const contactJson = {
-      id: contEditId,
+
+    const contactJson : ContatoPessoa = {
+      id: contEditId.length === 0 ? uuidv4() : contEditId,
       nome: contNome,
       descricao: contDescricao,
       telefone: contTelefone,
       celular: contCelular,
       email: contEmail,
+      pessoaId: null,
+      dataCadastro: null,
     };
 
-    const rows = [];
-
-    if (!contEditId || contEditId.includes('POST-')) {
-      const rowsPost = [];
-
-      // Cria um ID para possíveis edições antes de gravar
-      if (contEditId.length === 0) {
-        const uuid = `POST-${uuidv4()}`;
-        contactJson.id = uuid;
-      }
-
-      // Inclui na lista que será feito POST para API
-      rowsPost.push(contactJson);
-
-      // Inclui também os que já tinha
-      listaContatosPost.forEach((row) => {
-        if (row.id !== contactJson.id) {
-          rowsPost.push(row);
-        }
-      });
-
-      setListaContatosPost(rowsPost);
-    } else {
-      const rowsPut = [];
-      // Inclui na lista que será feito PUT na API
-      rowsPut.push(contactJson);
-
-      listaContatosPut.forEach((row) => {
-        // Inclui na lista apenas os demais itens
-        if (row.id !== contactJson.id) {
-          rowsPut.push(row);
-        }
-      });
-
-      setListaContatosPut(rowsPut);
-    }
-
+    const rows : ContatoPessoa[] = [];
     rows.push(contactJson);
 
     tableRows.forEach((row) => {
@@ -246,39 +197,7 @@ const NewPeople: NextPage<Props> = (props) => {
 
     setSavingContact(false);
   };
-  /*
-  const savePersonContacts = async (personId) => {
-    const baseUrl = `/pessoas/${personId}/contatos`;
-    let response;
-    let sucesso = true;
-    try {
-      const promissePost = listaContatosPost.map(async (con) => {
-        response = await api.post(baseUrl, con);
-        if (!response || !response.data || !response.data.sucesso) {
-          sucesso = false;
-        }
-      });
-      const promissePut = listaContatosPut.map(async (con) => {
-        response = await api.put(`${baseUrl}/${con.id}`, con);
-        if (!response || !response.data || !response.data.sucesso) {
-          sucesso = false;
-        }
-      });
-      const promisseDel = listaContatosDelete.map(async (con) => {
-        response = await api.delete(`${baseUrl}/${con.id}`);
-        if (!response || !response.data || !response.data.sucesso) {
-          sucesso = false;
-        }
-      });
-      await Promise.all(promissePost);
-      await Promise.all(promissePut);
-      await Promise.all(promisseDel);
-      return sucesso;
-    } catch (err) {
-      return false;
-    }
-  };
-*/
+ 
   const handleSave = async () => {
     setSaving(true);
 
@@ -339,7 +258,7 @@ const NewPeople: NextPage<Props> = (props) => {
         }
 
         if (!response?.data?.error) {
-          addToast(`Pessoa ${pessoaId ? 'alterada' : 'cadastrado'} com sucesso!`, {
+          addToast(`Cliente ${pessoaId ? 'alterado' : 'cadastrado'} com sucesso!`, {
             appearance: 'success',
           });
           router.push('/app/cadastro/pessoas');
@@ -568,39 +487,27 @@ const NewPeople: NextPage<Props> = (props) => {
           if (dados) {
             // Dados Gerais
             setCodigo(dados.codigo);
-            setCpfCnpj(dados.cpfCnpj || '');
+            setCpfCnpj(dados.cpfCnpj);
             setAtivo(dados.ativo);
-            setNomeRazao(dados.nome || '');
-            setFantasia(dados.fantasia || '');
-            setRgIE(dados.rgInscEstadual || '');
-            setInscMun(dados.inscMunicipal || '');
-            setTelefone(dados.telefone || '');
-            setCelular(dados.celular || '');
-            setEmail(dados.email || '');
-            setGrupo(dados.grupoId || '');
-            setCategoria(dados.categoriaId || '');
-            /*
-            const tipos = [];
-            if (dados.tipoCliente) {
-              tipos.push(getTag('C', 'Cliente'));
-            }
-            if (dados.tipoFornecedor) {
-              tipos.push(getTag('F', 'Fornecedor'));
-            }
-            if (dados.tipoVendedor) {
-              tipos.push(getTag('V', 'Vendedor'));
-            }
-            setTiposCadastro(tipos);
-*/
+            setNomeRazao(dados.nome);
+            setFantasia(dados.fantasia);
+            setRgIE(dados.rgInscEstadual);
+            setInscMun(dados.inscMunicipal);
+            setTelefone(dados.telefone);
+            setCelular(dados.celular);
+            setEmail(dados.email);
+            setGrupo(dados.grupo?.id || '');
+            setCategoria(dados.categoria?.id || '');
+
             // Endereço
-            setCep(dados.cep || '');
-            setCepConsultado(dados.cep || '');
-            setLogradouro(dados.logradouro || '');
-            setNumLogradouro(dados.numeroLogradouro || '');
-            setBairro(dados.bairro || '');
-            setComplemento(dados.complementoLogradouro || '');
-            setUF(dados.uf);
+            setCep(dados.cep);
+            setCepConsultado(dados.cep);
+            setLogradouro(dados.logradouro);
+            setNumLogradouro(dados.numero);
+            setBairro(dados.bairro);
+            setComplemento(dados.complemento);
             setCidade(dados.cidade);
+            setUF(dados.uf);
 
             // Contatos
             if (dados.contatos) {

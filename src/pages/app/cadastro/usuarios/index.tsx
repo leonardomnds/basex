@@ -9,6 +9,7 @@ import CustomTable, { getColumn, getRow } from '../../../../components/Table';
 import CustomDialog from '../../../../components/CustomDialog';
 import { GetServerSideProps, NextPage } from 'next';
 import api from '../../../../util/Api';
+import { Usuario } from '.prisma/client';
 
 type Props = {
   colunas: []
@@ -20,53 +21,20 @@ const PeopleList: NextPage<Props> = (props) => {
   const { colunas } = props;
 
   const [isLoading, setLoading] = useState<boolean>(false);
-  const [deletingPerson, setDeletingPerson] = useState(null);
+  const [deletingUser, setDeletingUser] = useState(null);
   const [linhas, setLinhas] = useState<Array<any>>([]);
 
-  const handleNewPerson = () => {
+  const handleNewUser = () => {
     router.push(`${router.pathname}/novo`);
   };
 
-  const handleEditPerson = (person) => {
-    router.push(`${router.pathname}/${person.id}`);
+  const handleEditUser = (user) => {
+    router.push(`${router.pathname}/${user.id}`);
   };
-
-  // const handleDeletePerson = (person) => {
-  //   setDeletingPerson(person);
-  // };
 
   const handleCloseDialog = () => {
-    setDeletingPerson(null);
+    setDeletingUser(null);
   };
-/*
-  const confirmDeletePerson = async () => {
-    try {
-      const response = null; // await useApi.delete(`/pessoas/${deletingPerson.id}`);
-
-      const { sucesso, dados, erros } = response.data;
-
-      addToast(sucesso ? dados : erros, {
-        appearance: sucesso ? 'success' : 'error',
-      });
-
-      if (sucesso) {
-        const rows = [];
-
-        tableRows.forEach((row) => {
-          if (row.id !== deletingPerson.id) {
-            rows.push(row);
-          }
-        });
-
-        setTableRows(rows);
-      }
-
-      handleCloseDialog();
-    } catch (err) {
-      addToast(err.message, { appearance: 'error' });
-    }
-  };
-*/
 
   useEffect(() => {
 
@@ -74,23 +42,23 @@ const PeopleList: NextPage<Props> = (props) => {
       const pessoas = [];
       setLoading(true);
 
-
       try {
-
-        const response = await api.get('/pessoas');
+        const response = await api.get('/usuarios');
 
         if (!response?.data?.error) {
-          response.data.forEach((pes) => {
+          response.data.forEach((u: Usuario) => {
+            const datePart = u.dataCadastro.toString().substring(0,10).split("-");
+            const dateCadastro = datePart[2]+'/'+datePart[1]+'/'+datePart[0];
+            
             pessoas.push(
               getRow(
                 [
-                  pes.id,
-                  pes.codigo,
-                  pes.cpfCnpj,
-                  pes.nome,
-                  pes.fantasia,
-                  `${pes.logradouro || ''}, ${pes.numero || ''}`,
-                  pes.ativo ? 'Ativo' : 'Inativo',
+                  u.id,
+                  u.nome,
+                  u.usuario,
+                  '********',
+                  dateCadastro,
+                  u.ativo ? 'Ativo' : 'Inativo',
                 ],
                 colunas,
               ),
@@ -112,21 +80,20 @@ const PeopleList: NextPage<Props> = (props) => {
 
   return (
       <Box>
-        <PageHeader title="Clientes " btnLabel="Novo" btnFunc={handleNewPerson} />
+        <PageHeader title="Usuários " btnLabel="Novo" btnFunc={handleNewUser} />
         <CustomTable
           isLoading={isLoading}
           columns={colunas}
           rows={linhas}
-          editFunction={handleEditPerson}
-          // deleteFunction={handleDeletePerson}
+          editFunction={handleEditUser}
         />
-        {deletingPerson && (
+        {deletingUser && (
           <CustomDialog
-            title="Excluir cliente"
-            text={`Confirma a exclusão do cliente ${deletingPerson.nome}?`}
-            isOpen={Boolean(deletingPerson)}
+            title="Excluir usuário"
+            text={`Confirma a exclusão do usuário ${deletingUser.nome}?`}
+            isOpen={Boolean(deletingUser)}
             onClose={handleCloseDialog}
-            onConfirm={()=>{}}// {confirmDeletePerson}
+            onConfirm={()=>{}}
           />
         )}
       </Box>
@@ -139,11 +106,10 @@ export const getServerSideProps : GetServerSideProps = async () => {
 
   const colunas = [];
   colunas.push(getColumn('id', 'Id', 0, 'center', null, true));
-  colunas.push(getColumn('codigo', 'Código', 30, 'center', "padleft"));
-  colunas.push(getColumn('cpfCnpj', 'CPF/CNPJ', 50, 'left'));
   colunas.push(getColumn('nome', 'Nome/Razão', 100, 'left'));
-  colunas.push(getColumn('fantasia', 'Apelido/Fantasia', 100, 'left'));
-  colunas.push(getColumn('endereco', 'Endereço', 100, 'left'));
+  colunas.push(getColumn('usuario', 'Usuário', 50, 'left'));
+  colunas.push(getColumn('senha', 'Senha', 50, 'left'));
+  colunas.push(getColumn('dataCadastro', 'Cadastro', 50, 'center'));
   colunas.push(getColumn('ativo', 'Status', 30, 'center'));
 
   return {

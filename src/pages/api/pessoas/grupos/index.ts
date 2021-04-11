@@ -2,9 +2,12 @@ import { GrupoPessoa } from '.prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 import prisma from '../../../../prisma/PrismaInstance';
+import cors from '../../../../util/Cors';
 
 export default async function Grupo(req: NextApiRequest, res: NextApiResponse) {
   try {
+
+    await cors(req, res);
     
     switch (req.method) {
       case 'POST':

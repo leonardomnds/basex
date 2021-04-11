@@ -140,7 +140,7 @@ const SignIn: NextPage<Props> = (props) => {
       try {
         const response = await api.post('/login', { usuario, senha });
 
-        if (response.status === 200) {
+        if (!response?.data?.error) {
           await cookie.set('user', response.data.usuario || null, { expires: 1/24*6 }); // 6 horas
           await cookie.set('token', response.data.token || null, { expires: 1/24*6 });
           router.replace('/app/home');

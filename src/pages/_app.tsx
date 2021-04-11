@@ -1,5 +1,7 @@
 import React from 'react';
 import Head from 'next/head';
+import Router from 'next/router';
+import NProgress from 'nprogress';
 import { ThemeProvider } from '@material-ui/core/styles';
 import { ToastProvider } from 'react-toast-notifications';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -7,6 +9,10 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import { theme2 } from '../theme';
 import Toast, { ToastContainer } from '../components/Toast';
 import Layout from '../components/Layout';
+
+Router.events.on("routeChangeStart", () => NProgress.start());
+Router.events.on("routeChangeComplete", () => NProgress.done());
+Router.events.on("routeChangeError", () => NProgress.done());
 
 export default function MyApp(props) {
   const { Component, pageProps } = props;
@@ -27,6 +33,7 @@ export default function MyApp(props) {
           name="viewport"
           content="minimum-scale=1, initial-scale=1, width=device-width"
         />
+        <link rel="stylesheet" type="text/css" href="/nprogress.css" />
       </Head>
       <ThemeProvider theme={theme2}>
         <ToastProvider

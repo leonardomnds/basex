@@ -3,9 +3,12 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 import prisma from '../../../../prisma/PrismaInstance';
 import { salvarGrupo } from '.';
+import cors from '../../../../util/Cors';
 
 export default async function Grupo(req: NextApiRequest, res: NextApiResponse) {
   try {
+
+    await cors(req, res);
 
     const id = req.query.id.toString();
     

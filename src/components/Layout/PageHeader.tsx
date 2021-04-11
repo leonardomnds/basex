@@ -41,18 +41,30 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function PageHeader({
-  title,
-  btnLabel,
-  btnFunc,
-  btnIcon,
-  btnLoading,
-  btnBack,
-}) {
+type Props = {
+  title: string,
+  btnLabel?: string,
+  btnFunc?: () => void,
+  btnIcon?: any,
+  btnLoading: boolean,
+  btnBack: boolean,
+}
+
+const PageHeader = (props: Props) => {
   const classes = useStyles();
   const router = useRouter();
+
+  const {
+    title,
+    btnLabel = null,
+    btnFunc = () => {},
+    btnIcon = <AddCircleIcon />,
+    btnLoading,
+    btnBack,
+  } = props;
+
   return (
-    <Box className={classes.root}>
+    <Box>
       <Box className={classes.header}>
         <Box className={classes.leftSection}>
           {btnBack && (
@@ -94,22 +106,5 @@ function PageHeader({
     </Box>
   );
 }
-
-PageHeader.propTypes = {
-  title: PropTypes.string.isRequired,
-  btnLabel: PropTypes.string,
-  btnFunc: PropTypes.func,
-  btnIcon: PropTypes.element,
-  btnLoading: PropTypes.bool,
-  btnBack: PropTypes.bool,
-};
-
-PageHeader.defaultProps = {
-  btnLabel: null,
-  btnFunc: () => {},
-  btnIcon: <AddCircleIcon />,
-  btnLoading: false,
-  btnBack: false,
-};
 
 export default PageHeader;

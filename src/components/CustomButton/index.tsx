@@ -21,18 +21,24 @@ type Props = {
   icon?: ReactNode,
   isLoading?: boolean,
   color?: "inherit" | "primary" | "secondary",
+  size?: "small" | "medium" | "large",
+  variant?: "contained" | "outlined" | "text",
+  className?: any,
+  componentSpan?: boolean,
 }
 
-function CustomButton({ label, func = ()=>{}, icon, isLoading, color='primary' }: Props) {
+function CustomButton({ label, func = ()=>{}, icon, isLoading, color='primary', size="medium", variant='contained', className, componentSpan }: Props) {
   const classes = useStyles();
   return (
     <Button
-      variant="contained"
+      variant={variant}
+      size={size}
       color={color}
       disabled={isLoading}
-      className={classes.btn}
+      className={className || classes.btn}
       startIcon={icon && icon}
       onClick={func}
+      component={componentSpan ? 'span' : 'button'}
     >
       {label}
       {isLoading && (

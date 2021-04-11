@@ -18,8 +18,15 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function CustomFab({ icon, label, onClick }) {
+type Props = {
+  icon?: any,
+  label: string,
+  onClick: () => void,
+}
+
+const CustomFab = (props: Props) => {
   const classes = useStyles();
+  const { icon, label, onClick } = props;
 
   const Icon = icon ?? AddCircleIcon;
   return (
@@ -34,12 +41,5 @@ function CustomFab({ icon, label, onClick }) {
     </Fab>
   );
 }
-
-CustomFab.propTypes = {
-  // eslint-disable-next-line react/require-default-props
-  icon: PropTypes.element,
-  label: PropTypes.string.isRequired,
-  onClick: PropTypes.func.isRequired,
-};
 
 export default CustomFab;

@@ -3,9 +3,12 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import prisma from '../../../../prisma/PrismaInstance';
 import { salvarCategoria } from '.';
 import { CategoriaPessoa } from '.prisma/client';
+import cors from '../../../../util/Cors';
 
 export default async function Categoria(req: NextApiRequest, res: NextApiResponse) {
   try {
+
+    await cors(req, res);
 
     const id = req.query.id.toString();
     

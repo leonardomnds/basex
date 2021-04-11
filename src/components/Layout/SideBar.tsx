@@ -1,5 +1,3 @@
-import cookie from 'js-cookie';
-
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 
@@ -244,7 +242,6 @@ function Sidebar(props) {
                 <Collapse
                   timeout="auto"
                   unmountOnExit
-                  className={classes.collapsedItem}
                   in={isSelectedItem(item.path) && opennedItem}
                 >
                   {item.items.map((sub, subKey) => {

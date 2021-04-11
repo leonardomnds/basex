@@ -20,7 +20,6 @@ export function ToastContainer({ ...rest }) {
 
   return (
     <DefaultToastContainer
-      className={classes.container}
       style={{ zIndex: 9999, padding: 15 }}
       {...rest}
     />

@@ -1,7 +1,11 @@
 import { NextApiRequest, NextApiResponse } from 'next';
+import cors from '../../../util/Cors';
 
-export default function Estados(req: NextApiRequest, res: NextApiResponse) {
+export default async function Estados(req: NextApiRequest, res: NextApiResponse) {
   try {
+
+    await cors(req, res);
+
     if (req.method === 'GET') {
       res.status(200).json(listarEstados());
     } else {

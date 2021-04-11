@@ -68,8 +68,6 @@ function Layout({ children }) {
 
     const auth = cookie.get('token') || null;
 
-    console.log(auth);
-
     if (!auth && needAuthInThisRoute()) {
       const identificador = cookie.get('identificador') || null;
       router.replace(!identificador ? '/' : `/${identificador}/login`);
@@ -90,7 +88,7 @@ function Layout({ children }) {
       >
         <div className={classes.contentContainer}>
           <Box className={classes.content}>{children}</Box>
-        </div>
+        </div>       
       </div>
     </div>
   ) : <Box>{children}</Box>;

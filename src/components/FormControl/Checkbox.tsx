@@ -1,12 +1,19 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 
 import { FormControlLabel, Checkbox } from '@material-ui/core';
 
 const { v4: uuidv4 } = require('uuid');
 
-function CustomCheckbox({ checked, label, onChange, color }) {
+type Props = {
+  label: string,
+  checked: boolean,
+  onChange: () => void,
+  color?: 'primary' | 'secondary',
+}
+
+const CustomCheckbox = (props: Props) => {
   const uuid = uuidv4();
+  const { checked, label, onChange, color = 'primary' } = props;
 
   return (
     <FormControlLabel
@@ -22,16 +29,5 @@ function CustomCheckbox({ checked, label, onChange, color }) {
     />
   );
 }
-
-CustomCheckbox.prototypes = {
-  label: PropTypes.string.isRequired,
-  checked: PropTypes.bool,
-  onChange: PropTypes.func.isRequired,
-  color: PropTypes.string,
-};
-
-CustomCheckbox.defaultProps = {
-  color: 'primary',
-};
 
 export default CustomCheckbox;

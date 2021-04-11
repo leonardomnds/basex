@@ -1,11 +1,15 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 
 import api from "../../../util/ApiSemBase";
+import cors from '../../../util/Cors';
 import { SomenteNumeros, FormatarCep } from "../../../util/functions";
 
 
 export default async function CEP(req: NextApiRequest, res: NextApiResponse) {
   try {
+
+    await cors(req, res);
+
     if (req.method === 'GET') {
       const cep = req.query.cep.toString();
       const endereco = await consultarCEP(cep);

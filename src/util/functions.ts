@@ -1,7 +1,8 @@
 import cookie from 'js-cookie';
 import jwt from 'jsonwebtoken';
+import { NextApiRequest } from 'next';
 
-export const SomenteNumeros = (str) => {
+export const SomenteNumeros = (str: string) => {
   let onlyNumbers = '';
   const value = str || '';
   for (let i = 0; i < value.length; i += 1) {
@@ -13,7 +14,7 @@ export const SomenteNumeros = (str) => {
   return onlyNumbers;
 };
 
-export const FormatarCpfCnpj = (str) => {
+export const FormatarCpfCnpj = (str: string) => {
   const doc = SomenteNumeros(str);
 
   let parte1 = '';
@@ -63,28 +64,7 @@ export const FormatarCpfCnpj = (str) => {
   return parte1 + parte2 + parte3 + parte4 + parte5 || '';
 };
 
-export const FormatarCpf = (str) => {
-  const cpf = SomenteNumeros(str);
-
-  const parte1 = cpf.substring(0, 3);
-  let parte2 = cpf.substring(3, 6);
-  let parte3 = cpf.substring(6, 9);
-  let parte4 = cpf.substring(9, 11);
-
-  if (parte2.length > 0) {
-    parte2 = `.${parte2}`;
-  }
-  if (parte3.length > 0) {
-    parte3 = `.${parte3}`;
-  }
-  if (parte4.length > 0) {
-    parte4 = `-${parte4}`;
-  }
-
-  return parte1 + parte2 + parte3 + parte4;
-};
-
-export const FormatarCnpj = (str) => {
+export const FormatarCnpj = (str: string) => {
   const cnpj = SomenteNumeros(str);
   const parte1 = cnpj.substring(0, 2);
   let parte2 = cnpj.substring(2, 5);
@@ -108,7 +88,7 @@ export const FormatarCnpj = (str) => {
   return parte1 + parte2 + parte3 + parte4 + parte5;
 };
 
-export const FormatarCep = (str) => {
+export const FormatarCep = (str: string) => {
   const cnpj = SomenteNumeros(str);
   const parte1 = cnpj.substring(0, 5);
   let parte2 = cnpj.substring(5, 8);
@@ -120,7 +100,7 @@ export const FormatarCep = (str) => {
   return parte1 + parte2;
 };
 
-export const FormatarTelefone = (str) => {
+export const FormatarTelefone = (str: string) => {
   const fone = SomenteNumeros(str);
   let parte1 = fone.substring(0, 2);
   let parte2 = '';
@@ -147,7 +127,7 @@ export const FormatarTelefone = (str) => {
   return parte1 + parte2 + parte3;
 };
 
-export const FormatarStringToMoney = (str) => {
+export const FormatarStringToMoney = (str: string) => {
   const valor = SomenteNumeros(str);
   const { length } = valor;
 
@@ -167,28 +147,28 @@ export const FormatarStringToMoney = (str) => {
   return `${parseInt(inteiro, 10)},${decimal}`;
 };
 
-export const StringToDouble = (str) => {
+export const StringToDouble = (str: string) => {
   return parseFloat(str.replace(',', '.'));
 };
 
-export const StringToCurrency = (str) => {
+export const StringToCurrency = (str: string) => {
   return `R$ ${str.replace('.', ',')}`;
 };
 
-export const DoubleToCurrency = (value, digits = 2) => {
+export const DoubleToCurrency = (value: number, digits: number = 2) => {
   return `R$ ${value.toLocaleString('pt-br', {
     minimumFractionDigits: digits,
     maximumFractionDigits: digits,
   })}`;
 };
 
-export const ZerosLeft = (value, digits = 0) => {
+export const ZerosLeft = (value: string | number, digits: number = 0) => {
   const str = value ? value.toString() : '';
   const pad = Array(digits + 1).join('0');
   return pad.substring(0, pad.length - str.length) + str;
 };
 
-export const ToBase64 = (value) =>
+export const ToBase64 = (value: any) =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(value);
@@ -210,7 +190,7 @@ export const GetAxiosConfig = () => {
   }
 }
 
-export const GetDataFromJwtToken = (req) => {
+export const GetDataFromJwtToken = (req: NextApiRequest) => {
   const bearerLength = 'Bearer '.length;
   const token = req.headers.authorization || null;
 

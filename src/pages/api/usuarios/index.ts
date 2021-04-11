@@ -3,9 +3,12 @@ import bcrypt from 'bcrypt';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 import prisma from '../../../prisma/PrismaInstance';
+import cors from '../../../util/Cors';
 
 export default async function Login(req: NextApiRequest, res: NextApiResponse) {
   try {
+
+    await cors(req, res);
     
     switch (req.method) {
       case 'POST':
@@ -42,12 +45,20 @@ const listarUsuarios = async () => {
       usuario: true,
       ativo: true,
       dataCadastro: true
+    },
+    where: {
+      usuario: {
+        not: 'admin'
+      }
     }
   });
   return users;
 }
 
-const salvarUsuario = async (usuario: Usuario) => {
+export const salvarUsuario = async (usuario: Usuario) => {
+
+  const id = usuario?.id || null;
+  delete usuario.id;
 
   const existe = await prisma.usuario.findUnique({
     where: {
@@ -58,25 +69,48 @@ const salvarUsuario = async (usuario: Usuario) => {
     }
   });
 
-  if (existe && existe.id !== usuario.id) {
-    return { code: 422, error: 'Usuário já cadastrado!'};
+  if ((existe && existe.id !== usuario.id) || usuario.usuario === 'admin') {
+    return { code: 422, error: usuario.usuario === 'admin' ? 'Esse usuário não pode ser alterado!' : 'Usuário já cadastrado!'};
   }
 
-  if (!usuario.id) {
+  let user;
+
+  if (id) {
+    delete usuario.dataCadastro;
+    delete usuario.senha;
+
+    user = await prisma.usuario.update({
+      data: usuario,
+      select: getUsuarioJsonReturn(),
+      where: {
+        id
+      }
+    });
+  } else {
     usuario.ativo = true;
     usuario.dataCadastro = new Date();
     usuario.senha = bcrypt.hashSync(usuario.senha, 10);
-  }
 
-  const user = await prisma.usuario.create({
-    data: usuario,
-    select: {
-      id: true,
-      nome: true,
-      usuario: true,
-    }
-  });
+    user = await prisma.usuario.create({
+      data: usuario,
+      select: {
+        id: true,
+        nome: true,
+        usuario: true,
+      }
+    });
+  }
 
   return { usuario: user };
 
+}
+
+export const getUsuarioJsonReturn = () => {
+  return {
+    id: true,
+    usuario: true,
+    nome: true,
+    ativo: true,
+    dataCadastro: true,
+  }
 }

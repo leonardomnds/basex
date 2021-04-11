@@ -1,12 +1,16 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 
 import api from "../../../util/ApiSemBase";
+import cors from '../../../util/Cors';
 import { SomenteNumeros, FormatarCnpj } from "../../../util/functions";
 import { consultarCEP } from '../cep/[cep]';
 
 
 export default async function CNPJ(req: NextApiRequest, res: NextApiResponse) {
   try {
+
+    await cors(req, res);
+
     if (req.method === 'GET') {
       const cnpj = req.query.cnpj.toString();
       const empresa = await consultarCNPJ(cnpj);
