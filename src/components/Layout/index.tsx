@@ -8,7 +8,6 @@ import { useTheme, makeStyles, Box } from '@material-ui/core';
 import TopBar from './TopBar';
 import Sidebar from './SideBar';
 import useWindowSize from '../../util/WindowSize';
-import { GetDataFromJwtToken } from '../../util/functions';
 
 const useStyles = makeStyles((theme) => ({
   themeError: {
@@ -56,7 +55,6 @@ function Layout({ children }) {
   const router = useRouter();
 
   const [isDrawerOpen, setDrawerOpen] = useState(true);
-  const [isClientLogged, setClientLogged] = useState(true);
 
   const needAuthInThisRoute = () => {
     return `${router.pathname}/`.startsWith('/app/');
@@ -70,8 +68,6 @@ function Layout({ children }) {
 
     const auth = cookie.get('token') || null;
 
-    setClientLogged(Boolean(GetDataFromJwtToken(auth)?.pessoaId));
-
     if (!auth && needAuthInThisRoute()) {
       router.replace('/login');
     }
@@ -81,7 +77,7 @@ function Layout({ children }) {
   (
     <div className={classes.root}>
       <TopBar isDrawerOpen={isDrawerOpen} setDrawerOpen={handleDrawer} />
-      <Sidebar isDrawerOpen={isDrawerOpen} setDrawerOpen={handleDrawer} isClientLogged={isClientLogged} />
+      <Sidebar isDrawerOpen={isDrawerOpen} setDrawerOpen={handleDrawer}/>
       <div
         className={classes.wrapper}
         style={{

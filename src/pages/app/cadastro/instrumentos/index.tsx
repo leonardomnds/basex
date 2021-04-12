@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useToasts } from 'react-toast-notifications';
+import { addHours, format } from 'date-fns';
 
 import { makeStyles, Box, Paper, Tabs, Tab, Grid } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/SearchRounded';
@@ -123,6 +124,8 @@ const List: NextPage<Props> = (props: Props) => {
 
         if (!response?.data?.error) {
           response.data.forEach((i) => {
+
+            console.log(i.ultimaCalibracao);
             
             instrumentos.push(
               getRow(
@@ -130,7 +133,7 @@ const List: NextPage<Props> = (props: Props) => {
                   i.id,
                   i.tag,
                   i.descricao,
-                  i.ultimaCalibracao,
+                  i.ultimaCalibracao ? format(addHours(new Date(i.ultimaCalibracao), 3), 'dd/MM/yyyy') : '',
                   i.ativo ? 'Ativo' : 'Inativo',
                 ],
                 colunas,

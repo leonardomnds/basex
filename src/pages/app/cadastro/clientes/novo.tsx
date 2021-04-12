@@ -22,11 +22,9 @@ import TextField, {
 import Select, {
   getSelectItem,
 } from '../../../../components/FormControl/Select';
-import CustomButton from '../../../../components/CustomButton';
 
 import EntityDialog, { Entity } from '../../../../components/CustomDialog/Entity';
 import CustomDialog from '../../../../components/CustomDialog';
-import CustomTable, { getColumn, getRow } from '../../../../components/Table';
 
 import api from '../../../../util/Api';
 
@@ -38,9 +36,7 @@ import {
   ZerosLeft,
 } from '../../../../util/functions';
 import { GetServerSideProps, NextPage } from 'next';
-import { CategoriaPessoa, ContatoPessoa, GrupoPessoa, Pessoa } from '.prisma/client';
-
-const { v4: uuidv4 } = require('uuid');
+import { CategoriaPessoa, GrupoPessoa, Pessoa } from '.prisma/client';
 
 const useStyles = makeStyles((theme) => ({
   themeError: {
@@ -69,20 +65,18 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 type Props = {
-  pessoaId: string,
-  colunas: [],
+  pessoaId: string
 }
 
 const NewPeople: NextPage<Props> = (props) => {
   const classes = useStyles();
   const router = useRouter();
-  const { pessoaId, colunas } = props;
+  const { pessoaId } = props;
 
   const { addToast } = useToasts();
 
   // Geral
   const [isSaving, setSaving] = useState(false);
-  const [isSavingContact, setSavingContact] = useState(false);
   const [currentTab, setCurrentTab] = useState(0);
   const [newEntity, setNewEntity] = useState<Entity>(null);
 
@@ -121,81 +115,11 @@ const NewPeople: NextPage<Props> = (props) => {
   const [cidade, setCidade] = useState('');
   const [complemento, setComplemento] = useState('');
 
-  const [contEnable, setContEnable] = useState(false);
-  const [contEditId, setContEditId] = useState('');
-  const [contNome, setContNome] = useState('');
-  const [contDescricao, setContDescricao] = useState('');
-  const [contTelefone, setContTelefone] = useState('');
-  const [contCelular, setContCelular] = useState('');
-  const [contEmail, setContEmail] = useState('');
-
-  const [tableRows, setTableRows] = useState([]);
+  // Dados de Acesso
+  const [senhaAcesso, setSenhaAcesso] = useState<string>('');
 
   const handleChangeTab = (event, newValue) => {
     setCurrentTab(newValue);
-  };
-
-  const limparCamposContatos = () => {
-    setContEditId('');
-    setContNome('');
-    setContDescricao('');
-    setContTelefone('');
-    setContCelular('');
-    setContEmail('');
-  };
-
-  const hadleEditContact = (contact) => {
-    limparCamposContatos();
-    setContEditId(contact.id);
-    setContNome(contact.nome);
-    setContDescricao(contact.descricao);
-    setContTelefone(contact.telefone);
-    setContCelular(contact.celular);
-    setContEmail(contact.email);
-
-    setContEnable(true);
-  };
-
-  const handleDeleteContact = (person) => {
-    const rows = [];
-    tableRows.forEach((row) => {
-      if (row.id !== person.id) {
-        rows.push(row);
-      }
-    });
-
-    setTableRows(rows);
-  };
-
-  const handleSaveContact = async () => {
-    setSavingContact(true);
-
-    const contactJson : ContatoPessoa = {
-      id: contEditId.length === 0 ? uuidv4() : contEditId,
-      nome: contNome,
-      descricao: contDescricao,
-      telefone: contTelefone,
-      celular: contCelular,
-      email: contEmail,
-      pessoaId: null,
-      dataCadastro: null,
-    };
-
-    const rows : ContatoPessoa[] = [];
-    rows.push(contactJson);
-
-    tableRows.forEach((row) => {
-      if (row.id !== contactJson.id) {
-        rows.push(row);
-      }
-    });
-
-    setTableRows(rows);
-
-    setContEnable(false);
-    limparCamposContatos();
-
-    setSavingContact(false);
   };
  
   const handleSave = async () => {
@@ -217,11 +141,18 @@ const NewPeople: NextPage<Props> = (props) => {
     } else if (cep && cep.length !== 9) {
       addToast('O CEP está incompleto!', {
         appearance: 'warning',
-      });
+      });      
+      setCurrentTab(1);
     } else if (uf && !cidade) {
       addToast('Selecione a cidade!', {
         appearance: 'warning',
       });
+      setCurrentTab(1);
+    } else if (!pessoaId && senhaAcesso === '****') {
+      addToast('Senha informada não é permitida!', {
+        appearance: 'warning',
+      });
+      setCurrentTab(2);
     } else {
       try {
 
@@ -243,6 +174,7 @@ const NewPeople: NextPage<Props> = (props) => {
           complemento: complemento || null,
           cidade: cidade || null,
           uf: uf || null,
+          senhaAcesso: senhaAcesso || null,
           grupoId: grupo || null,
           categoriaId: categoria || null,
           ativo: isAtivo,
@@ -384,27 +316,6 @@ const NewPeople: NextPage<Props> = (props) => {
     setCelular(FormatarTelefone(str));
   };
 
-  const maskTelefoneContato = (str) => {
-    setContTelefone(FormatarTelefone(str));
-  };
-
-  const maskCelularContato = (str) => {
-    setContCelular(FormatarTelefone(str));
-  };
-
-  // const getLimitTagsTipos = () => {
-  //   if (size.width <= theme.breakpoints.values.xs) {
-  //     return -1;
-  //   }
-  //   if (size.width < theme.breakpoints.values.sm) {
-  //     return 3;
-  //   }
-  //   if (size.width <= theme.breakpoints.values.md) {
-  //     return 1;
-  //   }
-  //   return -1;
-  // };
-
   const getGrupos = async () => {
     try {
       const response = await api.get('/pessoas/grupos');
@@ -476,8 +387,6 @@ const NewPeople: NextPage<Props> = (props) => {
   }, []);
 
   useEffect(() => {
-    const rows = [];
-
     async function getData() {
       try {
         const response = await api.get('/pessoas/'+pessoaId);
@@ -509,24 +418,9 @@ const NewPeople: NextPage<Props> = (props) => {
             setCidade(dados.cidade);
             setUF(dados.uf);
 
-            // Contatos
-            if (dados.contatos) {
-              dados.contatos.forEach((con) => {
-                rows.push(
-                  getRow(
-                    [
-                      con.id,
-                      con.nome,
-                      con.descricao,
-                      con.telefone,
-                      con.celular,
-                      con.email,
-                    ],
-                    colunas,
-                  ),
-                );
-              });
-            }
+            //Acesso
+            setSenhaAcesso('****');
+
           } else {
             router.push('/app/cadastro/clientes');
           }
@@ -537,8 +431,6 @@ const NewPeople: NextPage<Props> = (props) => {
         addToast(err.message, { appearance: 'error' });
       }
     }
-
-    setTableRows(rows);
 
     if (pessoaId) {
       getData();
@@ -601,93 +493,16 @@ const NewPeople: NextPage<Props> = (props) => {
         );
       case 2:
         return (
-          <Box>
-            <Box className={classes.btnContact}>
-              {!contEnable && (
-                <Box className={classes.btn}>
-                  <CustomButton
-                    //className={classes.btn}
-                    label="Novo contato"
-                    func={() => {
-                      setContEnable(true);
-                      limparCamposContatos();
-                    }}
-                  />
-                </Box>
-              )}
-              {contEnable && (
-                <Box className={classes.btn}>
-                  <CustomButton
-                    color="secondary"
-                    label="Voltar à lista"
-                    func={() => {
-                      setContEnable(false);
-                      limparCamposContatos();
-                    }}
-                  />
-                </Box>
-              )}
-              {contEnable && (
-                <Box className={classes.btn}>
-                  <CustomButton
-                    label="Salvar Contato"
-                    isLoading={isSavingContact}
-                    func={() => {
-                      handleSaveContact();
-                    }}
-                  />
-                </Box>
-              )}
-            </Box>
-            {!contEnable && (
-              <CustomTable
-                columns={colunas}
-                rows={tableRows}
-                editFunction={hadleEditContact}
-                deleteFunction={handleDeleteContact}
-                naoPreencherLinhasVazias
+          <Grid container spacing={2}>
+            <Grid item xs={6} sm={4} md={2}>
+              <TextField
+                label="Senha"
+                value={senhaAcesso}
+                setValue={setSenhaAcesso}
+                type='password'
               />
-            )}
-            {contEnable && (
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    label="Nome"
-                    value={contNome}
-                    setValue={setContNome}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    label="Descrição"
-                    value={contDescricao}
-                    setValue={setContDescricao}
-                  />
-                </Grid>
-                <Grid item xs={6} sm={6} md={3}>
-                  <TextField
-                    label="Telefone"
-                    value={contTelefone}
-                    setValue={maskTelefoneContato}
-                  />
-                </Grid>
-                <Grid item xs={6} sm={6} md={3}>
-                  <TextField
-                    label="Celular"
-                    value={contCelular}
-                    setValue={maskCelularContato}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={12} md={6}>
-                  <TextField
-                    label="E-mail"
-                    value={contEmail}
-                    setValue={setContEmail}
-                  />
-                </Grid>
-              </Grid>
-            )}
-          </Box>
+            </Grid>
+          </Grid>
         );
       default:
         // Dados gerais
@@ -752,19 +567,6 @@ const NewPeople: NextPage<Props> = (props) => {
                 setValue={setEmail}
               />
             </Grid>
-            {/* <Grid item xs={12} sm={6} md={6}>
-              <SelectTags
-                label="Tipo de Cadastro"
-                limitTags={getLimitTagsTipos()}
-                value={tiposCadastro}
-                setValue={setTiposCadastro}
-                items={[
-                  getTag('C', 'Cliente'),
-                  getTag('F', 'Fornecedor'),
-                  getTag('V', 'Vendedor'),
-                ]}
-              />
-            </Grid> */}
           </Grid>
         );
     }
@@ -834,7 +636,7 @@ const NewPeople: NextPage<Props> = (props) => {
           >
             <Tab label="Dados gerais" />
             <Tab label="Endereço" />
-            {/* <Tab label="Contatos" /> */}
+            <Tab label="Acesso" />
           </Tabs>
           <Box className={classes.tab}>{TablePanel()}</Box>
         </Paper>
@@ -892,19 +694,9 @@ const NewPeople: NextPage<Props> = (props) => {
 export default NewPeople;
 
 export const getServerSideProps : GetServerSideProps = async ({ params }) => {
-
-  const colunas = [];
-  colunas.push(getColumn('id', 'Id', 0, 'center', null, true));
-  colunas.push(getColumn('nome', 'Nome', 100, 'left'));
-  colunas.push(getColumn('descricao', 'Descrição', 100, 'left'));
-  colunas.push(getColumn('telefone', 'Telefone', 50, 'center'));
-  colunas.push(getColumn('celular', 'Celular', 50, 'center'));
-  colunas.push(getColumn('email', 'E-mail', 100, 'left'));
-
   return {
     props: {
       pessoaId: params?.id || null,
-      colunas
     }
   }
 }

@@ -1,3 +1,4 @@
+import cookie from 'js-cookie';
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 
@@ -22,6 +23,7 @@ import MenuRoundedIcon from '@material-ui/icons/MenuRounded';
 
 import sidebarItems, { Menu, SubMenu } from './sidebarItems';
 import useWindowSize from '../../util/WindowSize';
+import { GetDataFromJwtToken } from '../../util/functions';
 
 const useStyles = makeStyles((theme) => ({
   drawer: {
@@ -150,7 +152,6 @@ const useStyles = makeStyles((theme) => ({
 type Props = {
   isDrawerOpen: boolean,
   setDrawerOpen: () => void,
-  isClientLogged: boolean,
 }
 
 const Sidebar = (props: Props) => {
@@ -159,7 +160,11 @@ const Sidebar = (props: Props) => {
   const theme = useTheme();
   const size = useWindowSize();
 
-  const { isDrawerOpen, setDrawerOpen, isClientLogged } = props;
+  const { isDrawerOpen, setDrawerOpen } = props;
+
+  const token = cookie.get('token') || null;
+
+  const isClientLogged = Boolean(GetDataFromJwtToken(token)?.pessoaId);
 
   const userLogged = !isClientLogged;
   const clientLogged = isClientLogged;
@@ -198,9 +203,9 @@ const Sidebar = (props: Props) => {
     let listaSubMenus: Array<SubMenu>;
 
     if (userLogged) {
-      listaSubMenus = subMenus.filter((item) => item.user === true);
+      listaSubMenus = subMenus.filter((item) => item.user);
     } else if (clientLogged) {
-      listaSubMenus = subMenus.filter((item) => item.client === true)
+      listaSubMenus = subMenus.filter((item) => item.client);
     }
 
     return (
@@ -260,9 +265,9 @@ const Sidebar = (props: Props) => {
     let listaMenus: Array<Menu>;
 
     if (userLogged) {
-      listaMenus = sidebarItems.filter((item) => item.user === true);
+      listaMenus = sidebarItems.filter((item) => item.user);
     } else if (clientLogged) {
-      listaMenus = sidebarItems.filter((item) => item.client === true)
+      listaMenus = sidebarItems.filter((item) => item.client)
     }
 
     return (

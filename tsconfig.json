@@ -22,7 +22,7 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx"
-, "src/components/FormControl/TextField.tsx", "src/db/config/graphqlSchema.js", "src/util/Api.ts", "src/components/Layout/index.tsx", "src/components/Layout/SideBar.js"  ],
+, "src/components/FormControl/dd.tsx", "src/db/config/graphqlSchema.js", "src/util/Api.ts", "src/components/Layout/index.tsx", "src/components/Layout/SideBar.js"  ],
   "exclude": [
     "node_modules"
   ]

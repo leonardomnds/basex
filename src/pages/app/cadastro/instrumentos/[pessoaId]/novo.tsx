@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useToasts } from 'react-toast-notifications';
+import { addHours, format } from 'date-fns';
 
 import {
   makeStyles,
@@ -22,6 +23,8 @@ import api from '../../../../../util/Api';
 
 import { GetServerSideProps, NextPage } from 'next';
 import { Instrumento } from '.prisma/client';
+import { SomenteNumeros } from '../../../../../util/functions';
+import CustomTable, { getColumn, getRow } from '../../../../../components/Table';
 
 const useStyles = makeStyles((theme) => ({
   themeError: {
@@ -42,12 +45,13 @@ const useStyles = makeStyles((theme) => ({
 type Props = {
   pessoaId: string,
   instrumentoId: string,
+  colunas: Array<any>,
 }
 
 const NewInstrument: NextPage<Props> = (props: Props) => {
   const classes = useStyles();
   const router = useRouter();
-  const { pessoaId, instrumentoId } = props;
+  const { pessoaId, instrumentoId, colunas } = props;
 
   const { addToast } = useToasts();
 
@@ -68,13 +72,23 @@ const NewInstrument: NextPage<Props> = (props: Props) => {
 
   const [modelo, setModelo] = useState<string>('');
   const [fabricante, setFabricante] = useState<string>('');  
+  const [tempoCalibracao, setTempoCalibracao] = useState<number>(null);
 
   // Observações
   const [observacoes, setObservacoes] = useState<string>('');
 
+  // Histórico de Calibrações
+  const [isFinded, setFinded] = useState<boolean>(false);
+  const [isLoading, setLoading] = useState<boolean>(false);
+  const [linhas, setLinhas] = useState<Array<any>>([]);
+
   const handleChangeTab = (event, newValue) => {
     setCurrentTab(newValue);
   };
+
+  const setValueTempoCalibracao = (value) => {
+    setTempoCalibracao(parseInt(SomenteNumeros(value), 10));
+  }
  
   const handleSave = async () => {
     setSaving(true);
@@ -98,6 +112,7 @@ const NewInstrument: NextPage<Props> = (props: Props) => {
           fabricante: fabricante || null,
           modelo: modelo || null,
           observacoes: observacoes || null,
+          tempoCalibracao: tempoCalibracao || 0,
           ativo: isAtivo,
           dataCadastro: null,
         };
@@ -126,6 +141,51 @@ const NewInstrument: NextPage<Props> = (props: Props) => {
   };
 
   useEffect(() => {
+
+    const getData = async () => {
+      const calibracoes = [];
+      setLoading(true);
+
+      const queryFilter = '?pessoaId='+pessoaId
+        +'&instrumentoId='+instrumentoId
+
+      try {
+        const response = await api.get('/pessoas/'+pessoaId+'/instrumentos/calibracoes'+queryFilter);
+
+        if (!response?.data?.error) {
+          response.data.forEach((c) => {
+            
+            calibracoes.push(
+              getRow(
+                [
+                  c.id,
+                  c.dataCalibracao ? format(addHours(new Date(c.dataCalibracao), 3), 'dd/MM/yyyy') : '',
+                  c.numeroCertificado,
+                  c.laboratorio,
+                ],
+                colunas,
+              ),
+            );
+          });
+        } else {
+          throw new Error(response.data.error)
+        }
+      } catch (err) {
+        addToast(err.message, { appearance: 'error' });
+      }
+
+      setFinded(true);
+      setLinhas(calibracoes);
+      setLoading(false);
+    }
+
+    if (instrumentoId && currentTab === 2 && !isFinded) {
+      getData();
+    }
+
+  }, [currentTab])
+
+  useEffect(() => {
     async function getData() {
       try {
         const response = await api.get('/pessoas/'+pessoaId+'/instrumentos/'+instrumentoId);
@@ -144,6 +204,7 @@ const NewInstrument: NextPage<Props> = (props: Props) => {
             setModelo(ins.modelo);
             setFabricante(ins.fabricante);
             setObservacoes(ins.observacoes);
+            setTempoCalibracao(ins.tempoCalibracao);
 
           } else {
             router.push('/app/cadastro/instrumentos?pessoaId='+pessoaId);
@@ -178,10 +239,11 @@ const NewInstrument: NextPage<Props> = (props: Props) => {
         );
       case 2:
         return (
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-            </Grid>
-          </Grid>
+          <CustomTable
+            isLoading={isLoading}
+            columns={colunas}
+            rows={linhas}
+          />
         );
       default:
         // Dados gerais
@@ -189,11 +251,11 @@ const NewInstrument: NextPage<Props> = (props: Props) => {
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6} md={3}>
               <TextField
-                label="Série"
-                value={serie}
-                setValue={setSerie}
+                label="Periodicidade (Meses)"
+                value={(tempoCalibracao || '').toString()}
+                setValue={setValueTempoCalibracao}
               />
-            </Grid>
+            </Grid>            
             <Grid item xs={12} sm={6} md={3}>
               <TextField
                 label="Responsável"
@@ -214,8 +276,8 @@ const NewInstrument: NextPage<Props> = (props: Props) => {
                 value={subArea}
                 setValue={setSubArea}
               />
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
+            </Grid>            
+            <Grid item xs={12} sm={12} md={6}>
               <TextField
                 label="Fabricante"
                 value={fabricante}
@@ -227,6 +289,13 @@ const NewInstrument: NextPage<Props> = (props: Props) => {
                 label="Modelo"
                 value={modelo}
                 setValue={setModelo}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <TextField
+                label="Número de série"
+                value={serie}
+                setValue={setSerie}
               />
             </Grid>
           </Grid>
@@ -295,10 +364,17 @@ export default NewInstrument;
 
 export const getServerSideProps : GetServerSideProps = async ({ params }) => {
 
+  const colunas = [];
+  colunas.push(getColumn('id', 'Id', 0, 'center', null, true));
+  colunas.push(getColumn('dtCalibracao', 'Data', 50, 'center'));
+  colunas.push(getColumn('numCert', 'Certificado', 50, 'left'));
+  colunas.push(getColumn('laboratorio', 'Laboratório', 100, 'left'));
+
   return {
     props: {
       pessoaId: params?.pessoaId || null,
       instrumentoId: params?.id || null,
+      colunas,
     }
   }
 }

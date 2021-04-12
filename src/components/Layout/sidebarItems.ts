@@ -1,5 +1,6 @@
 import HomeIcon from '@material-ui/icons/HomeRounded';
 import CategoryIcon from '@material-ui/icons/CategoryRounded';
+import DescriptionIcon from '@material-ui/icons/DescriptionRounded';
 
 
 export type SubMenu = {
@@ -50,6 +51,27 @@ const sidebarItems : Menu[] = [
         path: 'usuarios',
         user: true,
       }
+    ],
+  },
+  {
+    label: 'Calibrações',
+    path: '/app/calibracoes',
+    user: true,
+    client: true,
+    icon: DescriptionIcon,
+    items: [
+      {
+        label: 'Nova Calibração',
+        path: 'novo',
+        user: true,
+        client: true,
+      },
+      {
+        label: 'Histórico',
+        path: 'historico',
+        user: true,
+        client: true,
+      },
     ],
   },
 ];

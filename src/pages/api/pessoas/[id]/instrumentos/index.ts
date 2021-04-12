@@ -43,20 +43,26 @@ export default async function Instrumentos(req: NextApiRequest, res: NextApiResp
 }
 
 const listarInstrumentos = async (pessoaId: string) => {
-  const instrumentos = await prisma.instrumento.findMany({
-    where: {
-      pessoaId
-    },
-    orderBy: {
-      descricao: 'asc'
-    },
-    select: {
-      id: true,
-      tag: true,
-      descricao: true,
-      ativo: true,
-    },
-  });
+
+  const instrumentos = await prisma.$queryRaw(`
+    SELECT
+      i."id",
+      i."tag",
+      i."descricao",
+      i."ativo",
+      MAX(c."dataCalibracao") AS "ultimaCalibracao"
+    FROM 
+      "InstrumentosPessoas" as i
+      LEFT JOIN "InstrumentosCalibracoes" AS c ON (i."id" = c."instrumentoId")
+    WHERE
+      i."pessoaId" = '${pessoaId}'
+    GROUP BY
+      i."id",
+      i."tag",
+      i."descricao",
+      i."ativo"
+  `);
+
   return instrumentos;
 }
 
@@ -106,12 +112,13 @@ export const getInstrumentoJsonReturn = () => {
     },
     tag: true,
     descricao: true,
-    serie: true,
+    tempoCalibracao: true,
     responsavel: true,
     area: true,
     subArea: true,
     fabricante: true,
     modelo: true,
+    serie: true,
     observacoes: true,
     ativo: true,
     dataCadastro: true,

@@ -50,6 +50,7 @@ model Pessoa {
   cidade String? @db.VarChar(255)
   uf String? @db.VarChar(2)
   complemento String? @db.VarChar(255)
+  senhaAcesso String @db.VarChar(100) @default("")
   grupoId String? @db.VarChar(100)
   grupo GrupoPessoa? @relation(fields: [grupoId], references: [id])
   categoriaId String? @db.VarChar(100)
@@ -81,7 +82,8 @@ model Instrumento {
   pessoaId String @db.VarChar(100)
   pessoa Pessoa @relation(fields: [pessoaId], references: [id])
   tag String @db.VarChar(100)
-  descricao String @db.VarChar(100)  
+  descricao String @db.VarChar(100)
+  tempoCalibracao Int @default(0)
   serie String? @db.VarChar(100)
   responsavel String? @db.VarChar(100)
   area String? @db.VarChar(100)
@@ -90,7 +92,20 @@ model Instrumento {
   modelo String? @db.VarChar(100)
   observacoes String? @db.Text
   ativo Boolean @default(true)
-  dataCadastro DateTime @default(now())  
+  dataCadastro DateTime @default(now())
+  calibracoes Calibracao[]
   @@map("InstrumentosPessoas")
   @@unique([pessoaId, tag])
+}
+
+model Calibracao {
+  id String @id @default(uuid()) @db.VarChar(100)
+  instrumentoId String @db.VarChar(100)
+  instrumento Instrumento @relation(fields: [instrumentoId], references: [id])
+  dataCalibracao DateTime @db.Date
+  numeroCertificado String @db.VarChar(100)
+  arquivoCertificado Bytes? @db.ByteA
+  laboratorio String? @db.VarChar(100)
+  dataCadastro DateTime @default(now())
+  @@map("InstrumentosCalibracoes")
 }

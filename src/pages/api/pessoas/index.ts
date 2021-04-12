@@ -1,10 +1,11 @@
 import { Pessoa } from '.prisma/client';
+import bcrypt from 'bcrypt';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 import prisma from '../../../prisma/PrismaInstance';
 import cors from '../../../util/Cors';
 
-import { ValidateAuth  } from "../../../util/functions";
+import { SomenteNumeros, ValidateAuth  } from "../../../util/functions";
 
 export default async function Pessoas(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -65,6 +66,16 @@ export const salvarPessoa = async (pessoa: Pessoa) => {
 
   const id = pessoa?.id || null;
   delete pessoa.id;
+
+  if (!pessoa?.senhaAcesso) {
+    pessoa.senhaAcesso = SomenteNumeros(pessoa?.cpfCnpj || '0000').substring(0,4)
+  } else if (pessoa?.senhaAcesso === '****') {
+    delete pessoa.senhaAcesso;
+  }
+
+  if (pessoa.senhaAcesso) {
+    pessoa.senhaAcesso = bcrypt.hashSync(pessoa.senhaAcesso, 10);
+  }
 
   let person;
 

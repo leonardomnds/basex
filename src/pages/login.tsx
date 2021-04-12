@@ -12,10 +12,12 @@ import {
   // Link,
   Button,
   CircularProgress,
+  Link,
 } from '@material-ui/core';
 
 import api from '../util/Api';
 import { GetServerSideProps, NextPage } from 'next';
+import { FormatarCpfCnpj } from '../util/functions';
 
 const useStyles = makeStyles((theme) => ({
   themeError: {
@@ -113,6 +115,9 @@ const useStyles = makeStyles((theme) => ({
     marginTop: -18,
     position: 'absolute',
   },
+  alternarLogin: {
+    cursor: 'pointer',
+  }
 }));
 
 type Props = {
@@ -128,17 +133,19 @@ const SignIn: NextPage<Props> = (props) => {
   const [senha, setSenha] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const [loginCliente, setLoginCliente] = useState(true);
+
   const handleSignIn = async () => {
     setLoading(true);
     removeAllToasts();
 
     if (!usuario || !senha) {
-      addToast('Informe usuário e senha para continuar!', {
+      addToast(`Informe ${ loginCliente ? 'CPF/CNPJ' : 'usuário' } e senha para continuar!`, {
         appearance: 'warning',
       });
     } else {
       try {
-        const response = await api.post('/login', { usuario, senha });
+        const response = await api.post('/login?pessoa='+(loginCliente ? 'true' : 'false'), { usuario, senha });
 
         if (!response?.data?.error) {
           await cookie.set('user', response.data.usuario || null, { expires: 1/24*6 }); // 6 horas
@@ -161,20 +168,26 @@ const SignIn: NextPage<Props> = (props) => {
         <Paper className={classes.loginWrap}>
           <Box className={classes.loginTitleBackground}>
             <Typography variant="body2" className={classes.loginTitle}>
-              CONECTE-SE
+            { `PORTAL DO ${loginCliente ? 'CLIENTE' : 'FUNCIONÁRIO'}` }
             </Typography>
           </Box>
           <form className={classes.form}>
             <TextField
               variant="outlined"
-              label="Usuário"
+              label={ loginCliente ? "CPF/CNPJ" : "Usuário"}
               type="text"
               name="usuario"
               className={classes.input}
               fullWidth
               autoFocus
               value={usuario}
-              onChange={(event) => setUsuario(event.target.value)}
+              onChange={(event) => {
+                if (loginCliente) {
+                  setUsuario(FormatarCpfCnpj(event.target.value));
+                } else {
+                  setUsuario(event.target.value);
+                }
+              }}
             />
             <TextField
               variant="outlined"
@@ -194,7 +207,7 @@ const SignIn: NextPage<Props> = (props) => {
                 className={classes.loginButton}
                 onClick={handleSignIn}
               >
-                {loading ? 'Autenticando' : 'Entrar'}
+                {loading ? `Autenticando ${ loginCliente ? 'Cliente' : 'Funcionário'}` : 'Entrar'}
                 {loading && (
                   <CircularProgress
                     size={36}
@@ -204,9 +217,18 @@ const SignIn: NextPage<Props> = (props) => {
                 )}
               </Button>
             </Box>
-            {/* <Box className={classes.options}>
-              <Link href="/account/recover_password">Esqueceu sua senha?</Link>
-            </Box> */}
+            <Box className={classes.options}>
+              <Link
+                className={classes.alternarLogin}
+                onClick={() => {
+                  setLoginCliente(!loginCliente);
+                  setUsuario('');
+                  setSenha('');
+                }}
+              >
+                { loginCliente ? 'Não sou cliente! Fazer login como funcionário.' : 'É cliente? Clique aqui para fazer Login.'}
+              </Link>
+            </Box>
           </form>
         </Paper>
       </Box>

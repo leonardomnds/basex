@@ -1,7 +1,6 @@
 import cookie from 'js-cookie';
 import jwt from 'jsonwebtoken';
-import { NextApiRequest, NextApiResponse } from 'next';
-import { string } from 'prop-types';
+import { NextApiRequest } from 'next';
 
 export const SomenteNumeros = (str: string) => {
   let onlyNumbers = '';

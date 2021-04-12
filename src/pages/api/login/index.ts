@@ -99,11 +99,12 @@ const efetuarLoginPessoa = async (usuario: string, senha: string) => {
       cpfCnpj: true,
       nome: true,
       fantasia: true,
+      senhaAcesso: true,
     }
   });
 
   if (people) {
-    const validPass = senha === '123456'; // bcrypt.compareSync(senha, user.senha);
+    const validPass = bcrypt.compareSync(senha, people.senhaAcesso);
 
     if (validPass) {
       const token = await jwt.sign(
@@ -117,7 +118,7 @@ const efetuarLoginPessoa = async (usuario: string, senha: string) => {
         },
       );
 
-      // delete people.senha;
+      delete people.senhaAcesso;
 
       return {
         usuario: people,

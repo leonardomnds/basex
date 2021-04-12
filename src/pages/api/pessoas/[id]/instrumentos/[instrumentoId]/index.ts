@@ -1,10 +1,10 @@
 import { Instrumento, Pessoa } from '.prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getInstrumentoJsonReturn, salvarInstrumento } from '.';
+import { getInstrumentoJsonReturn, salvarInstrumento } from '../';
 
-import prisma from '../../../../../prisma/PrismaInstance';
-import cors from '../../../../../util/Cors';
-import { ValidateAuth } from '../../../../../util/functions';
+import prisma from '../../../../../../prisma/PrismaInstance';
+import cors from '../../../../../../util/Cors';
+import { ValidateAuth } from '../../../../../../util/functions';
 
 export default async function Instrumentos(req: NextApiRequest, res: NextApiResponse) {
   try {
