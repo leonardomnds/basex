@@ -1,9 +1,9 @@
 import { Pessoa } from '.prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
-import prisma from '../../../prisma/PrismaInstance';
-import { getPessoaJsonReturn, salvarPessoa } from '.';
-import cors from '../../../util/Cors';
+import prisma from '../../../../prisma/PrismaInstance';
+import { getPessoaJsonReturn, salvarPessoa } from '../';
+import cors from '../../../../util/Cors';
 
 export default async function Grupo(req: NextApiRequest, res: NextApiResponse) {
   try {

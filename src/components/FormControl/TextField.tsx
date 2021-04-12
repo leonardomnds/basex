@@ -45,6 +45,8 @@ type Props = {
   setValue?: (v: any) => void,
   autoFocus?: boolean,
   endItem?: ReactNode,
+  numLinhas?: number,
+  variant?: 'standard' | 'outlined' | 'filled'
 }
 
 function CustomTextField({
@@ -55,13 +57,15 @@ function CustomTextField({
   setValue = (v) => {},
   autoFocus,
   endItem,
+  numLinhas = 1,
+  variant = 'standard'
 }: Props) {
   const classes = useStyles();
 
   const uuid = uuidv4();
 
   return (
-    <FormControl className={classes.input}>
+    <FormControl className={classes.input} variant={variant}>
       <InputLabel htmlFor={uuid}>{label}</InputLabel>
       <Input
         id={uuid}
@@ -72,6 +76,8 @@ function CustomTextField({
         disabled={disabled}
         autoFocus={autoFocus}
         fullWidth
+        multiline={numLinhas !== 1}
+        rows={numLinhas}
         onChange={(event) => setValue && setValue(event.target.value)}
         endAdornment={endItem && endItem}
       />

@@ -4,16 +4,25 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 import prisma from '../../../prisma/PrismaInstance';
 import cors from '../../../util/Cors';
+import { FormatarCpfCnpj } from '../../../util/functions';
 
 export default async function Login(req: NextApiRequest, res: NextApiResponse) {
   try {
 
     await cors(req, res);
+
+    const loginPessoa = Boolean(req.query?.pessoa === 'true');
     
     switch (req.method) {
       case 'POST':
         const { usuario, senha } = req.body;
-        const json = await efetuarLogin(usuario, senha);
+        let json;
+
+        if (loginPessoa) {
+          json = await efetuarLoginPessoa(usuario, senha);
+        } else {
+          json = await efetuarLogin(usuario, senha);
+        }
 
         if (json) {
           res.status(200).json(json);
@@ -67,6 +76,51 @@ const efetuarLogin = async (usuario: string, senha: string) => {
 
       return {
         usuario: user,
+        token,
+      }
+    }
+  }
+  return null;
+}
+
+const efetuarLoginPessoa = async (usuario: string, senha: string) => {
+  await criarUsuarioAdmin();
+
+  usuario = FormatarCpfCnpj(usuario);
+
+  const people = await prisma.pessoa.findFirst({
+    where: {
+      cpfCnpj: usuario,
+      ativo: true
+    },
+    select: {
+      id: true,
+      codigo: true,
+      cpfCnpj: true,
+      nome: true,
+      fantasia: true,
+    }
+  });
+
+  if (people) {
+    const validPass = senha === '123456'; // bcrypt.compareSync(senha, user.senha);
+
+    if (validPass) {
+      const token = await jwt.sign(
+        {
+          usuarioId: null,
+          pessoaId: people.id
+        },
+        process.env.JWT_KEY,
+        {
+          expiresIn: '6h'
+        },
+      );
+
+      // delete people.senha;
+
+      return {
+        usuario: people,
         token,
       }
     }

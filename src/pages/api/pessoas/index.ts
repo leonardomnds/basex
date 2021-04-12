@@ -4,23 +4,24 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import prisma from '../../../prisma/PrismaInstance';
 import cors from '../../../util/Cors';
 
-import { GetDataFromJwtToken  } from "../../../util/functions";
+import { ValidateAuth  } from "../../../util/functions";
 
 export default async function Pessoas(req: NextApiRequest, res: NextApiResponse) {
   try {
 
     await cors(req, res);
 
-    const jwtData = GetDataFromJwtToken(req);
+    const usuarioId = ValidateAuth(req, 'user');
 
-    if (!jwtData || !jwtData.usuarioId) {
+    if (!usuarioId) {
       res.status(401).json({error: 'Acesso não autorizado!'});
-    }
+      return;
+    }  
     
     switch (req.method) {
       case 'POST':
         const pessoaSalvar : Pessoa = req.body;
-        pessoaSalvar.usuarioId = jwtData.usuarioId;
+        pessoaSalvar.usuarioId = usuarioId;
 
         const retPost = await salvarPessoa(pessoaSalvar);
 

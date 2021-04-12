@@ -59,6 +59,7 @@ model Pessoa {
   usuarioId String @db.VarChar(100)
   usuario Usuario @relation(fields: [usuarioId], references: [id])
   contatos ContatoPessoa[]
+  intrumentos Instrumento[]
   @@map("Pessoas")
 }
 
@@ -71,6 +72,25 @@ model ContatoPessoa {
   telefone String? @db.VarChar(20)
   celular String? @db.VarChar(20)
   email String? @db.VarChar(255)
-  dataCadastro DateTime @default(now())  
+  dataCadastro DateTime @default(now())
   @@map("ContatosPessoas")
+}
+
+model Instrumento {
+  id String @id @default(uuid()) @db.VarChar(100)
+  pessoaId String @db.VarChar(100)
+  pessoa Pessoa @relation(fields: [pessoaId], references: [id])
+  tag String @db.VarChar(100)
+  descricao String @db.VarChar(100)  
+  serie String? @db.VarChar(100)
+  responsavel String? @db.VarChar(100)
+  area String? @db.VarChar(100)
+  subArea String? @db.VarChar(100)
+  fabricante String? @db.VarChar(100)
+  modelo String? @db.VarChar(100)
+  observacoes String? @db.Text
+  ativo Boolean @default(true)
+  dataCadastro DateTime @default(now())  
+  @@map("InstrumentosPessoas")
+  @@unique([pessoaId, tag])
 }

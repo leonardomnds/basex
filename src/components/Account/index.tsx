@@ -1,6 +1,6 @@
 import cookie from 'js-cookie';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from "next/router";
 
 import { makeStyles, Avatar, Menu, MenuItem } from '@material-ui/core';
@@ -24,10 +24,10 @@ function Account(props: Props) {
   const ref = useRef();
   const router = useRouter()
   const [isOpen, setOpen] = useState(false);
+  const [username, setUsername] = useState(null);
 
   const { user } = props;
-
-  const isAuthenticated = Boolean(cookie.get('token'));
+  const isAuthenticated = Boolean(user);
 
   const handleOpen = () => {
     setOpen(true);
@@ -76,6 +76,15 @@ function Account(props: Props) {
     },
   ];
 
+  useEffect(() => {
+    const getUser = () => {
+      setUsername(JSON.parse(user).nome || null);
+    }
+    if (Boolean(user)) {
+      getUser();
+    }    
+  }, [])
+
   return (
     <>
       <Avatar
@@ -83,7 +92,7 @@ function Account(props: Props) {
         style={{ cursor: 'pointer' }}
         className={classes.avatar}
         onClick={handleOpen}
-        alt={user ? JSON.parse(user).nome : null}
+        alt={username}
         src="/"
       />
       <Menu

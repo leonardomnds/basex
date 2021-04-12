@@ -261,7 +261,7 @@ const NewPeople: NextPage<Props> = (props) => {
           addToast(`Cliente ${pessoaId ? 'alterado' : 'cadastrado'} com sucesso!`, {
             appearance: 'success',
           });
-          router.push('/app/cadastro/pessoas');
+          router.push('/app/cadastro/clientes');
           return;
         }
         throw new Error(response.data.error);
@@ -528,13 +528,9 @@ const NewPeople: NextPage<Props> = (props) => {
               });
             }
           } else {
-            router.push('/app/cadastro/pessoas');
+            router.push('/app/cadastro/clientes');
           }
         } else {
-          if (response.data.error.includes('Variable "$id" got invalid value')) {
-            router.push('/app/cadastro/pessoas');
-            return;
-          }
           throw new Error(response.data.error);
         }
       } catch (err) {

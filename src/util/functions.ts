@@ -1,6 +1,7 @@
 import cookie from 'js-cookie';
 import jwt from 'jsonwebtoken';
-import { NextApiRequest } from 'next';
+import { NextApiRequest, NextApiResponse } from 'next';
+import { string } from 'prop-types';
 
 export const SomenteNumeros = (str: string) => {
   let onlyNumbers = '';
@@ -190,12 +191,25 @@ export const GetAxiosConfig = () => {
   }
 }
 
-export const GetDataFromJwtToken = (req: NextApiRequest) => {
-  const bearerLength = 'Bearer '.length;
-  const token = req.headers.authorization || null;
-
-  if (token && token.length > bearerLength) {
-    return jwt.decode(token.slice(bearerLength), process.env.JWT_KEY);
+export const GetDataFromJwtToken = (token: string) => {
+  if (token) {
+    const bearerLength = 'Bearer '.length;
+    
+    if (token && !token.toLowerCase().startsWith('bearer ')) {
+      return jwt.decode(token, process.env.JWT_KEY);
+    } else if (token && token.length > bearerLength) {
+      return jwt.decode(token.slice(bearerLength), process.env.JWT_KEY);
+    }
   }
   return null;
+}
+
+export const ValidateAuth = (req: NextApiRequest, type: 'user' | 'person') => {
+  let idAuth: string = null;
+  const jwtData = GetDataFromJwtToken(req?.headers?.authorization);
+  if (jwtData) {
+    idAuth = jwtData[(type === 'person') ? 'pessoaId' : 'usuarioId'];
+  }
+  
+  return idAuth;
 }

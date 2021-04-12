@@ -20,7 +20,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMoreRounded';
 import DotIcon from '@material-ui/icons/FiberManualRecordRounded';
 import MenuRoundedIcon from '@material-ui/icons/MenuRounded';
 
-import sidebarItems from './sidebarItems';
+import sidebarItems, { Menu, SubMenu } from './sidebarItems';
 import useWindowSize from '../../util/WindowSize';
 
 const useStyles = makeStyles((theme) => ({
@@ -147,13 +147,22 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function Sidebar(props) {
+type Props = {
+  isDrawerOpen: boolean,
+  setDrawerOpen: () => void,
+  isClientLogged: boolean,
+}
+
+const Sidebar = (props: Props) => {
   const classes = useStyles();
   const router = useRouter();
   const theme = useTheme();
   const size = useWindowSize();
 
-  const { isDrawerOpen, setDrawerOpen } = props;
+  const { isDrawerOpen, setDrawerOpen, isClientLogged } = props;
+
+  const userLogged = !isClientLogged;
+  const clientLogged = isClientLogged;
 
   const [opennedItem, setOpennedItem] = useState(false);
   const [descOpennedItem, setDescOpennedItem] = useState('');
@@ -184,116 +193,140 @@ function Sidebar(props) {
     }
   }, []);
 
-  const content = (
-    <Box
-      height="100%"
-      display="flex"
-      flexDirection="column"
-      className={
-        size.width >= theme.breakpoints.values.lg
-          ? classes.drawerContent
-          : classes.drawerContentMobile
-      }
-    >
-      <List>
-        {sidebarItems.map((item, itemKey) => {
-          const Icon = item.icon;
+  const getSubMenus = (menuPath: string, subMenus: Array<SubMenu>) => {
+
+    let listaSubMenus: Array<SubMenu>;
+
+    if (userLogged) {
+      listaSubMenus = subMenus.filter((item) => item.user === true);
+    } else if (clientLogged) {
+      listaSubMenus = subMenus.filter((item) => item.client === true)
+    }
+
+    return (
+      <Collapse
+        timeout="auto"
+        unmountOnExit
+        in={isSelectedItem(menuPath) && opennedItem}
+      >
+        {listaSubMenus.map((sub, subKey) => {
           return (
-            // eslint-disable-next-line react/no-array-index-key
-            <Box key={itemKey}>
-              <Box
-                className={
-                  isCurrentPath(item.path)
-                    ? classes.itemSelectedBox
-                    : classes.unselectedBox
-                }
+            <Box
+              // eslint-disable-next-line react/no-array-index-key
+              key={subKey}
+              className={
+                isCurrentPath(`${menuPath}/${sub.path}`)
+                  ? classes.subSelectedBox
+                  : classes.unselectedBox
+              }
+            >
+              <ListItem
+                className={classes.listItem}
+                onClick={() => {
+                  if (size.width < theme.breakpoints.values.lg) {
+                    setDrawerOpen();
+                  }
+                  router.push(`${menuPath}/${sub.path}`);
+                }}
               >
-                <ListItem
-                  className={classes.listItem}
-                  onClick={() => {
-                    setOpennedItem(item.path !== selectedItem || !opennedItem);
-                    setDescOpennedItem(item.path);
-                    setSelectedItem(item.path);
-                    if (!item.items) {
-                      if (size.width < theme.breakpoints.values.lg) {
-                        setDrawerOpen();
-                      }
-                      router.push(item.path);
+                <ListItemIcon className={classes.listItemIcon}>
+                  <DotIcon
+                    className={
+                      isCurrentPath(`${menuPath}/${sub.path}`)
+                        ? classes.iconSubItemSelected
+                        : classes.iconSubItem
                     }
-                  }}
-                >
-                  <ListItemIcon className={classes.listItemIcon}>
-                    <Icon />
-                  </ListItemIcon>
-                  <ListItemText
-                    unselectable="on"
-                    primary={item.label}
-                    className={classes.listItemText}
                   />
-                  {item.items &&
-                    (descOpennedItem === item.path && opennedItem ? (
-                      <ExpandLessIcon className={classes.collapsedIcon} />
-                    ) : (
-                      <ExpandMoreIcon className={classes.collapsedIcon} />
-                    ))}
-                </ListItem>
-              </Box>
-              {Boolean(item.items) && (
-                <Collapse
-                  timeout="auto"
-                  unmountOnExit
-                  in={isSelectedItem(item.path) && opennedItem}
-                >
-                  {item.items.map((sub, subKey) => {
-                    return (
-                      <Box
-                        // eslint-disable-next-line react/no-array-index-key
-                        key={subKey}
-                        className={
-                          isCurrentPath(`${item.path}/${sub.path}`)
-                            ? classes.subSelectedBox
-                            : classes.unselectedBox
-                        }
-                      >
-                        <ListItem
-                          className={classes.listItem}
-                          onClick={() => {
-                            if (size.width < theme.breakpoints.values.lg) {
-                              setDrawerOpen();
-                            }
-                            router.push(`${item.path}/${sub.path}`);
-                          }}
-                        >
-                          <ListItemIcon className={classes.listItemIcon}>
-                            <DotIcon
-                              className={
-                                isCurrentPath(`${item.path}/${sub.path}`)
-                                  ? classes.iconSubItemSelected
-                                  : classes.iconSubItem
-                              }
-                            />
-                          </ListItemIcon>
-                          <ListItemText
-                            unselectable="on"
-                            primary={sub.label}
-                            className={
-                              isCurrentPath(`${item.path}/${sub.path}`)
-                                ? classes.listItemTextSelected
-                                : classes.listItemText
-                            }
-                          />
-                        </ListItem>
-                      </Box>
-                    );
-                  })}
-                </Collapse>
-              )}
+                </ListItemIcon>
+                <ListItemText
+                  unselectable="on"
+                  primary={sub.label}
+                  className={
+                    isCurrentPath(`${menuPath}/${sub.path}`)
+                      ? classes.listItemTextSelected
+                      : classes.listItemText
+                  }
+                />
+              </ListItem>
             </Box>
           );
         })}
-      </List>
-    </Box>
-  );
+      </Collapse>
+    );
+  };
+
+  const getMenus = () => {
+
+    let listaMenus: Array<Menu>;
+
+    if (userLogged) {
+      listaMenus = sidebarItems.filter((item) => item.user === true);
+    } else if (clientLogged) {
+      listaMenus = sidebarItems.filter((item) => item.client === true)
+    }
+
+    return (
+      <Box
+        height="100%"
+        display="flex"
+        flexDirection="column"
+        className={
+          size.width >= theme.breakpoints.values.lg
+            ? classes.drawerContent
+            : classes.drawerContentMobile
+        }
+      >
+        <List>
+          {listaMenus.map((item, itemKey) => {
+            const Icon = item.icon;
+            return (
+              // eslint-disable-next-line react/no-array-index-key
+              <Box key={itemKey}>
+                <Box
+                  className={
+                    isCurrentPath(item.path)
+                      ? classes.itemSelectedBox
+                      : classes.unselectedBox
+                  }
+                >
+                  <ListItem
+                    className={classes.listItem}
+                    onClick={() => {
+                      setOpennedItem(item.path !== selectedItem || !opennedItem);
+                      setDescOpennedItem(item.path);
+                      setSelectedItem(item.path);
+                      if (!item.items) {
+                        if (size.width < theme.breakpoints.values.lg) {
+                          setDrawerOpen();
+                        }
+                        router.push(item.path);
+                      }
+                    }}
+                  >
+                    <ListItemIcon className={classes.listItemIcon}>
+                      <Icon />
+                    </ListItemIcon>
+                    <ListItemText
+                      unselectable="on"
+                      primary={item.label}
+                      className={classes.listItemText}
+                    />
+                    {item.items &&
+                      (descOpennedItem === item.path && opennedItem ? (
+                        <ExpandLessIcon className={classes.collapsedIcon} />
+                      ) : (
+                        <ExpandMoreIcon className={classes.collapsedIcon} />
+                      ))}
+                  </ListItem>
+                </Box>
+                {Boolean(item.items) && getSubMenus(item.path, item.items) }
+              </Box>
+            );
+          })}
+        </List>
+      </Box>
+    );
+  }
 
   return (
     <Drawer
@@ -329,7 +362,7 @@ function Sidebar(props) {
           />
         </Box>
       </Hidden>
-      {content}
+      {getMenus()}
     </Drawer>
   );
 }
