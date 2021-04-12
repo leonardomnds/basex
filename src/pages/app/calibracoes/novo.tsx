@@ -159,6 +159,7 @@ const List: NextPage<Props> = (props: Props) => {
           addToast(`Calibração ${calibracao.id ? 'alterada' : 'cadastrada'} com sucesso!`, {
             appearance: 'success',
           });
+          limparCamposInstrumento();
         } else {
           throw new Error(response.data.error);
         }        
@@ -166,8 +167,6 @@ const List: NextPage<Props> = (props: Props) => {
         addToast(err.message, { appearance: 'error' });
       }
     }
-
-    limparCamposInstrumento();
     setSaving(false);
   }
 
