@@ -123,10 +123,7 @@ const List: NextPage<Props> = (props: Props) => {
         const response = await api.get('/pessoas/'+uuidPessoa+'/instrumentos');
 
         if (!response?.data?.error) {
-          response.data.forEach((i) => {
-
-            console.log(i.ultimaCalibracao);
-            
+          response.data.forEach((i) => {            
             instrumentos.push(
               getRow(
                 [

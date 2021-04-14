@@ -10,9 +10,7 @@ function index() {
     }
   }, [])
 
-  return (
-    <></>
-  )
+  return <></>
 }
 
 export default index

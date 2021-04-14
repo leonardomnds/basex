@@ -9,6 +9,8 @@ import CustomTable, { getColumn, getRow } from '../../../../components/Table';
 import CustomDialog from '../../../../components/CustomDialog';
 import { GetServerSideProps, NextPage } from 'next';
 import api from '../../../../util/Api';
+import { AbrirRelatorio } from '../../../../util/functions';
+import { NomeRelatorio } from '../../../../reports/nomesRelatorios';
 
 type Props = {
   colunas: []
@@ -119,6 +121,7 @@ const PeopleList: NextPage<Props> = (props) => {
           rows={linhas}
           editFunction={handleEditPerson}
           // deleteFunction={handleDeletePerson}
+          pdfFunction={() => AbrirRelatorio(NomeRelatorio.listaClientes)}
         />
         {deletingPerson && (
           <CustomDialog

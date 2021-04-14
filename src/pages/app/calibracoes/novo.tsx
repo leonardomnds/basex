@@ -1,19 +1,25 @@
 import React, { useState } from 'react';
-import { useRouter } from "next/router";
+import { useRouter } from 'next/router';
 import { useToasts } from 'react-toast-notifications';
 
-import { makeStyles, Box, Paper, Tabs, Tab, Grid } from '@material-ui/core';
+import { makeStyles, Box, Paper, Grid } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/SearchRounded';
 import CloseIcon from '@material-ui/icons/CloseRounded';
 
 import PageHeader from '../../../components/Layout/PageHeader';
 
-import TextField, { getEndItemIconButton } from '../../../components/FormControl/TextField';
+import TextField, {
+  getEndItemIconButton,
+} from '../../../components/FormControl/TextField';
 import DatePicker from '../../../components/FormControl/DatePicker';
 
 import { GetServerSideProps, NextPage } from 'next';
 import api from '../../../util/Api';
-import { FormatarCpfCnpj, GetDataFromJwtToken, ZerosLeft } from '../../../util/functions';
+import {
+  FormatarCpfCnpj,
+  GetDataFromJwtToken,
+  ZerosLeft,
+} from '../../../util/functions';
 import ConsultaPessoas from '../../../components/CustomDialog/ConsultaPessoas';
 import ConsultaInstrumentos from '../../../components/CustomDialog/ConsultaInstrumentos';
 import { Calibracao } from '.prisma/client';
@@ -30,9 +36,9 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 type Props = {
-  usuarioId: string,
-  pessoaId: string,
-}
+  usuarioId: string;
+  pessoaId: string;
+};
 
 const List: NextPage<Props> = (props: Props) => {
   const classes = useStyles();
@@ -49,7 +55,9 @@ const List: NextPage<Props> = (props: Props) => {
   const [uuidInstrumento, setUuidInstrumento] = useState<string>('');
   const [tagInstrumento, setTagInstrumento] = useState<string>('');
   const [descricaoInstrumento, setDescricaoInstrumento] = useState<string>('');
-  const [consultandoInstrumento, setConsultandoInstrumento] = useState<boolean>(false);
+  const [consultandoInstrumento, setConsultandoInstrumento] = useState<boolean>(
+    false,
+  );
 
   const [dataCalibracao, setDataCalibracao] = React.useState<Date>(new Date());
   const [laboratorio, setLaboratorio] = useState<string>('');
@@ -88,7 +96,7 @@ const List: NextPage<Props> = (props: Props) => {
         : () => {
             setConsultandoPessoa(true);
           },
-         uuidPessoa ? 'Remover seleção' : 'Consultar',
+      uuidPessoa ? 'Remover seleção' : 'Consultar',
     );
   };
 
@@ -97,14 +105,16 @@ const List: NextPage<Props> = (props: Props) => {
       uuidInstrumento ? <CloseIcon /> : <SearchIcon />,
       uuidInstrumento
         ? limparCamposInstrumento
-        : () => {            
+        : () => {
             if (uuidPessoa) {
               setConsultandoInstrumento(true);
             } else {
-              addToast('É necessário selecionar o cliente!', { appearance: 'warning' });
+              addToast('É necessário selecionar o cliente!', {
+                appearance: 'warning',
+              });
             }
           },
-         uuidPessoa ? 'Remover seleção' : 'Consultar',
+      uuidPessoa ? 'Remover seleção' : 'Consultar',
     );
   };
 
@@ -115,8 +125,7 @@ const List: NextPage<Props> = (props: Props) => {
       if (!response?.data?.error) {
         const { codigo, cpfCnpj, nome } = response.data;
 
-        setCodPessoa(codigo),
-        setCpfCnpjPessoa(cpfCnpj);
+        setCodPessoa(codigo), setCpfCnpjPessoa(cpfCnpj);
         setNomePessoa(nome);
       } else {
         throw new Error(response.data.error);
@@ -130,15 +139,16 @@ const List: NextPage<Props> = (props: Props) => {
     setSaving(true);
 
     if (!uuidPessoa || !uuidInstrumento) {
-      addToast('Selecione o cliente e o instrumento!', { appearance: 'warning' });
+      addToast('Selecione o cliente e o instrumento!', {
+        appearance: 'warning',
+      });
     } else if (!dataCalibracao) {
       addToast('Informe a data da calibração!', { appearance: 'warning' });
     } else if (!numeroCertificado) {
       addToast('Informe o número do certificado!', { appearance: 'warning' });
     } else {
       try {
-
-        const calibracao : Calibracao = {
+        const calibracao: Calibracao = {
           id: null,
           instrumentoId: uuidInstrumento || null,
           dataCalibracao: dataCalibracao || null,
@@ -149,30 +159,53 @@ const List: NextPage<Props> = (props: Props) => {
         };
 
         let response;
-        if (false) { // Alteração ainda não criada
-          response = await api.put('/pessoas/'+uuidPessoa+'/instrumentos/'+uuidInstrumento+'/calibracoes/'+calibracao.id, calibracao);
+        if (false) {
+          // Alteração ainda não criada
+          response = await api.put(
+            '/pessoas/' +
+              uuidPessoa +
+              '/instrumentos/' +
+              uuidInstrumento +
+              '/calibracoes/' +
+              calibracao.id,
+            calibracao,
+          );
         } else {
-          response = await api.post('/pessoas/'+uuidPessoa+'/instrumentos/'+uuidInstrumento+'/calibracoes', calibracao);
+          response = await api.post(
+            '/pessoas/' +
+              uuidPessoa +
+              '/instrumentos/' +
+              uuidInstrumento +
+              '/calibracoes',
+            calibracao,
+          );
         }
 
         if (!response?.data?.error) {
-          addToast(`Calibração ${calibracao.id ? 'alterada' : 'cadastrada'} com sucesso!`, {
-            appearance: 'success',
-          });
+          addToast(
+            `Calibração ${
+              calibracao.id ? 'alterada' : 'cadastrada'
+            } com sucesso!`,
+            {
+              appearance: 'success',
+            },
+          );
           limparCamposInstrumento();
         } else {
           throw new Error(response.data.error);
-        }        
+        }
       } catch (err) {
         addToast(err.message, { appearance: 'error' });
       }
     }
     setSaving(false);
-  }
+  };
 
   const getDataInstrumento = async (insId: string) => {
     try {
-      const response = await api.get(`/pessoas/${uuidPessoa}/instrumentos/${insId}`);
+      const response = await api.get(
+        `/pessoas/${uuidPessoa}/instrumentos/${insId}`,
+      );
 
       if (!response?.data?.error) {
         const { tag, descricao } = response.data;
@@ -221,7 +254,7 @@ const List: NextPage<Props> = (props: Props) => {
         </Grid>
       </Paper>
     );
-  }
+  };
 
   const getCamposBuscaInstrumento = () => {
     return (
@@ -247,7 +280,7 @@ const List: NextPage<Props> = (props: Props) => {
         </Grid>
       </Paper>
     );
-  }
+  };
 
   const getCamposLancamentoCalibracao = () => {
     return (
@@ -286,16 +319,17 @@ const List: NextPage<Props> = (props: Props) => {
         </Grid>
       </Paper>
     );
-  }
+  };
 
   return (
     <Box>
       <PageHeader
         title="Nova Calibração"
-        btnLabel={uuidInstrumento ? "Salvar" : ''}
+        btnLabel={uuidInstrumento ? 'Salvar' : ''}
         btnIcon={<SaveRoundedIcon />}
         btnFunc={salvarCalibracao}
-        btnLoading={isSaving}/>
+        btnLoading={isSaving}
+      />
       {usuarioId && getCamposBuscaCliente()}
       {getCamposBuscaInstrumento()}
       {uuidInstrumento && getCamposLancamentoCalibracao()}
@@ -322,19 +356,21 @@ const List: NextPage<Props> = (props: Props) => {
       )}
     </Box>
   );
-}
+};
 
 export default List;
 
-export const getServerSideProps : GetServerSideProps = async ({ req, query }) => {
-
+export const getServerSideProps: GetServerSideProps = async ({
+  req,
+  query,
+}) => {
   const { pessoaId } = query;
   const jwt = GetDataFromJwtToken(req.cookies.token);
 
   return {
     props: {
       usuarioId: jwt?.usuarioId || null,
-      pessoaId: jwt?.pessoaId ? jwt.pessoaId : (pessoaId || null),
-    }
-  }
-}
+      pessoaId: jwt?.pessoaId ? jwt.pessoaId : pessoaId || null,
+    },
+  };
+};

@@ -1,6 +1,7 @@
 import cookie from 'js-cookie';
 import jwt from 'jsonwebtoken';
 import { NextApiRequest } from 'next';
+import { NomeRelatorio } from '../reports/nomesRelatorios';
 
 export const SomenteNumeros = (str: string) => {
   let onlyNumbers = '';
@@ -211,4 +212,27 @@ export const ValidateAuth = (req: NextApiRequest, type: 'user' | 'person') => {
   }
   
   return idAuth;
+}
+
+export const AbrirRelatorio = (relatorio: NomeRelatorio) => {
+
+  const win = window.open('/app/pdf?ref='+relatorio.toString(), '_blank');
+    if (win) {
+      win.focus();
+    }
+}
+
+export const PascalCase = (str: string = '', qtdeNotCapitalize: number = 0) => {
+  let word = ''
+  const words = (` ${str} `).split(' ');
+
+  words.forEach((w) => {
+    if (w.trim().length > qtdeNotCapitalize) {
+      word += w.charAt(0).toUpperCase() + w.substr(1).toLowerCase() + ' ';
+    } else {
+      word += w.toLowerCase() + ' ';
+    }
+  });
+
+  return word;
 }

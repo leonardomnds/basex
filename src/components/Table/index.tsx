@@ -19,12 +19,14 @@ import {
   Grid,
   TextField,
   InputAdornment,
+  IconButton,
 } from '@material-ui/core';
 
 import EditIcon from '@material-ui/icons/EditRounded';
 import DeleteIcon from '@material-ui/icons/DeleteRounded';
 import SearchIcon from '@material-ui/icons/SearchRounded';
 import CheckIcon from '@material-ui/icons/CheckCircleRounded';
+import PdfIcon from '@material-ui/icons/PrintRounded';
 
 import {
   SomenteNumeros,
@@ -109,6 +111,12 @@ const useStyles = makeStyles((theme) => ({
   iconSearch: {
     color: 'gray',
   },
+  paginationBox: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    paddingRight: 15,
+  }
 }));
 
 export const getColumn = (
@@ -144,7 +152,8 @@ type Props = {
   rows: Array<any>,
   editFunction?: (v: any) => void,
   deleteFunction?: (v: any) => void,
-  selectFunction?: (v: any) => void,
+  selectFunction?: (v: any) => void,  
+  pdfFunction?: () => void,
   naoPreencherLinhasVazias?: boolean,
   naoPesquisar?: boolean,
   linhasPorPagina?: number,
@@ -157,6 +166,7 @@ function CustomTable({
   editFunction,
   deleteFunction,
   selectFunction,
+  pdfFunction,
   naoPreencherLinhasVazias,
   naoPesquisar,
   linhasPorPagina = 10,
@@ -245,19 +255,28 @@ function CustomTable({
 
   const getPagination = () => {
     return (
-      <TablePagination
-        rowsPerPageOptions={[]}
-        component="div"
-        count={filteredRows.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onChangePage={handleChangePage}
-        onChangeRowsPerPage={handleChangeRowsPerPage}
-        labelRowsPerPage="Exibir"
-        nextIconButtonText="Próxima página"
-        backIconButtonText="Página anterior"
-        labelDisplayedRows={paginationRowsInfo}
-      />
+      <Box className={classes.paginationBox}>
+        <TablePagination
+          rowsPerPageOptions={[]}
+          component="div"
+          count={filteredRows.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onChangePage={handleChangePage}
+          onChangeRowsPerPage={handleChangeRowsPerPage}
+          labelRowsPerPage="Exibir"
+          nextIconButtonText="Próxima página"
+          backIconButtonText="Página anterior"
+          labelDisplayedRows={paginationRowsInfo}
+        />
+        {pdfFunction && (
+          <Tooltip title="Gerar PDF" placement="left" arrow>
+            <IconButton color='inherit' component="span" onClick={pdfFunction} >
+              <PdfIcon />
+            </IconButton>
+          </Tooltip>          
+        )}
+      </Box>
     );
   };
 

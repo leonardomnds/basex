@@ -73,7 +73,7 @@ function Layout({ children }) {
     }
   }, []);
 
-  return needAuthInThisRoute() ?
+  return needAuthInThisRoute() && !(router.pathname+'/').startsWith('/app/pdf/') ?
   (
     <div className={classes.root}>
       <TopBar isDrawerOpen={isDrawerOpen} setDrawerOpen={handleDrawer} />
