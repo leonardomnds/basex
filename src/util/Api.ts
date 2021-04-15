@@ -2,7 +2,7 @@ import axios from 'axios';
 import { GetTokenFromCookie } from './functions';
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL + '/api',
+  baseURL: '/api',
 });
 
 api.interceptors.request.use(async (request) => {
