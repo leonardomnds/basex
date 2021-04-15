@@ -12,7 +12,7 @@
     "migrate": "npx prisma migrate dev --schema ./src/prisma/schema.prisma",
     "release": "npx prisma migrate deploy --schema ./src/prisma/schema.prisma",
     "generate": "npx prisma generate --schema ./src/prisma/schema.prisma",
-    "postinstall": "prisma generate --schema=./src/prisma/schema.prisma && npm run build",
+    "postinstall": "prisma generate --schema=./src/prisma/schema.prisma && prisma migrate deploy --schema=./src/prisma/schema.prisma && npm run build",
     "heroku-postbuild": "npm run generate && npm run release && npm run build"
   },
   "browser": {
