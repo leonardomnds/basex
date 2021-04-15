@@ -43,9 +43,9 @@ export const consultarCEP = async (cep: string) => {
     return {
       cep: FormatarCep(cep),
       logradouro: json.logradouro ? json.logradouro.toUpperCase() : null,
-      numeroLogradouro: '',
+      numero: '',
       bairro: json.bairro ? json.bairro.toUpperCase() : null,
-      complementoLogradouro: json.complemento,
+      complemento: json.complemento,
       cidade: json.localidade ? json.localidade.toUpperCase() : null,
       uf: json.uf ? json.uf.toUpperCase() : null,
     };

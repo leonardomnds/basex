@@ -53,7 +53,7 @@ export const consultarCNPJ = async (cnpj: string) => {
 
       return {
         cnpj: FormatarCnpj(cnpj),
-        razaoSocial: json.nome ? json.nome.toUpperCase() : null,
+        razao_social: json.nome ? json.nome.toUpperCase() : null,
         fantasia: json.fantasia ? json.fantasia.toUpperCase() : null,
         endereco: endereco || null,
       };

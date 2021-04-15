@@ -1,5 +1,5 @@
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -13,33 +13,33 @@ model Usuario {
   senha String @db.VarChar(100)
   nome String @db.VarChar(100)
   ativo Boolean @default(true)
-  dataCadastro DateTime @default(now())
+  data_cadastro DateTime @default(now())
   pessoas Pessoa[]
-  @@map("Usuarios")
+  @@map("usuarios")
 }
 
 model CategoriaPessoa {  
   id String @id @default(uuid()) @db.VarChar(100)
   descricao String @unique @db.VarChar(100)
   pessoas Pessoa[]
-  @@map("CategoriasPessoa")
+  @@map("categorias_pessoa")
 }
 
 model GrupoPessoa {
   id String @id @default(uuid()) @db.VarChar(100)
   descricao String @unique @db.VarChar(100)
   pessoas Pessoa[]
-  @@map("GruposPessoa")
+  @@map("grupos_pessoa")
 }
 
 model Pessoa {
   id String @id @default(uuid()) @db.VarChar(100)
   codigo Int @unique
-  cpfCnpj String @db.VarChar(18)
+  cpf_cnpj String @db.VarChar(18)
   nome String @db.VarChar(100)
   fantasia String? @db.VarChar(100)
-  rgInscEstadual String? @db.VarChar(50)
-  inscMunicipal String? @db.VarChar(50)
+  rg_insc_estadual String? @db.VarChar(50)
+  insc_municipal String? @db.VarChar(50)
   telefone String? @db.VarChar(20)
   celular String? @db.VarChar(20)
   email String? @db.VarChar(255)
@@ -50,62 +50,61 @@ model Pessoa {
   cidade String? @db.VarChar(255)
   uf String? @db.VarChar(2)
   complemento String? @db.VarChar(255)
-  senhaAcesso String @db.VarChar(100) @default("")
-  grupoId String? @db.VarChar(100)
-  grupo GrupoPessoa? @relation(fields: [grupoId], references: [id])
-  categoriaId String? @db.VarChar(100)
-  categoria CategoriaPessoa? @relation(fields: [categoriaId], references: [id])
+  senha_acesso String @db.VarChar(100) @default("")
+  grupo_id String? @db.VarChar(100)
+  grupo GrupoPessoa? @relation(fields: [grupo_id], references: [id])
+  categoria_id String? @db.VarChar(100)
+  categoria CategoriaPessoa? @relation(fields: [categoria_id], references: [id])
   ativo Boolean @default(true)
-  dataCadastro DateTime @default(now())  
-  usuarioId String @db.VarChar(100)
-  usuario Usuario @relation(fields: [usuarioId], references: [id])
+  data_cadastro DateTime @default(now())  
+  usuario_id String @db.VarChar(100)
+  usuario Usuario @relation(fields: [usuario_id], references: [id])
   contatos ContatoPessoa[]
   intrumentos Instrumento[]
-  @@map("Pessoas")
+  @@map("pessoas")
 }
 
 model ContatoPessoa {
   id String @id @default(uuid()) @db.VarChar(100)
-  pessoaId String @db.VarChar(100)
-  pessoa Pessoa @relation(fields: [pessoaId], references: [id])
+  pessoa_id String @db.VarChar(100)
+  pessoa Pessoa @relation(fields: [pessoa_id], references: [id])
   nome String @db.VarChar(100)
   descricao String @db.VarChar(100)
   telefone String? @db.VarChar(20)
   celular String? @db.VarChar(20)
   email String? @db.VarChar(255)
-  dataCadastro DateTime @default(now())
-  @@map("ContatosPessoas")
+  data_cadastro DateTime @default(now())
+  @@map("contatos_pessoas")
 }
 
 model Instrumento {
   id String @id @default(uuid()) @db.VarChar(100)
-  pessoaId String @db.VarChar(100)
-  pessoa Pessoa @relation(fields: [pessoaId], references: [id])
+  pessoa_id String @db.VarChar(100)
+  pessoa Pessoa @relation(fields: [pessoa_id], references: [id])
   tag String @db.VarChar(100)
   descricao String @db.VarChar(100)
-  tempoCalibracao Int @default(0)
+  tempo_calibracao Int @default(0)
   serie String? @db.VarChar(100)
   responsavel String? @db.VarChar(100)
   area String? @db.VarChar(100)
-  subArea String? @db.VarChar(100)
+  subarea String? @db.VarChar(100)
   fabricante String? @db.VarChar(100)
   modelo String? @db.VarChar(100)
   observacoes String? @db.Text
   ativo Boolean @default(true)
-  dataCadastro DateTime @default(now())
+  data_cadastro DateTime @default(now())
   calibracoes Calibracao[]
-  @@map("InstrumentosPessoas")
-  @@unique([pessoaId, tag])
+  @@map("instrumentos")
+  @@unique([pessoa_id, tag])
 }
 
 model Calibracao {
   id String @id @default(uuid()) @db.VarChar(100)
-  instrumentoId String @db.VarChar(100)
-  instrumento Instrumento @relation(fields: [instrumentoId], references: [id])
-  dataCalibracao DateTime @db.Date
-  numeroCertificado String @db.VarChar(100)
-  arquivoCertificado Bytes? @db.ByteA
+  instrumento_id String @db.VarChar(100)
+  instrumento Instrumento @relation(fields: [instrumento_id], references: [id])
+  data_calibracao DateTime @db.Date
+  numero_certificado String @db.VarChar(100)
   laboratorio String? @db.VarChar(100)
-  dataCadastro DateTime @default(now())
-  @@map("InstrumentosCalibracoes")
+  data_cadastro DateTime @default(now())
+  @@map("instrumentos_calibracoes")
 }

@@ -38,7 +38,7 @@ export default async function Grupo(req: NextApiRequest, res: NextApiResponse) {
         return;
 
       default:
-        res.status(405).json({error: 'Método não suportado!'});
+        res.status(405).json({ error: 'Método não suportado!' });
     }
 
   } catch (err) {

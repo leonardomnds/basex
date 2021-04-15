@@ -67,7 +67,7 @@ function ConsultaPessoas(props: Props) {
                   i.id,
                   i.tag,
                   i.descricao,
-                  i.ultimaCalibracao ? format(addHours(new Date(i.ultimaCalibracao), 3), 'dd/MM/yyyy') : '',
+                  i.ultima_calibracao ? format(addHours(new Date(i.ultima_calibracao), 3), 'dd/MM/yyyy') : '',
                 ],
                 tableColumns,
               ),

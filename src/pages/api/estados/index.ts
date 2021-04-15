@@ -9,7 +9,7 @@ export default async function Estados(req: NextApiRequest, res: NextApiResponse)
     if (req.method === 'GET') {
       res.status(200).json(listarEstados());
     } else {
-      res.status(405).json({error: 'Método não suportado!'});
+      res.status(405).json({ error: 'Método não suportado!' });
     }
   } catch (err) {
     res.status(500).json({error: err.message});

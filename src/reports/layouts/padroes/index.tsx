@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, Font } from "@react-pdf/renderer";
+import { StyleSheet, View, Text } from "@react-pdf/renderer";
 import { format } from "date-fns";
 
 const classes = StyleSheet.create({
@@ -56,7 +56,7 @@ export const getFooter = () => {
 
 export const getTable = (colunas: JSX.Element, linhas: JSX.Element[]) => {
   return (
-    <View style={{ width: 'auto', margin: '0cm' }}>
+    <View style={{ width: 'auto', margin: '0cm', marginBottom: 10 }}>
       {colunas}
       {linhas.map((value) => value)}
     </View>

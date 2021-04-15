@@ -49,7 +49,7 @@ const PeopleList: NextPage<Props> = (props) => {
 
         if (!response?.data?.error) {
           response.data.forEach((u: Usuario) => {
-            const datePart = u.dataCadastro.toString().substring(0,10).split("-");
+            const datePart = u.data_cadastro.toString().substring(0,10).split("-");
             const dateCadastro = datePart[2]+'/'+datePart[1]+'/'+datePart[0];
             
             pessoas.push(

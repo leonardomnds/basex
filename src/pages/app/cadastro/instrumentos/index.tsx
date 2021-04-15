@@ -17,8 +17,9 @@ import CustomTable, { getColumn, getRow } from '../../../../components/Table';
 import CustomDialog from '../../../../components/CustomDialog';
 import { GetServerSideProps, NextPage } from 'next';
 import api from '../../../../util/Api';
-import { FormatarCpfCnpj, GetDataFromJwtToken, ZerosLeft } from '../../../../util/functions';
+import { AbrirRelatorio, FormatarCpfCnpj, GetDataFromJwtToken, ZerosLeft } from '../../../../util/functions';
 import ConsultaPessoas from '../../../../components/CustomDialog/ConsultaPessoas';
+import { NomeRelatorio } from '../../../../reports/nomesRelatorios';
 
 const useStyles = makeStyles((theme) => ({
   themeError: {
@@ -100,10 +101,10 @@ const List: NextPage<Props> = (props: Props) => {
       const response = await api.get(`/pessoas/${pesId}`);
 
       if (!response?.data?.error) {
-        const { codigo, cpfCnpj, nome } = response.data;
+        const { codigo, cpf_cnpj, nome } = response.data;
 
         setCodPessoa(codigo),
-        setCpfCnpjPessoa(cpfCnpj);
+        setCpfCnpjPessoa(cpf_cnpj);
         setNomePessoa(nome);
       } else {
         throw new Error(response.data.error);
@@ -130,7 +131,7 @@ const List: NextPage<Props> = (props: Props) => {
                   i.id,
                   i.tag,
                   i.descricao,
-                  i.ultimaCalibracao ? format(addHours(new Date(i.ultimaCalibracao), 3), 'dd/MM/yyyy') : '',
+                  i.ultima_calibracao ? format(addHours(new Date(i.ultima_calibracao), 3), 'dd/MM/yyyy') : '',
                   i.ativo ? 'Ativo' : 'Inativo',
                 ],
                 colunas,
@@ -206,6 +207,13 @@ const List: NextPage<Props> = (props: Props) => {
           columns={colunas}
           rows={linhas}
           editFunction={handleEditInstrument}
+          pdfFunction={() => {
+            if (uuidPessoa) {
+              AbrirRelatorio(NomeRelatorio.listaInstrumentos, `p.id = '${uuidPessoa}'`);
+            } else {
+              addToast('É necessário selecionar o cliente!', { appearance: 'warning' });
+            }
+          }}
         />
         {deletingInstrument && (
           <CustomDialog

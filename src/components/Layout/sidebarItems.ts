@@ -2,7 +2,6 @@ import HomeIcon from '@material-ui/icons/HomeRounded';
 import CategoryIcon from '@material-ui/icons/CategoryRounded';
 import DescriptionIcon from '@material-ui/icons/DescriptionRounded';
 
-
 export type SubMenu = {
   label: string,
   path: string,

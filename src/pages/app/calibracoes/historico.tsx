@@ -118,10 +118,10 @@ const List: NextPage<Props> = (props: Props) => {
       const response = await api.get(`/pessoas/${pesId}`);
 
       if (!response?.data?.error) {
-        const { codigo, cpfCnpj, nome } = response.data;
+        const { codigo, cpf_cnpj, nome } = response.data;
 
         setCodPessoa(codigo),
-        setCpfCnpjPessoa(cpfCnpj);
+        setCpfCnpjPessoa(cpf_cnpj);
         setNomePessoa(nome);
       } else {
         throw new Error(response.data.error);
@@ -154,10 +154,9 @@ const List: NextPage<Props> = (props: Props) => {
       const calibracoes = [];
       setLoading(true);
 
-      const queryFilter = '?pessoaId='+uuidPessoa
-        +'&instrumentoId='+uuidInstrumento
-        +'&dataCalibracaoInicial='+format(dataInicial,'yyyy-MM-dd')
-        +'&dataCalibracaoFinal='+format(dataFinal,'yyyy-MM-dd');
+      const queryFilter = '?instrumento_id='+uuidInstrumento
+        +'&data_calibracao_inicial='+format(dataInicial,'yyyy-MM-dd')
+        +'&data_calibracao_final='+format(dataFinal,'yyyy-MM-dd');
 
       try {
         const response = await api.get('/pessoas/'+uuidPessoa+'/instrumentos/calibracoes'+queryFilter);
@@ -169,10 +168,10 @@ const List: NextPage<Props> = (props: Props) => {
               getRow(
                 [
                   c.id,
-                  c.dataCalibracao ? format(addHours(new Date(c.dataCalibracao), 3), 'dd/MM/yyyy') : '',
+                  c.data_calibracao ? format(addHours(new Date(c.data_calibracao), 3), 'dd/MM/yyyy') : '',
                   c.instrumento?.tag || '',
                   c.instrumento?.descricao || '',
-                  c.numeroCertificado,
+                  c.numero_certificado,
                 ],
                 colunas,
               ),

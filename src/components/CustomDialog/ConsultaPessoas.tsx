@@ -63,7 +63,7 @@ function ConsultaPessoas(props: Props) {
           pessoas.forEach((pes) => {
             rows.push(
               getRow(
-                [pes.id, pes.codigo, pes.cpfCnpj, pes.nome, pes.fantasia],
+                [pes.id, pes.codigo, pes.cpf_cnpj, pes.nome, pes.fantasia],
                 tableColumns,
                     ),
             );

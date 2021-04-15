@@ -95,7 +95,7 @@ const NewUser: NextPage<Props> = (props) => {
           usuario,
           senha,
           ativo: isAtivo,
-          dataCadastro: null,
+          data_cadastro: null,
         };
 
         let response;

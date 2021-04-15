@@ -55,7 +55,7 @@ const getPessoa = async (id: string) => {
     where: {
       id
     },
-    select: getPessoaJsonReturn(),
+    select: getPessoaJsonReturn()
   })
 
   return pessoa;

@@ -40,28 +40,28 @@ const listarCalibracoes = async (query: { [key: string]: string | string[] }) =>
     id: {
       not: '',
     },
-    pessoaId: {
+    pessoa_id: {
       not: ''
     }
   }
 
-  if (query?.pessoaId) {
-    instrumento.pessoaId = query?.pessoaId?.toString();
+  if (query?.id) {
+    instrumento.pessoa_id = query?.id?.toString();
   }
   if (query?.instrumentoId) {
-    instrumento.id = query?.instrumentoId?.toString();
+    instrumento.id = query?.instrumento_id?.toString();
   }
 
   const calibracoes = await prisma.calibracao.findMany({
     where: {
-      dataCalibracao: {
-        gte: query?.dataCalibracaoInicial ? new Date(query.dataCalibracaoInicial.toString()) : new Date(2000,1,1),
-        lte: query?.dataCalibracaoFinal ? new Date(query.dataCalibracaoFinal.toString()) : new Date(2050,1,1),
+      data_calibracao: {
+        gte: query?.data_calibracao_inicial ? new Date(query.data_calibracao_inicial.toString()) : new Date(2000,1,1),
+        lte: query?.data_calibracao_final ? new Date(query.data_calibracao_final.toString()) : new Date(2050,1,1),
       },
       instrumento,
     },
     orderBy: {
-      dataCalibracao: 'desc',
+      data_calibracao: 'desc',
     },
     select: getCalibracaoJsonReturn(),
   });

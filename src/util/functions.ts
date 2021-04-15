@@ -214,12 +214,11 @@ export const ValidateAuth = (req: NextApiRequest, type: 'user' | 'person') => {
   return idAuth;
 }
 
-export const AbrirRelatorio = (relatorio: NomeRelatorio) => {
-
-  const win = window.open('/app/pdf?ref='+relatorio.toString(), '_blank');
-    if (win) {
-      win.focus();
-    }
+export const AbrirRelatorio = (relatorio: NomeRelatorio, filters?: string) => {
+  let url = `/app/pdf?ref=${relatorio.toString()}`;
+  if (filters?.length > 0) url += '&filters='+btoa(filters);
+  const win = window.open(url, '_blank');
+  if (win) win.focus();
 }
 
 export const PascalCase = (str: string = '', qtdeNotCapitalize: number = 0) => {

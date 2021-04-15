@@ -90,21 +90,21 @@ const efetuarLoginPessoa = async (usuario: string, senha: string) => {
 
   const people = await prisma.pessoa.findFirst({
     where: {
-      cpfCnpj: usuario,
+      cpf_cnpj: usuario,
       ativo: true
     },
     select: {
       id: true,
       codigo: true,
-      cpfCnpj: true,
+      cpf_cnpj: true,
       nome: true,
       fantasia: true,
-      senhaAcesso: true,
+      senha_acesso: true,
     }
   });
 
   if (people) {
-    const validPass = bcrypt.compareSync(senha, people.senhaAcesso);
+    const validPass = bcrypt.compareSync(senha, people.senha_acesso);
 
     if (validPass) {
       const token = await jwt.sign(
@@ -118,7 +118,7 @@ const efetuarLoginPessoa = async (usuario: string, senha: string) => {
         },
       );
 
-      delete people.senhaAcesso;
+      delete people.senha_acesso;
 
       return {
         usuario: people,

@@ -1,4 +1,4 @@
-import CadastroUsuario, { getServerSideProps as props } from './novo';
+import CadastroUsuario , { getServerSideProps as props } from './novo';
 
 export default CadastroUsuario;
 

@@ -88,7 +88,7 @@ const PeopleList: NextPage<Props> = (props) => {
                 [
                   pes.id,
                   pes.codigo,
-                  pes.cpfCnpj,
+                  pes.cpf_cnpj,
                   pes.nome,
                   pes.fantasia,
                   `${pes.logradouro || ''}, ${pes.numero || ''}`,

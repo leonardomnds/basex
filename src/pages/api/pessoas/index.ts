@@ -22,7 +22,7 @@ export default async function Pessoas(req: NextApiRequest, res: NextApiResponse)
     switch (req.method) {
       case 'POST':
         const pessoaSalvar : Pessoa = req.body;
-        pessoaSalvar.usuarioId = usuarioId;
+        pessoaSalvar.usuario_id = usuarioId;
 
         const retPost = await salvarPessoa(pessoaSalvar);
 
@@ -48,7 +48,7 @@ const listarPessoas = async () => {
     select: {
       id: true,
       codigo: true,
-      cpfCnpj: true,
+      cpf_cnpj: true,
       nome: true,
       fantasia: true,
       logradouro: true,
@@ -67,22 +67,22 @@ export const salvarPessoa = async (pessoa: Pessoa) => {
   const id = pessoa?.id || null;
   delete pessoa.id;
 
-  if (!pessoa?.senhaAcesso) {
-    pessoa.senhaAcesso = SomenteNumeros(pessoa?.cpfCnpj || '0000').substring(0,4)
-  } else if (pessoa?.senhaAcesso === '****') {
-    delete pessoa.senhaAcesso;
+  if (!pessoa?.senha_acesso) {
+    pessoa.senha_acesso = SomenteNumeros(pessoa?.cpf_cnpj || '0000').substring(0,4)
+  } else if (pessoa?.senha_acesso === '****') {
+    delete pessoa.senha_acesso;
   }
 
-  if (pessoa.senhaAcesso) {
-    pessoa.senhaAcesso = bcrypt.hashSync(pessoa.senhaAcesso, 10);
+  if (pessoa.senha_acesso) {
+    pessoa.senha_acesso = bcrypt.hashSync(pessoa.senha_acesso, 10);
   }
 
   let person;
 
   if (id) {
     delete pessoa.codigo;
-    delete pessoa.usuarioId;
-    delete pessoa.dataCadastro;
+    delete pessoa.usuario_id;
+    delete pessoa.data_cadastro;
 
     person = await prisma.pessoa.update({
       data: pessoa,
@@ -93,7 +93,7 @@ export const salvarPessoa = async (pessoa: Pessoa) => {
     });
   } else {
     pessoa.ativo = true;
-    pessoa.dataCadastro = new Date();
+    pessoa.data_cadastro = new Date();
     
     const ultimoCodigo = await prisma.pessoa.aggregate({
       max: {
@@ -117,11 +117,11 @@ export const getPessoaJsonReturn = () => {
   return {
     id: true,
     codigo: true,
-    cpfCnpj: true,
+    cpf_cnpj: true,
     nome: true,
     fantasia: true,
-    rgInscEstadual: true,
-    inscMunicipal: true,
+    rg_insc_estadual: true,
+    insc_municipal: true,
     telefone: true,
     celular: true,
     email: true,
@@ -133,7 +133,7 @@ export const getPessoaJsonReturn = () => {
     cidade: true,
     uf: true,
     ativo: true,
-    dataCadastro: true,
+    data_cadastro: true,
     grupo: true,
     categoria: true,
     usuario: {

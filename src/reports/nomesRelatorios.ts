@@ -1,5 +1,6 @@
 export enum NomeRelatorio {
   listaUsuarios,
-  listaClientes
+  listaClientes,
+  listaInstrumentos,
 }
 

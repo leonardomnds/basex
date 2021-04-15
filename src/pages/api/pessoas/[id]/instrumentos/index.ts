@@ -46,21 +46,21 @@ const listarInstrumentos = async (pessoaId: string) => {
 
   const instrumentos = await prisma.$queryRaw(`
     SELECT
-      i."id",
-      i."tag",
-      i."descricao",
-      i."ativo",
-      MAX(c."dataCalibracao") AS "ultimaCalibracao"
+      i.id,
+      i.tag,
+      i.descricao,
+      i.ativo,
+      MAX(c.data_calibracao) AS ultima_calibracao
     FROM 
-      "InstrumentosPessoas" as i
-      LEFT JOIN "InstrumentosCalibracoes" AS c ON (i."id" = c."instrumentoId")
+      instrumentos as i
+      LEFT JOIN instrumentos_calibracoes AS c ON (i.id = c.instrumento_id)
     WHERE
-      i."pessoaId" = '${pessoaId}'
+      i.pessoa_id = '${pessoaId}'
     GROUP BY
-      i."id",
-      i."tag",
-      i."descricao",
-      i."ativo"
+      i.id,
+      i.tag,
+      i.descricao,
+      i.ativo
   `);
 
   return instrumentos;
@@ -73,8 +73,8 @@ export const salvarInstrumento = async (instrumento: Instrumento, pessoaId: stri
 
   let json;
   if (id) { // Update
-    delete instrumento.pessoaId;
-    delete instrumento.dataCadastro;
+    delete instrumento.pessoa_id;
+    delete instrumento.data_cadastro;
 
     json = await prisma.instrumento.update({
       data: instrumento,
@@ -85,8 +85,8 @@ export const salvarInstrumento = async (instrumento: Instrumento, pessoaId: stri
     });
   } else {
     instrumento.ativo = true;
-    instrumento.pessoaId = pessoaId;
-    instrumento.dataCadastro = new Date();
+    instrumento.pessoa_id = pessoaId;
+    instrumento.data_cadastro = new Date();
 
     json = await prisma.instrumento.create({
       data: instrumento,
@@ -105,22 +105,22 @@ export const getInstrumentoJsonReturn = () => {
       select: {
         id: true,
         codigo: true,
-        cpfCnpj: true,
+        cpf_cnpj: true,
         nome: true,
         fantasia: true,
       }
     },
     tag: true,
     descricao: true,
-    tempoCalibracao: true,
+    tempo_calibracao: true,
     responsavel: true,
     area: true,
-    subArea: true,
+    subarea: true,
     fabricante: true,
     modelo: true,
     serie: true,
     observacoes: true,
     ativo: true,
-    dataCadastro: true,
+    data_cadastro: true,
   }
 }

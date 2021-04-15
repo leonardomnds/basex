@@ -102,19 +102,19 @@ const NewInstrument: NextPage<Props> = (props: Props) => {
 
         const instrument : Instrumento = {
           id: instrumentoId || null,
-          pessoaId: pessoaId || null,
+          pessoa_id: pessoaId || null,
           tag: tag || null,
           descricao: descricao || null,
           serie: serie || null,
           responsavel: responsavel || null,
           area: area || null,
-          subArea: subArea || null,
+          subarea: subArea || null,
           fabricante: fabricante || null,
           modelo: modelo || null,
           observacoes: observacoes || null,
-          tempoCalibracao: tempoCalibracao || 0,
+          tempo_calibracao: tempoCalibracao || 0,
           ativo: isAtivo,
-          dataCadastro: null,
+          data_cadastro: null,
         };
 
         let response;
@@ -159,8 +159,8 @@ const NewInstrument: NextPage<Props> = (props: Props) => {
               getRow(
                 [
                   c.id,
-                  c.dataCalibracao ? format(addHours(new Date(c.dataCalibracao), 3), 'dd/MM/yyyy') : '',
-                  c.numeroCertificado,
+                  c.data_calibracao ? format(addHours(new Date(c.data_calibracao), 3), 'dd/MM/yyyy') : '',
+                  c.numero_certificado,
                   c.laboratorio,
                 ],
                 colunas,
@@ -200,11 +200,11 @@ const NewInstrument: NextPage<Props> = (props: Props) => {
             setSerie(ins.serie);
             setResponsavel(ins.responsavel);
             setArea(ins.area);
-            setSubArea(ins.subArea);
+            setSubArea(ins.subarea);
             setModelo(ins.modelo);
             setFabricante(ins.fabricante);
             setObservacoes(ins.observacoes);
-            setTempoCalibracao(ins.tempoCalibracao);
+            setTempoCalibracao(ins.tempo_calibracao);
 
           } else {
             router.push('/app/cadastro/instrumentos?pessoaId='+pessoaId);

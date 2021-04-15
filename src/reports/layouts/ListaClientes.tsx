@@ -4,6 +4,7 @@ import { Page, Document } from '@react-pdf/renderer';
 import { getHeader, getRows, getColumns, getTable, columnData, getFooter } from './padroes';
 import { PascalCase, ZerosLeft } from '../../util/functions';
 import { NextPage } from 'next';
+import format from 'date-fns/format';
 
 type Props = {
   dados: []
@@ -32,11 +33,11 @@ const ListaUsuarios: NextPage<Props> = (props: Props) => {
     dados.map((p: any) => {
       celulas = [];
       celulas.push({ label: ZerosLeft(p.codigo, 4) });
-      celulas.push({ label: p.cpfCnpj });
+      celulas.push({ label: p.cpf_cnpj });
       celulas.push({ label: PascalCase(p.nome, 2) });
       celulas.push({ label: PascalCase(p.fantasia, 2) });
-      celulas.push({ label: p.ativo });
-      celulas.push({ label: p.dataCadastro });
+      celulas.push({ label: p.ativo ? 'Sim' : 'Não' });
+      celulas.push({ label: p.data_cadastro ? format(new Date(p.data_cadastro), 'dd/MM/yyyy') : ''});
 
       linhas.push({ celula: celulas });
     });

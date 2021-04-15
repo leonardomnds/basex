@@ -3,10 +3,13 @@ import listaRelatorios from '../../reports';
 import { GetServerSideProps } from 'next';
 import { PDFViewer } from '@react-pdf/renderer';
 
-import ListaUsuarios from '../../reports/layouts/ListaUsuarios';
-import ListaClientes from '../../reports/layouts/ListaClientes';
 import { Box, CircularProgress, makeStyles } from '@material-ui/core';
 import { NomeRelatorio } from '../../reports/nomesRelatorios';
+
+// Relatórios
+import ListaUsuarios from '../../reports/layouts/ListaUsuarios';
+import ListaClientes from '../../reports/layouts/ListaClientes';
+import ListaInstrumentos from '../../reports/layouts/ListaInstrumentos';
 
 const useStyles = makeStyles({
   pageContainer: {
@@ -53,6 +56,9 @@ const Pdf = (props: Props) => {
         case NomeRelatorio.listaClientes:
           setPdf(<ListaClientes dados={data} />);
           break;
+        case NomeRelatorio.listaInstrumentos:
+          setPdf(<ListaInstrumentos dados={data} />);
+          break;
         default:
           break;
       }
@@ -83,7 +89,7 @@ const Pdf = (props: Props) => {
 
 export default Pdf;
 
-export const getServerSideProps : GetServerSideProps = async ({ query: { ref }}) => {
+export const getServerSideProps : GetServerSideProps = async ({ query: { ref, filters }}) => {
 
   let relIndex: number = null;
   let data: any[] = null;
@@ -93,13 +99,13 @@ export const getServerSideProps : GetServerSideProps = async ({ query: { ref }})
   
   if (rel && rel[0]) {    
     relIndex = parseInt(ref.toString(), 10);
-    data = await rel[0].getData();
+    data = await rel[0].getData((filters || '').toString().length === 0 ? '1=1' : Buffer.from(filters.toString(), 'base64').toString('utf-8'));
     if (!data) {      
       message = 'Não há dados para exibir!';
     }
   } else {
     message = 'Use o sistema para gerar o relatório!';
   }
-  
+
   return { props: { relIndex, data, message } }
 }

@@ -123,9 +123,10 @@ const List: NextPage<Props> = (props: Props) => {
       const response = await api.get(`/pessoas/${pesId}`);
 
       if (!response?.data?.error) {
-        const { codigo, cpfCnpj, nome } = response.data;
+        const { codigo, cpf_cnpj, nome } = response.data;
 
-        setCodPessoa(codigo), setCpfCnpjPessoa(cpfCnpj);
+        setCodPessoa(codigo);
+        setCpfCnpjPessoa(cpf_cnpj);
         setNomePessoa(nome);
       } else {
         throw new Error(response.data.error);
@@ -150,12 +151,11 @@ const List: NextPage<Props> = (props: Props) => {
       try {
         const calibracao: Calibracao = {
           id: null,
-          instrumentoId: uuidInstrumento || null,
-          dataCalibracao: dataCalibracao || null,
-          numeroCertificado: numeroCertificado || null,
-          arquivoCertificado: null,
+          instrumento_id: uuidInstrumento || null,
+          data_calibracao: dataCalibracao || null,
+          numero_certificado: numeroCertificado || null,
           laboratorio: laboratorio || null,
-          dataCadastro: null,
+          data_cadastro: null,
         };
 
         let response;

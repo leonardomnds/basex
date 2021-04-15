@@ -44,14 +44,14 @@ export default async function Calibracoes(req: NextApiRequest, res: NextApiRespo
   }
 }
 
-const listarCalibracoes = async (instrumentoId: string) => {
+const listarCalibracoes = async (instrumento_id: string) => {
 
   const calibracoes = await prisma.calibracao.findMany({
     where: {
-      instrumentoId
+      instrumento_id
     },
     orderBy: {
-      dataCalibracao: 'asc',
+      data_calibracao: 'asc',
     },
     select: getCalibracaoJsonReturn(),
   });
@@ -64,11 +64,11 @@ export const salvarCalibracao = async (calibracao: Calibracao, instrumentoId: st
   const id = calibracao.id;
   delete calibracao.id;
 
-  calibracao.instrumentoId = instrumentoId;
+  calibracao.instrumento_id = instrumentoId;
 
   let json;
   if (id) { // Update
-    delete calibracao.dataCadastro;
+    delete calibracao.data_cadastro;
 
     json = await prisma.calibracao.update({
       data: calibracao,
@@ -78,7 +78,7 @@ export const salvarCalibracao = async (calibracao: Calibracao, instrumentoId: st
       select: getCalibracaoJsonReturn(),
     });
   } else {
-    calibracao.dataCadastro = new Date();
+    calibracao.data_cadastro = new Date();
 
     json = await prisma.calibracao.create({
       data: calibracao,
@@ -100,8 +100,8 @@ export const getCalibracaoJsonReturn = () => {
         descricao: true,
       }
     },
-    dataCalibracao: true,
-    numeroCertificado: true,
+    data_calibracao: true,
+    numero_certificado: true,
     laboratorio: true,
   }
 }

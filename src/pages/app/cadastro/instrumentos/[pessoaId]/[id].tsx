@@ -1,5 +1,5 @@
-import CadastroPessoa, { getServerSideProps as props } from './novo';
+import CadastroInstrumentos, { getServerSideProps as props } from './novo';
 
-export default CadastroPessoa;
+export default CadastroInstrumentos;
 
 export const getServerSideProps = props;

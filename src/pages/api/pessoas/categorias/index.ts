@@ -23,7 +23,7 @@ export default async function Categoria(req: NextApiRequest, res: NextApiRespons
         return;
 
       default:
-        res.status(405).json({error: 'Método não suportado!'});
+        res.status(405).json({ error: 'Método não suportado!' });
     }
 
   } catch (err) {

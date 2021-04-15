@@ -21,7 +21,7 @@ export default async function Login(req: NextApiRequest, res: NextApiResponse) {
 
       if (objRelatorio) {
 
-        const data = await objRelatorio.getData();
+        const data = await objRelatorio.getData('1=1');
 
         ejs.renderFile(`./src/reports/${objRelatorio.name}.ejs`, { data }, (err, html) => {
           if (err) {

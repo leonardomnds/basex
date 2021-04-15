@@ -44,7 +44,7 @@ const listarUsuarios = async () => {
       nome: true,
       usuario: true,
       ativo: true,
-      dataCadastro: true
+      data_cadastro: true
     },
     where: {
       usuario: {
@@ -76,7 +76,7 @@ export const salvarUsuario = async (usuario: Usuario) => {
   let user;
 
   if (id) {
-    delete usuario.dataCadastro;
+    delete usuario.data_cadastro;
     delete usuario.senha;
 
     user = await prisma.usuario.update({
@@ -88,7 +88,7 @@ export const salvarUsuario = async (usuario: Usuario) => {
     });
   } else {
     usuario.ativo = true;
-    usuario.dataCadastro = new Date();
+    usuario.data_cadastro = new Date();
     usuario.senha = bcrypt.hashSync(usuario.senha, 10);
 
     user = await prisma.usuario.create({
@@ -111,6 +111,6 @@ export const getUsuarioJsonReturn = () => {
     usuario: true,
     nome: true,
     ativo: true,
-    dataCadastro: true,
+    data_cadastro: true,
   }
 }

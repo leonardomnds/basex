@@ -48,6 +48,7 @@ type Props = {
   btnIcon?: any,
   btnLoading?: boolean,
   btnBack?: boolean,
+  componentRight?: React.ReactNode,
 }
 
 const PageHeader = (props: Props) => {
@@ -61,6 +62,7 @@ const PageHeader = (props: Props) => {
     btnIcon = <AddCircleIcon />,
     btnLoading,
     btnBack,
+    componentRight
   } = props;
 
   return (
@@ -102,6 +104,7 @@ const PageHeader = (props: Props) => {
             )}
           </Button>
         )}
+        {componentRight && componentRight}
       </Box>
     </Box>
   );

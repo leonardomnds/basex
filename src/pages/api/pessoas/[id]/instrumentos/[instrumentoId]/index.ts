@@ -64,7 +64,7 @@ const getInstrumento = async (id: string) => {
     where: {
       id
     },
-    select: getInstrumentoJsonReturn(),
+    select: getInstrumentoJsonReturn()
   })
 
   return instrumento;

@@ -3,7 +3,7 @@ import { NomeRelatorio } from "./nomesRelatorios";
 
 export type Report = {
   name: NomeRelatorio,
-  getData: () => Promise<any[]>,
+  getData: (where: string) => Promise<any[]>,
 }
 
 const listaRelatorios: Report[] = [
@@ -14,6 +14,10 @@ const listaRelatorios: Report[] = [
   {
     name: NomeRelatorio.listaClientes,
     getData: get.listaClientes,
+  },
+  {
+    name: NomeRelatorio.listaInstrumentos,
+    getData: get.listaInstrumentos,
   }
 ];
 

@@ -159,11 +159,11 @@ const NewPeople: NextPage<Props> = (props) => {
         const person : Pessoa = {
           id: pessoaId || null,
           codigo: codigo || null,
-          cpfCnpj: cpfCnpj || null,
+          cpf_cnpj: cpfCnpj || null,
           nome: nomeRazao || null,
           fantasia: fantasia || null,
-          rgInscEstadual: rgIe || null,
-          inscMunicipal: inscMun || null,
+          rg_insc_estadual: rgIe || null,
+          insc_municipal: inscMun || null,
           telefone: telefone || null,
           celular: celular || null,
           email: email || null,
@@ -174,12 +174,12 @@ const NewPeople: NextPage<Props> = (props) => {
           complemento: complemento || null,
           cidade: cidade || null,
           uf: uf || null,
-          senhaAcesso: senhaAcesso || null,
-          grupoId: grupo || null,
-          categoriaId: categoria || null,
+          senha_acesso: senhaAcesso || null,
+          grupo_id: grupo || null,
+          categoria_id: categoria || null,
           ativo: isAtivo,
-          dataCadastro: null,
-          usuarioId: null,
+          data_cadastro: null,
+          usuario_id: null,
         };
 
         let response;
@@ -213,7 +213,7 @@ const NewPeople: NextPage<Props> = (props) => {
         const dados = response.data;
         if (dados) {
           // Dados Gerais
-          setNomeRazao(dados.razaoSocial);
+          setNomeRazao(dados.razao_social);
           setFantasia(dados.fantasia);
 
           if (dados.endereco) {
@@ -396,12 +396,12 @@ const NewPeople: NextPage<Props> = (props) => {
           if (dados) {
             // Dados Gerais
             setCodigo(dados.codigo);
-            setCpfCnpj(dados.cpfCnpj);
+            setCpfCnpj(dados.cpf_cnpj);
             setAtivo(dados.ativo);
             setNomeRazao(dados.nome);
             setFantasia(dados.fantasia);
-            setRgIE(dados.rgInscEstadual);
-            setInscMun(dados.inscMunicipal);
+            setRgIE(dados.rg_insc_estadual);
+            setInscMun(dados.insc_municipal);
             setTelefone(dados.telefone);
             setCelular(dados.celular);
             setEmail(dados.email);
