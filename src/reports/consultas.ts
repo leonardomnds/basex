@@ -1,4 +1,5 @@
 import prisma from "../prisma/PrismaInstance";
+import ConsultasComuns from "../util/ConsultasComuns";
 
 export default {
   async listaUsuarios(where: string) {
@@ -34,7 +35,7 @@ export default {
     return json;
   },
   async listaInstrumentos(where: string) {
-    const json = await prisma.$queryRaw(`
+    const json = await prisma.$queryRaw(`    
     select
       p.codigo as codigo_cliente,
       p.nome as nome_cliente,
@@ -48,7 +49,7 @@ export default {
     from 
       instrumentos as i
       inner join pessoas as p on (i.pessoa_id = p.id)
-      inner join view_vencimentos_calibracoes as v on (i.id = v.id)
+      inner join (${ConsultasComuns.vencimentosCalibracoes()}) as v on (i.id = v.id)
     where ${where}
     order by
       p.codigo,
