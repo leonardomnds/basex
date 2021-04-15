@@ -70,6 +70,8 @@ export default async function Indicadores(req: NextApiRequest, res: NextApiRespo
     }
 
   } catch (err) {
+    console.error(err);
+    console.error(err.message);
     res.status(500).json({error: err.message});
   }
 }
