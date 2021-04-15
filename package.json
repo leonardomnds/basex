@@ -5,13 +5,16 @@
   "engines": {
     "node": "14.15.4"
   },
+  "prisma": {
+    "schema": "./src/prisma/schema.prisma"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "migrate": "npx prisma migrate dev --schema ./src/prisma/schema.prisma",
-    "release": "npx prisma migrate deploy --schema ./src/prisma/schema.prisma",
-    "generate": "npx prisma generate --schema ./src/prisma/schema.prisma",
+    "migrate": "npx prisma migrate dev",
+    "release": "npx prisma migrate deploy",
+    "generate": "npx prisma generate",
     "postinstall": "npm run generate && npm run release && npm run build",
     "heroku-postbuild": "npm run generate && npm run release && npm run build" 
   },
