@@ -2,13 +2,10 @@
   "name": "basex",
   "version": "0.1.0",
   "private": true,
-  "engines": {
-    "node": "14.15.4"
-  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "npm install && next build && next start",
+    "start": "node server && npm install && next build && next start",
     "migrate": "npx prisma migrate dev --schema ./src/prisma/schema.prisma",
     "release": "npx prisma migrate deploy --schema ./src/prisma/schema.prisma",
     "generate": "npx prisma generate --schema ./src/prisma/schema.prisma",
