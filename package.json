@@ -16,7 +16,7 @@
     "release": "npx prisma migrate deploy",
     "generate": "npx prisma generate",
     "postinstall": "npm run generate && npm run release && npm run build",
-    "heroku-postbuild": "npm run generate && npm run release && npm run build" 
+    "heroku-postbuild": "npm run generate && npm run release && npm run build"
   },
   "browser": {
     "child_process": false
