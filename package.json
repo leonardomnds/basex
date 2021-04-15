@@ -15,7 +15,7 @@
     "migrate": "npx prisma migrate dev",
     "release": "npx prisma migrate deploy",
     "generate": "npx prisma generate",
-    "postinstall": "npm run release && npm run build",
+    "postinstall": "npm run migrate && npm run build",
     "heroku-postbuild": "npm run generate && npm run release && npm run build"
   },
   "browser": {
