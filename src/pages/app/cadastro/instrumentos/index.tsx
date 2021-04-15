@@ -208,11 +208,7 @@ const List: NextPage<Props> = (props: Props) => {
           rows={linhas}
           editFunction={handleEditInstrument}
           pdfFunction={() => {
-            if (uuidPessoa) {
-              AbrirRelatorio(NomeRelatorio.listaInstrumentos, `p.id = '${uuidPessoa}'`);
-            } else {
-              addToast('É necessário selecionar o cliente!', { appearance: 'warning' });
-            }
+            AbrirRelatorio(NomeRelatorio.listaInstrumentos, (uuidPessoa ? `p.id = '${uuidPessoa}'` : ''))
           }}
         />
         {deletingInstrument && (

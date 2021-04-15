@@ -36,7 +36,7 @@ const ListaInstrumentos: NextPage<Props> = (props: Props) => {
       celulas.push({ label: i.descricao || '' });
       celulas.push({ label: i.area ? PascalCase(i.area, 2) : '' });
       celulas.push({ label: i.ultima_calibracao ? format(new Date(i.ultima_calibracao), 'dd/MM/yyyy') : '' });
-      celulas.push({ label: i.proxima_calibracao ? format(new Date(i.proxima_calibracao), 'dd/MM/yyyy') : '' });
+      celulas.push({ label: i.vencimento_calibracao ? format(new Date(i.vencimento_calibracao), 'dd/MM/yyyy') : '' });
       celulas.push({ label: i.ativo ? 'Sim' : 'Não' });
 
       linhas.push({ celula: celulas });

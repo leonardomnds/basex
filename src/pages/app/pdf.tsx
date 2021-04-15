@@ -10,6 +10,7 @@ import { NomeRelatorio } from '../../reports/nomesRelatorios';
 import ListaUsuarios from '../../reports/layouts/ListaUsuarios';
 import ListaClientes from '../../reports/layouts/ListaClientes';
 import ListaInstrumentos from '../../reports/layouts/ListaInstrumentos';
+import ListaCalibracoes from '../../reports/layouts/ListaCalibracoes';
 
 const useStyles = makeStyles({
   pageContainer: {
@@ -49,18 +50,23 @@ const Pdf = (props: Props) => {
         window.history.replaceState(null, '', '/app/pdf')
       }
 
-      switch (relIndex) {
-        case NomeRelatorio.listaUsuarios:
-          setPdf(<ListaUsuarios dados={data} />);
-          break;
-        case NomeRelatorio.listaClientes:
-          setPdf(<ListaClientes dados={data} />);
-          break;
-        case NomeRelatorio.listaInstrumentos:
-          setPdf(<ListaInstrumentos dados={data} />);
-          break;
-        default:
-          break;
+      if (Boolean(data)) {
+        switch (relIndex) {
+          case NomeRelatorio.listaUsuarios:
+            setPdf(<ListaUsuarios dados={data} />);
+            break;
+          case NomeRelatorio.listaClientes:
+            setPdf(<ListaClientes dados={data} />);
+            break;
+          case NomeRelatorio.listaInstrumentos:
+            setPdf(<ListaInstrumentos dados={data} />);
+            break;
+          case NomeRelatorio.listaCalibracoes:
+            setPdf(<ListaCalibracoes dados={data} />);
+            break;
+          default:
+            break;
+        }
       }
     }
     gerarRelatorio();
@@ -100,12 +106,16 @@ export const getServerSideProps : GetServerSideProps = async ({ query: { ref, fi
   if (rel && rel[0]) {    
     relIndex = parseInt(ref.toString(), 10);
     data = await rel[0].getData((filters || '').toString().length === 0 ? '1=1' : Buffer.from(filters.toString(), 'base64').toString('utf-8'));
-    if (!data) {      
+
+    if (data?.length === 0) {
+      data = null;   
       message = 'Não há dados para exibir!';
     }
   } else {
     message = 'Use o sistema para gerar o relatório!';
   }
+
+  console.log({ relIndex, data, message });
 
   return { props: { relIndex, data, message } }
 }

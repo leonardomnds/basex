@@ -18,9 +18,10 @@ import DatePicker from '../../../components/FormControl/DatePicker';
 import CustomTable, { getColumn, getRow } from '../../../components/Table';
 import { GetServerSideProps, NextPage } from 'next';
 import api from '../../../util/Api';
-import { FormatarCpfCnpj, GetDataFromJwtToken, ZerosLeft } from '../../../util/functions';
+import { AbrirRelatorio, FormatarCpfCnpj, GetDataFromJwtToken, ZerosLeft } from '../../../util/functions';
 import ConsultaPessoas from '../../../components/CustomDialog/ConsultaPessoas';
 import ConsultaInstrumentos from '../../../components/CustomDialog/ConsultaInstrumentos';
+import { NomeRelatorio } from '../../../reports/nomesRelatorios';
 
 const useStyles = makeStyles((theme) => ({
   themeError: {
@@ -289,6 +290,18 @@ const List: NextPage<Props> = (props: Props) => {
           isLoading={isLoading}
           columns={colunas}
           rows={linhas}
+          pdfFunction={() => {
+            if (uuidPessoa) {
+
+              let where = `i.pessoa_id = '${uuidPessoa}'`;
+              where += ` and c.data_calibracao between '${format(dataInicial, 'yyyy-MM-dd')}' and '${format(dataFinal, 'yyyy-MM-dd')}'`;
+              if (uuidInstrumento) where += ` and i.id = '${uuidInstrumento}'`;
+
+              AbrirRelatorio(NomeRelatorio.listaCalibracoes, where);
+            } else {
+              addToast('É necessário selecionar o cliente!', { appearance: 'warning' });
+            }
+          }}
         />
         {consultandoPessoa && (
           <ConsultaPessoas

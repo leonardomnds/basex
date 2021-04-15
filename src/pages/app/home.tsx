@@ -101,7 +101,7 @@ const Indicadores = () => {
               label="Vencidas"
               strColor="#dc3545"
               icon={EventNoteRoundedIcon}
-              func={() => {}}
+              func={() => { AbrirRelatorio(NomeRelatorio.listaInstrumentos, 'v.ativo = 1 and v.dias_vencer < 0') }}
             />
           </Grid>
           <Grid item xs={6} md={3}>
@@ -111,7 +111,7 @@ const Indicadores = () => {
               label="Vencendo em 7 dias"
               strColor="#ffc107"
               icon={EventNoteRoundedIcon}
-              func={() => {}}
+              func={() => { AbrirRelatorio(NomeRelatorio.listaInstrumentos, 'v.ativo = 1 and v.dias_vencer between 0 and 7') }}
             />
           </Grid>
           <Grid item xs={6} md={3}>
@@ -121,7 +121,7 @@ const Indicadores = () => {
               label="Vencendo em 15 dias"
               strColor="#17a2b8"
               icon={EventNoteRoundedIcon}
-              func={() => {}}
+              func={() => { AbrirRelatorio(NomeRelatorio.listaInstrumentos, 'v.ativo = 1 and v.dias_vencer between 0 and 15') }}
             />
           </Grid>
           <Grid item xs={6} md={3}>
@@ -131,7 +131,7 @@ const Indicadores = () => {
               label="Vencendo em 30 dias"
               strColor="#28a745"
               icon={EventNoteRoundedIcon}
-              func={() => {}}
+              func={() => { AbrirRelatorio(NomeRelatorio.listaInstrumentos, 'v.ativo = 1 and v.dias_vencer between 0 and 30') }}
             />
           </Grid>
         </Grid>

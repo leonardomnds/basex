@@ -34,7 +34,6 @@ export default {
     return json;
   },
   async listaInstrumentos(where: string) {
-    console.error(where);
     const json = await prisma.$queryRaw(`
     select
       p.codigo as codigo_cliente,
@@ -43,25 +42,35 @@ export default {
       i.descricao,
       i.area,
       i.ativo,
-      MAX(c.data_calibracao) as ultima_calibracao,
-      date_add(max(c.data_calibracao), interval i.tempo_calibracao month) as proxima_calibracao,
-      datediff(date_add(max(c.data_calibracao), interval i.tempo_calibracao month), current_date) as dias_vencer
+      v.ultima_calibracao,
+      v.vencimento_calibracao,
+      v.dias_vencer
     from 
       instrumentos as i
       inner join pessoas as p on (i.pessoa_id = p.id)
-      left join instrumentos_calibracoes as c on (i.id = c.instrumento_id)
+      inner join view_vencimentos_calibracoes as v on (i.id = v.id)
     where ${where}
-    group by
-      p.codigo,
-      p.nome,
-      i.tag,
-      i.descricao,
-      i.area,
-      i.ativo,
-      i.tempo_calibracao
     order by
       p.codigo,
       i.descricao
+    `);
+    return json;
+  },
+  async listaCalibracoes(where: string) {
+    const json = await prisma.$queryRaw(`
+    select
+      i.tag,
+      i.descricao,
+      c.data_calibracao,
+      c.numero_certificado,
+      c.laboratorio
+    from 
+      instrumentos_calibracoes as c
+      inner join instrumentos as i on (i.id = c.instrumento_id)
+    where ${where}
+    order by
+      i.descricao,
+      c.data_calibracao
     `);
     return json;
   },

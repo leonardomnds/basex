@@ -18,6 +18,10 @@ const listaRelatorios: Report[] = [
   {
     name: NomeRelatorio.listaInstrumentos,
     getData: get.listaInstrumentos,
+  },
+  {
+    name: NomeRelatorio.listaCalibracoes,
+    getData: get.listaCalibracoes,
   }
 ];
 

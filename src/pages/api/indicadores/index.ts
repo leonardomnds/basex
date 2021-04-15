@@ -27,37 +27,39 @@ export default async function Indicadores(req: NextApiRequest, res: NextApiRespo
     }
 
     if (req.method === 'GET') {
-/*
-      const selectCalibracoesVencidas = (dateDiff: string, alias: string) => {
-        return `(select count(1) from (select i."id" from "InstrumentosPessoas" as i
-          left join "InstrumentosCalibracoes" as c on (i."id" = c."instrumentoId")
-          where ${pessoaId ? `i."pessoaId" = '${pessoaId}'` : '1=1'} and i."ativo" = true
-          group by i."id", "tempoCalibracao" having coalesce(date_part('day', (MAX(c."dataCalibracao")
-          + (i."tempoCalibracao" * interval '1 month')) - MAX(c."dataCalibracao")),-1) ${dateDiff}) as T) as "${alias}"`;
-      }
-*/
+
       let sqlResult;
       const json: IndicadoresType = {};
 
       // Quantidade de Clientes Ativos
-      sqlResult = await prisma.$queryRaw(`select count(1) qtde from pessoas where ativo = 1 and ${pessoaId ? `id = '${pessoaId}'` : '1=1'}`);
+      sqlResult = await prisma.$queryRaw(`select count(1) qtde from pessoas 
+        where ativo = 1 and ${pessoaId ? `id = '${pessoaId}'` : '1=1'}`);
       json.clientes_ativos = sqlResult[0].qtde;
 
       // Quantidade de Instrumentos Ativos
-      sqlResult = await prisma.$queryRaw(`select count(1) qtde from instrumentos where ativo = 1 and ${pessoaId ? `pessoa_id = '${pessoaId}'` : '1=1'}`);
+      sqlResult = await prisma.$queryRaw(`select count(1) qtde from instrumentos 
+        where ativo = 1 and ${pessoaId ? `pessoa_id = '${pessoaId}'` : '1=1'}`);
       json.instrumentos_ativos = sqlResult[0].qtde;
-/*
 
-      const sql = `
-        select
-            (select count(1) from "Pessoas" where ativo = true and ${pessoaId ? `id = '${pessoaId}'` : '1=1'}) as "clientesAtivos",
-            (select count(1) from "InstrumentosPessoas" where ativo = true and ${pessoaId ? `"pessoaId" = '${pessoaId}'` : '1=1'}) as "instrumentosAtivos",
-            ${selectCalibracoesVencidas('< 0', 'calibracoesVencidas')},
-            ${selectCalibracoesVencidas('between 0 and 7', 'calibracoesVencer7')},
-            ${selectCalibracoesVencidas('between 0 and 15', 'calibracoesVencer15')},
-            ${selectCalibracoesVencidas('between 0 and 30', 'calibracoesVencer30')}
-      `;
-*/
+      // Quantidade de Calibrações Vencidas
+      sqlResult = await prisma.$queryRaw(`select count(1) qtde from view_vencimentos_calibracoes 
+        where ativo = 1 and dias_vencer < 0 and ${pessoaId ? `pessoa_id = '${pessoaId}'` : '1=1'}`);
+      json.calibracoes_vencidas = sqlResult[0].qtde;
+
+      // Quantidade de Calibrações a Vencer em 7 dias
+      sqlResult = await prisma.$queryRaw(`select count(1) qtde from view_vencimentos_calibracoes 
+        where ativo = 1 and dias_vencer between 0 and 7 and ${pessoaId ? `pessoa_id = '${pessoaId}'` : '1=1'}`);
+      json.calibracoes_vencer_7 = sqlResult[0].qtde;
+
+      // Quantidade de Calibrações a Vencer em 15 dias
+      sqlResult = await prisma.$queryRaw(`select count(1) qtde from view_vencimentos_calibracoes 
+        where ativo = 1 and dias_vencer between 0 and 15 and ${pessoaId ? `pessoa_id = '${pessoaId}'` : '1=1'}`);
+      json.calibracoes_vencer_15 = sqlResult[0].qtde;
+
+      // Quantidade de Calibrações a Vencer em 30 dias
+      sqlResult = await prisma.$queryRaw(`select count(1) qtde from view_vencimentos_calibracoes 
+        where ativo = 1 and dias_vencer between 0 and 30 and ${pessoaId ? `pessoa_id = '${pessoaId}'` : '1=1'}`);
+      json.calibracoes_vencer_30 = sqlResult[0].qtde;
 
       res.status(200).json(json);
       return;
