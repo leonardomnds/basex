@@ -3,7 +3,7 @@ import listaRelatorios from '../../reports';
 import { GetServerSideProps } from 'next';
 import { PDFViewer } from '@react-pdf/renderer';
 
-import { Box, CircularProgress, makeStyles } from '@material-ui/core';
+import { Box, Typography, CircularProgress, makeStyles } from '@material-ui/core';
 import { NomeRelatorio } from '../../reports/nomesRelatorios';
 
 // Relatórios
@@ -11,6 +11,7 @@ import ListaUsuarios from '../../reports/layouts/ListaUsuarios';
 import ListaClientes from '../../reports/layouts/ListaClientes';
 import ListaInstrumentos from '../../reports/layouts/ListaInstrumentos';
 import ListaCalibracoes from '../../reports/layouts/ListaCalibracoes';
+import CustomButton from '../../components/CustomButton';
 
 const useStyles = makeStyles({
   pageContainer: {
@@ -19,8 +20,9 @@ const useStyles = makeStyles({
     width: '100%',
     height: '100vh',
   },
-  loadingContainer: {
+  dataContainer: {
     display: 'flex',
+    flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
     width: '100vw',
@@ -29,6 +31,10 @@ const useStyles = makeStyles({
     top: 0,
     left: 0,
     zIndex: 9990,
+  },
+  message: {
+    fontSize: 20,
+    marginBottom: 10,
   },
 });
 
@@ -76,12 +82,22 @@ const Pdf = (props: Props) => {
 
     if (message.includes('Carregando') && !pdf) {
       return (
-        <Box className={classes.loadingContainer}>
+        <Box className={classes.dataContainer}>
           <CircularProgress />
         </Box>
         );
     } else if (!data || !pdf) {
-      return <h3>{message}</h3>
+      return (
+        <Box className={classes.dataContainer}>
+          <Typography variant="h3" className={classes.message}>
+            {message}
+          </Typography>
+          <CustomButton
+            label="Fechar Relatório"
+            func={() => window.close()}
+          />
+        </Box>
+      );
     }
     return (
       <PDFViewer className={classes.pageContainer}>
@@ -99,23 +115,19 @@ export const getServerSideProps : GetServerSideProps = async ({ query: { ref, fi
 
   let relIndex: number = null;
   let data: any[] = null;
-  let message = 'Carregando. Aguarde...';
+  let message = 'Não há dados para exibir!';
 
   const rel = listaRelatorios.filter((v) => v.name.toString() === (ref || -1).toString())
   
   if (rel && rel[0]) {    
     relIndex = parseInt(ref.toString(), 10);
     data = await rel[0].getData((filters || '').toString().length === 0 ? '1=1' : Buffer.from(filters.toString(), 'base64').toString('utf-8'));
-
     if (data?.length === 0) {
-      data = null;   
-      message = 'Não há dados para exibir!';
+      data = null;
     }
   } else {
-    message = 'Use o sistema para gerar o relatório!';
+    message = 'Esse relatório não está mais disponível.';
   }
-
-  console.log({ relIndex, data, message });
 
   return { props: { relIndex, data, message } }
 }

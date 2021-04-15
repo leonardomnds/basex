@@ -44,36 +44,36 @@ function Account(props: Props) {
     router.replace('/login');
   };
 
-  const handleSignIn = () => {
-    handleClose();
-    router.replace('/');
-  };
+  // const handleSignIn = () => {
+  //   handleClose();
+  //   router.replace('/');
+  // };
 
   const items = [
-    {
-      id: 1,
-      label: 'Meu Perfil',
-      auth: true,
-      onClick: () => {},
-    },
+    // {
+    //   id: 1,
+    //   label: 'Meu Perfil',
+    //   auth: true,
+    //   onClick: () => {},
+    // },
     {
       id: 2,
       label: 'Sair',
       auth: true,
       onClick: handleSignOut,
     },
-    {
-      id: 3,
-      label: 'Registrar',
-      auth: false,
-      onClick: () => {},
-    },
-    {
-      id: 1,
-      label: 'Fazer Login',
-      auth: false,
-      onClick: handleSignIn,
-    },
+    // {
+    //   id: 3,
+    //   label: 'Registrar',
+    //   auth: false,
+    //   onClick: () => {},
+    // },
+    // {
+    //   id: 1,
+    //   label: 'Fazer Login',
+    //   auth: false,
+    //   onClick: handleSignIn,
+    // },
   ];
 
   useEffect(() => {
@@ -95,6 +95,7 @@ function Account(props: Props) {
         alt={username}
         src="/"
       />
+      {isAuthenticated && 
       <Menu
         className={classes.avatarMenu}
         anchorEl={ref.current}
@@ -114,6 +115,7 @@ function Account(props: Props) {
           ) : null;
         })}
       </Menu>
+      }
     </>
   );
 }

@@ -13,7 +13,7 @@ import {
 
 import MenuRoundedIcon from '@material-ui/icons/MenuRounded';
 
-import NotificationsRoundedIcon from '@material-ui/icons/NotificationsRounded';
+// import NotificationsRoundedIcon from '@material-ui/icons/NotificationsRounded';
 import Account from '../Account';
 import useWindowSize from '../../util/WindowSize';
 
@@ -93,11 +93,11 @@ function TopBar(props: Props) {
           />
         </Box>
         <Box className={classes.accountSection}>
-          <Tooltip title="Notificações" placement="bottom" arrow>
+          {/* <Tooltip title="Notificações" placement="bottom" arrow>
             <IconButton className={classes.icon}>
               <NotificationsRoundedIcon />
             </IconButton>
-          </Tooltip>
+          </Tooltip> */}
           <Account user={cookie.get('user') || null} />
         </Box>
       </Toolbar>

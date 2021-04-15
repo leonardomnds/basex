@@ -77,7 +77,7 @@ const Indicadores = () => {
     } else {
       setTimeout(() => setTimer(timer - 1), 1000);
     }
-    
+
   }, [timer])
 
   const getTimer = () => {
@@ -94,17 +94,17 @@ const Indicadores = () => {
       <Paper className={classes.paperBox}> {/* Calibrações */}
         <Typography className={classes.paperBoxLabel} variant="h5">Calibrações</Typography>
         <Grid container spacing={2}>
-          <Grid item xs={6} md={3}>
+          <Grid item xs={12} sm={6} md={3}>
             <PainelIndicador
               isLoading={isLoading}
               value={data?.calibracoes_vencidas || 0}
-              label="Vencidas"
+              label={(data?.calibracoes_vencidas || 0) === 1 ? "Vencida" : "Vencidas"}
               strColor="#dc3545"
               icon={EventNoteRoundedIcon}
               func={() => { AbrirRelatorio(NomeRelatorio.listaInstrumentos, 'v.ativo = 1 and v.dias_vencer < 0') }}
             />
           </Grid>
-          <Grid item xs={6} md={3}>
+          <Grid item xs={12} sm={6} md={3}>
             <PainelIndicador
               isLoading={isLoading}
               value={data?.calibracoes_vencer_7 || 0}
@@ -114,7 +114,7 @@ const Indicadores = () => {
               func={() => { AbrirRelatorio(NomeRelatorio.listaInstrumentos, 'v.ativo = 1 and v.dias_vencer between 0 and 7') }}
             />
           </Grid>
-          <Grid item xs={6} md={3}>
+          <Grid item xs={12} sm={6} md={3}>
             <PainelIndicador
               isLoading={isLoading}
               value={data?.calibracoes_vencer_15 || 0}
@@ -124,7 +124,7 @@ const Indicadores = () => {
               func={() => { AbrirRelatorio(NomeRelatorio.listaInstrumentos, 'v.ativo = 1 and v.dias_vencer between 0 and 15') }}
             />
           </Grid>
-          <Grid item xs={6} md={3}>
+          <Grid item xs={12} sm={6} md={3}>
             <PainelIndicador
               isLoading={isLoading}
               value={data?.calibracoes_vencer_30 || 0}
@@ -140,22 +140,22 @@ const Indicadores = () => {
         <Typography className={classes.paperBoxLabel} variant="h5">Cadastros</Typography>
         <Grid container spacing={2}>
           {!pessoaId && 
-            <Grid item xs={6} md={3}>
+            <Grid item xs={12} sm={6} md={3}>
               <PainelIndicador
                 isLoading={isLoading}
                 value={data?.clientes_ativos || 0}
-                label="Clientes ativos"
+                label={(data?.clientes_ativos || 0) === 1 ? "Cliente ativo" : "Clientes ativos"}
                 strColor="#4ce0b3"
                 icon={PeopleRoundedIcon}
                 func={() => { AbrirRelatorio(NomeRelatorio.listaClientes, 'p.ativo = 1') }}
               />
             </Grid>
           }
-          <Grid item xs={6} md={3}>
+          <Grid item xs={12} sm={6} md={3}>
             <PainelIndicador
               isLoading={isLoading}
               value={data?.instrumentos_ativos || 0}
-              label="Instrumentos ativos"
+              label={(data?.instrumentos_ativos || 0) === 1 ? "Instrumento ativo" : "Instrumentos ativos"}
               strColor="#937666"
               icon={SpeedRoundedIcon}
               func={() => { AbrirRelatorio(NomeRelatorio.listaInstrumentos, 'i.ativo = 1' + (Boolean(pessoaId) ? ` and p.id = '${pessoaId}'` : '')) }}

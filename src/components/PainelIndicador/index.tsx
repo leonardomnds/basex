@@ -37,9 +37,6 @@ const useStyles = makeStyles((theme) => ({
     top: -75,
     display: 'flex',
     justifyContent: 'flex-end',
-    [theme.breakpoints.down('xs')]: {
-      visibility: 'hidden',
-    },
   },
   indicatorBoxInfoIcon: {
     fontSize: 100,
