@@ -69,7 +69,7 @@ export const salvarUsuario = async (usuario: Usuario) => {
     }
   });
 
-  if ((existe && existe.id !== usuario.id) || usuario.usuario === 'admin') {
+  if ((existe && existe.id !== id) || usuario.usuario === 'admin') {
     return { code: 422, error: usuario.usuario === 'admin' ? 'Esse usuário não pode ser alterado!' : 'Usuário já cadastrado!'};
   }
 
