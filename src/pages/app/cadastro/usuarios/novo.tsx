@@ -86,6 +86,10 @@ const NewUser: NextPage<Props> = (props) => {
           appearance: 'warning',
         },
       );
+    } else if (!usuarioId && senha === '****') {
+      addToast('Senha informada não é permitida!', {
+        appearance: 'warning',
+      });
     } else {
       try {
 
@@ -132,7 +136,7 @@ const NewUser: NextPage<Props> = (props) => {
             // Dados Gerais
             setNome(u.nome);
             setUsuario(u.usuario);
-            setSenha('********');
+            setSenha('****');
             setAtivo(u.ativo);
 
           } else {

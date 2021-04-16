@@ -80,30 +80,33 @@ const Pdf = (props: Props) => {
 
   const getViewer = () => {
 
-    if (message.includes('Carregando') && !pdf) {
-      return (
-        <Box className={classes.dataContainer}>
-          <CircularProgress />
-        </Box>
+    if (!Boolean(pdf)) {
+      if (Boolean(data)) {
+        return (
+          <Box className={classes.dataContainer}>
+            <CircularProgress />
+          </Box>
         );
-    } else if (!data || !pdf) {
+      } else {
+        return (
+          <Box className={classes.dataContainer}>
+            <Typography variant="h3" className={classes.message}>
+              {message}
+            </Typography>
+            <CustomButton
+              label="Fechar Relatório"
+              func={() => window.close()}
+            />
+          </Box>
+        );
+      }
+    } else {
       return (
-        <Box className={classes.dataContainer}>
-          <Typography variant="h3" className={classes.message}>
-            {message}
-          </Typography>
-          <CustomButton
-            label="Fechar Relatório"
-            func={() => window.close()}
-          />
-        </Box>
+        <PDFViewer className={classes.pageContainer}>
+          { pdf }
+        </PDFViewer>
       );
-    }
-    return (
-      <PDFViewer className={classes.pageContainer}>
-        { pdf }
-      </PDFViewer>
-    );
+    }    
   }
 
   return getViewer();

@@ -73,11 +73,18 @@ export const salvarUsuario = async (usuario: Usuario) => {
     return { code: 422, error: usuario.usuario === 'admin' ? 'Esse usuário não pode ser alterado!' : 'Usuário já cadastrado!'};
   }
 
+  if (usuario?.senha === '****') {
+    delete usuario.senha;
+  }
+
+  if (usuario.senha) {
+    usuario.senha = bcrypt.hashSync(usuario.senha, 10);
+  }
+
   let user;
 
   if (id) {
     delete usuario.data_cadastro;
-    delete usuario.senha;
 
     user = await prisma.usuario.update({
       data: usuario,
@@ -89,7 +96,6 @@ export const salvarUsuario = async (usuario: Usuario) => {
   } else {
     usuario.ativo = true;
     usuario.data_cadastro = new Date();
-    usuario.senha = bcrypt.hashSync(usuario.senha, 10);
 
     user = await prisma.usuario.create({
       data: usuario,
