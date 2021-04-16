@@ -26,6 +26,11 @@ export default async function Pessoas(req: NextApiRequest, res: NextApiResponse)
 
         const retPost = await salvarPessoa(pessoaSalvar);
 
+        if (retPost.error) {
+          res.status(retPost.code).json({error: retPost.error});
+          return;
+        }
+
         res.status(201).json(retPost.pessoa);
         return;
 
@@ -66,6 +71,19 @@ export const salvarPessoa = async (pessoa: Pessoa) => {
 
   const id = pessoa?.id || null;
   delete pessoa.id;
+
+  const existe = await prisma.pessoa.findUnique({
+    where: {
+      cpf_cnpj: pessoa.cpf_cnpj
+    },
+    select: {
+      id: true
+    }
+  });
+
+  if (existe && existe.id !== id) {
+    return { code: 422, error: 'Já existe um cliente cadastrado com esse CPF/CNPJ!'};
+  }
 
   if (!pessoa?.senha_acesso) {
     pessoa.senha_acesso = SomenteNumeros(pessoa?.cpf_cnpj || '0000').substring(0,4)

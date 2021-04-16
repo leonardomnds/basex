@@ -35,7 +35,7 @@ model GrupoPessoa {
 model Pessoa {
   id String @id @default(uuid()) @db.VarChar(100)
   codigo Int @unique
-  cpf_cnpj String @db.VarChar(18)
+  cpf_cnpj String @db.VarChar(18) @unique
   nome String @db.VarChar(100)
   fantasia String? @db.VarChar(100)
   rg_insc_estadual String? @db.VarChar(50)

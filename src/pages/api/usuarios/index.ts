@@ -60,6 +60,8 @@ export const salvarUsuario = async (usuario: Usuario) => {
   const id = usuario?.id || null;
   delete usuario.id;
 
+  usuario.usuario = usuario.usuario?.toUpperCase();
+
   const existe = await prisma.usuario.findUnique({
     where: {
       usuario: usuario.usuario
@@ -69,8 +71,8 @@ export const salvarUsuario = async (usuario: Usuario) => {
     }
   });
 
-  if ((existe && existe.id !== id) || usuario.usuario === 'admin') {
-    return { code: 422, error: usuario.usuario === 'admin' ? 'Esse usuário não pode ser alterado!' : 'Usuário já cadastrado!'};
+  if ((existe && existe.id !== id) || usuario.usuario === 'ADMIN') {
+    return { code: 422, error: usuario.usuario === 'ADMIN' ? 'Esse usuário não pode ser alterado!' : 'Usuário já cadastrado!'};
   }
 
   if (usuario?.senha === '****') {

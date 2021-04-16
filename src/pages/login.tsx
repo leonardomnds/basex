@@ -198,6 +198,11 @@ const SignIn: NextPage<Props> = (props) => {
               fullWidth
               value={senha}
               onChange={(event) => setSenha(event.target.value)}
+              onKeyPress={(event) => {
+                if (event.key === 'Enter' && usuario && senha) {
+                  handleSignIn();
+                }
+              }}
             />
             <Box className={classes.loginButtonWrapper}>
               <Button

@@ -78,7 +78,7 @@ function Account(props: Props) {
 
   useEffect(() => {
     const getUser = () => {
-      setUsername(JSON.parse(user).nome || null);
+      setUsername(JSON.parse(user)?.nome?.toUpperCase() || null);
     }
     if (Boolean(user)) {
       getUser();

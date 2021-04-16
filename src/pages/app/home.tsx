@@ -101,7 +101,12 @@ const Indicadores = () => {
               label={(data?.calibracoes_vencidas || 0) === 1 ? "Vencida" : "Vencidas"}
               strColor="#dc3545"
               icon={EventNoteRoundedIcon}
-              func={() => { AbrirRelatorio(NomeRelatorio.listaInstrumentos, 'v.ativo = 1 and v.dias_vencer < 0') }}
+              func={() => {
+                if ((data?.calibracoes_vencidas || 0) > 0) {
+                  AbrirRelatorio(NomeRelatorio.listaInstrumentos, 'v.ativo = 1 and v.dias_vencer < 0>');
+                } else {
+                  addToast('Não há dados a imprimir!', { appearance: 'warning' });
+                }}}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
@@ -111,7 +116,12 @@ const Indicadores = () => {
               label="Vencendo em 7 dias"
               strColor="#ffc107"
               icon={EventNoteRoundedIcon}
-              func={() => { AbrirRelatorio(NomeRelatorio.listaInstrumentos, 'v.ativo = 1 and v.dias_vencer between 0 and 7') }}
+              func={() => {
+                if ((data?.calibracoes_vencer_7 || 0) > 0) {
+                  AbrirRelatorio(NomeRelatorio.listaInstrumentos, 'v.ativo = 1 and v.dias_vencer between 0 and 7');
+                } else {
+                  addToast('Não há dados a imprimir!', { appearance: 'warning' });
+                }}}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
@@ -121,7 +131,12 @@ const Indicadores = () => {
               label="Vencendo em 15 dias"
               strColor="#17a2b8"
               icon={EventNoteRoundedIcon}
-              func={() => { AbrirRelatorio(NomeRelatorio.listaInstrumentos, 'v.ativo = 1 and v.dias_vencer between 0 and 15') }}
+              func={() => {
+                if ((data?.calibracoes_vencer_15 || 0) > 0) {
+                  AbrirRelatorio(NomeRelatorio.listaInstrumentos, 'v.ativo = 1 and v.dias_vencer between 0 and 15');
+                } else {
+                  addToast('Não há dados a imprimir!', { appearance: 'warning' });
+                }}}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
@@ -131,7 +146,12 @@ const Indicadores = () => {
               label="Vencendo em 30 dias"
               strColor="#28a745"
               icon={EventNoteRoundedIcon}
-              func={() => { AbrirRelatorio(NomeRelatorio.listaInstrumentos, 'v.ativo = 1 and v.dias_vencer between 0 and 30') }}
+              func={() => {
+                if ((data?.calibracoes_vencer_30 || 0) > 0) {
+                  AbrirRelatorio(NomeRelatorio.listaInstrumentos, 'v.ativo = 1 and v.dias_vencer between 0 and 30');
+                } else {
+                  addToast('Não há dados a imprimir!', { appearance: 'warning' });
+                }}}
             />
           </Grid>
         </Grid>
@@ -147,7 +167,12 @@ const Indicadores = () => {
                 label={(data?.clientes_ativos || 0) === 1 ? "Cliente ativo" : "Clientes ativos"}
                 strColor="#4ce0b3"
                 icon={PeopleRoundedIcon}
-                func={() => { AbrirRelatorio(NomeRelatorio.listaClientes, 'p.ativo = 1') }}
+                func={() => {
+                  if ((data?.clientes_ativos || 0) > 0) {
+                    AbrirRelatorio(NomeRelatorio.listaClientes, 'p.ativo = 1');
+                  } else {
+                    addToast('Não há dados a imprimir!', { appearance: 'warning' });
+                  }}}
               />
             </Grid>
           }
@@ -158,7 +183,12 @@ const Indicadores = () => {
               label={(data?.instrumentos_ativos || 0) === 1 ? "Instrumento ativo" : "Instrumentos ativos"}
               strColor="#937666"
               icon={SpeedRoundedIcon}
-              func={() => { AbrirRelatorio(NomeRelatorio.listaInstrumentos, 'i.ativo = 1' + (Boolean(pessoaId) ? ` and p.id = '${pessoaId}'` : '')) }}
+              func={() => {
+                if ((data?.instrumentos_ativos || 0) > 0) {
+                  AbrirRelatorio(NomeRelatorio.listaInstrumentos, 'i.ativo = 1' + (Boolean(pessoaId) ? ` and p.id = '${pessoaId}'` : ''));
+                } else {
+                  addToast('Não há dados a imprimir!', { appearance: 'warning' });
+                }}}
             />
           </Grid>
         </Grid>

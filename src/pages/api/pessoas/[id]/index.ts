@@ -24,6 +24,11 @@ export default async function Grupo(req: NextApiRequest, res: NextApiResponse) {
 
         const retPost = await salvarPessoa(pessoaSalvar);
 
+        if (retPost.error) {
+          res.status(retPost.code).json({error: retPost.error});
+          return;
+        }
+
         res.status(200).json(retPost.pessoa);
         return;
 

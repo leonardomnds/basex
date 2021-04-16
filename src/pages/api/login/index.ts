@@ -21,7 +21,7 @@ export default async function Login(req: NextApiRequest, res: NextApiResponse) {
         if (loginPessoa) {
           json = await efetuarLoginPessoa(usuario, senha);
         } else {
-          json = await efetuarLogin(usuario, senha);
+          json = await efetuarLogin(usuario?.toUpperCase(), senha);
         }
 
         if (json) {
@@ -58,7 +58,7 @@ const efetuarLogin = async (usuario: string, senha: string) => {
       }
     });
 
-    if (!user && usuario === 'admin') {
+    if (!user && usuario === 'ADMIN') {
       criarUsuarioAdmin();
     } else {
       break;
@@ -140,7 +140,7 @@ const criarUsuarioAdmin = async () => {
   await prisma.usuario.create({
     data: {
       nome: 'Administrador',
-      usuario: 'admin',
+      usuario: 'ADMIN',
       senha: '$2b$10$K.8mjdRixKhxQy1XcjTol.x7W5mXjcdKy9ehZIsdxKORcr5Sw4Sqi'
     }
   });
