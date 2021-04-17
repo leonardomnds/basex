@@ -1,5 +1,6 @@
 import HomeIcon from '@material-ui/icons/HomeRounded';
 import CategoryIcon from '@material-ui/icons/CategoryRounded';
+import TuneIcon from '@material-ui/icons/TuneRounded';
 import DescriptionIcon from '@material-ui/icons/DescriptionRounded';
 
 export type SubMenu = {
@@ -57,7 +58,7 @@ const sidebarItems : Menu[] = [
     path: '/app/calibracoes',
     user: true,
     client: true,
-    icon: DescriptionIcon,
+    icon: TuneIcon,
     items: [
       {
         label: 'Nova Calibração',
@@ -68,6 +69,33 @@ const sidebarItems : Menu[] = [
       {
         label: 'Histórico',
         path: 'historico',
+        user: true,
+        client: true,
+      },
+    ],
+  },
+  {
+    label: 'Relatórios',
+    path: '/app/relatorios',
+    user: true,
+    client: true,
+    icon: DescriptionIcon,
+    items: [
+      {
+        label: 'Lista de Clientes',
+        path: 'lista-clientes',
+        user: true,
+        client: false,
+      },
+      {
+        label: 'Lista de Instrumentos',
+        path: 'lista-instrumentos',
+        user: true,
+        client: true,
+      },
+      {
+        label: 'Calibrações',
+        path: 'lista-calibracoes',
         user: true,
         client: true,
       },

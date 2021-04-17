@@ -100,6 +100,10 @@ function ConsultaPessoas(props: Props) {
             setSelectedId(p.id);
             onClose();
           }}
+          clickFunction={(p: Pessoa) => {
+            setSelectedId(p.id);
+            onClose();
+          }}
         />
       </DialogContent>
     </Dialog>

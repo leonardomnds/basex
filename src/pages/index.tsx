@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/router';
 
 function index() {
@@ -10,7 +10,8 @@ function index() {
     }
   }, [])
 
-  return <></>
+  return <></>;
+
 }
 
 export default index

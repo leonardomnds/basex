@@ -1,4 +1,5 @@
 import cookie from 'js-cookie';
+import { Base64 } from 'js-base64';
 import jwt from 'jsonwebtoken';
 import { NextApiRequest } from 'next';
 import { NomeRelatorio } from '../reports/nomesRelatorios';
@@ -216,7 +217,8 @@ export const ValidateAuth = (req: NextApiRequest, type: 'user' | 'person') => {
 
 export const AbrirRelatorio = (relatorio: NomeRelatorio, filters?: string) => {
   let url = `/app/pdf?ref=${relatorio.toString()}`;
-  if (filters?.length > 0) url += '&filters='+btoa(filters);
+  //if (filters?.length > 0) url += '&filters='+btoa(filters);
+  if (filters?.length > 0) url += '&filters='+encodeURI(Base64.btoa(filters));
   const win = window.open(url, '_blank');
   if (win) win.focus();
 }

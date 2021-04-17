@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import listaRelatorios from '../../reports';
 import { GetServerSideProps } from 'next';
 import { PDFViewer } from '@react-pdf/renderer';
+import { Base64 } from 'js-base64';
 
 import { Box, Typography, CircularProgress, makeStyles } from '@material-ui/core';
 import { NomeRelatorio } from '../../reports/nomesRelatorios';
@@ -121,10 +122,13 @@ export const getServerSideProps : GetServerSideProps = async ({ query: { ref, fi
   let message = 'Não há dados para exibir!';
 
   const rel = listaRelatorios.filter((v) => v.name.toString() === (ref || -1).toString())
+
+  let where = filters as string;
+  where = where.split(' ').join('+');
   
   if (rel && rel[0]) {    
     relIndex = parseInt(ref.toString(), 10);
-    data = await rel[0].getData((filters || '').toString().length === 0 ? '1=1' : Buffer.from(filters.toString(), 'base64').toString('utf-8'));
+    data = await rel[0].getData((filters || '').toString().length === 0 ? '1=1' : Base64.atob(decodeURI(where)));
     if (data?.length === 0) {
       data = null;
     }

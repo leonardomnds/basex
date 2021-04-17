@@ -99,6 +99,7 @@ const NewUser: NextPage<Props> = (props) => {
           usuario,
           senha,
           ativo: isAtivo,
+          avatar: null,
           data_cadastro: null,
         };
 

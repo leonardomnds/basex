@@ -49,6 +49,7 @@ type Props = {
   autoFocus?: boolean,
   items: Array<ItemList>,
   itemZero?: boolean,
+  textItemZero?: string,
   btnAction?: (v: any) => void,
 }
 
@@ -60,6 +61,7 @@ function CustomSelect({
   autoFocus,
   items = [],
   itemZero = true,
+  textItemZero,
   btnAction,
 }: Props) {
   const classes = useStyles();
@@ -78,7 +80,7 @@ function CustomSelect({
           fullWidth
           onChange={(event) => setValue(event.target.value)}
         >
-          {itemZero && <MenuItem value="">-</MenuItem>}
+          {itemZero && <MenuItem value={textItemZero ? " " : ""}>{textItemZero ? textItemZero : '-'}</MenuItem>}
           {items.map((item, key) => {
             return (
               // eslint-disable-next-line react/no-array-index-key

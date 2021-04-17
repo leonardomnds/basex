@@ -103,7 +103,7 @@ const Indicadores = () => {
               icon={EventNoteRoundedIcon}
               func={() => {
                 if ((data?.calibracoes_vencidas || 0) > 0) {
-                  AbrirRelatorio(NomeRelatorio.listaInstrumentos, 'v.ativo = 1 and v.dias_vencer < 0>');
+                  AbrirRelatorio(NomeRelatorio.listaInstrumentos, 'v.ativo = 1 and v.dias_vencer < 0');
                 } else {
                   addToast('Não há dados a imprimir!', { appearance: 'warning' });
                 }}}

@@ -4,6 +4,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import prisma from '../../../../../prisma/PrismaInstance';
 import cors from '../../../../../util/Cors';
 import { ValidateAuth } from '../../../../../util/functions';
+import ConsultasComuns from '../../../../../util/ConsultasComuns';
 
 export default async function Instrumentos(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -50,10 +51,11 @@ const listarInstrumentos = async (pessoaId: string) => {
       i.tag,
       i.descricao,
       i.ativo,
-      MAX(c.data_calibracao) AS ultima_calibracao
+      c.ultima_calibracao,
+      c.vencimento_calibracao
     FROM 
       instrumentos as i
-      LEFT JOIN instrumentos_calibracoes AS c ON (i.id = c.instrumento_id)
+      LEFT JOIN (${ConsultasComuns.vencimentosCalibracoes()}) as c ON (i.id = c.id)
     WHERE
       i.pessoa_id = '${pessoaId}'
     GROUP BY

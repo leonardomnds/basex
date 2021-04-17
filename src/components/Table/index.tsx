@@ -154,6 +154,7 @@ type Props = {
   deleteFunction?: (v: any) => void,
   selectFunction?: (v: any) => void,  
   pdfFunction?: () => void,
+  clickFunction?: (v: any) => void,  
   naoPreencherLinhasVazias?: boolean,
   naoPesquisar?: boolean,
   linhasPorPagina?: number,
@@ -167,6 +168,7 @@ function CustomTable({
   deleteFunction,
   selectFunction,
   pdfFunction,
+  clickFunction,
   naoPreencherLinhasVazias,
   naoPesquisar,
   linhasPorPagina = 10,
@@ -349,7 +351,7 @@ function CustomTable({
               .map((row, rowKey) => {
                 return (
                   // eslint-disable-next-line react/no-array-index-key
-                  <TableRow hover role="checkbox" tabIndex={-1} key={rowKey}>
+                  <TableRow hover role="checkbox" tabIndex={-1} key={rowKey} onClick={() => clickFunction(row)}>
                     {columns.map((column) => {
                       const value = row[column.id];
                       return (

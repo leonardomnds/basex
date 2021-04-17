@@ -1,28 +1,25 @@
-import React, { useState } from 'react';
-import { useToasts } from 'react-toast-notifications';
-
-import { makeStyles, Box, Paper, Grid } from '@material-ui/core';
+import { makeStyles, Box, Grid, Paper, Hidden } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/SearchRounded';
 import CloseIcon from '@material-ui/icons/CloseRounded';
+import PrintIcon from '@material-ui/icons/PrintRounded';
+import GridIcon from '@material-ui/icons/GridOnRounded';
 
-import PageHeader from '../../../components/Layout/PageHeader';
-
-import TextField, {
-  getEndItemIconButton,
-} from '../../../components/FormControl/TextField';
+import { useToasts } from 'react-toast-notifications';
+import React, { useState } from 'react'
+import TextField, { getEndItemIconButton } from '../../../components/FormControl/TextField';
+import Select from '../../../components/FormControl/Select';
 import DatePicker from '../../../components/FormControl/DatePicker';
-
+import PageHeader from '../../../components/Layout/PageHeader';
 import { GetServerSideProps, NextPage } from 'next';
-import api from '../../../util/Api';
-import {
-  FormatarCpfCnpj,
-  GetDataFromJwtToken,
-  ZerosLeft,
-} from '../../../util/functions';
+import { AbrirRelatorio, FormatarCpfCnpj, GetDataFromJwtToken, ZerosLeft } from '../../../util/functions';
 import ConsultaPessoas from '../../../components/CustomDialog/ConsultaPessoas';
 import ConsultaInstrumentos from '../../../components/CustomDialog/ConsultaInstrumentos';
-import { Calibracao } from '.prisma/client';
-import SaveRoundedIcon from '@material-ui/icons/SaveRounded';
+import api from '../../../util/Api';
+import { addDays } from 'date-fns';
+import prisma from '../../../prisma/PrismaInstance';
+import {format} from 'date-fns';
+import CustomButton from '../../../components/CustomButton';
+import { NomeRelatorio } from '../../../reports/nomesRelatorios';
 
 const useStyles = makeStyles((theme) => ({
   themeError: {
@@ -32,17 +29,25 @@ const useStyles = makeStyles((theme) => ({
     padding: 20,
     marginBottom: 25,
   },
+  btnBox: {
+    display: 'flex',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  btnMargin: {
+    marginRight: 10,
+  }
 }));
-
 type Props = {
   usuarioId: string;
   pessoaId: string;
+  laboratorios: { value: string, text: string }[]
 };
 
-const List: NextPage<Props> = (props: Props) => {
+const ListaCalibracoes: NextPage<Props> = (props: Props) => {
   const classes = useStyles();
   const { addToast } = useToasts();
-  const { usuarioId, pessoaId } = props;
+  const { usuarioId, pessoaId, laboratorios } = props;
 
   const [uuidPessoa, setUuidPessoa] = useState<string>(pessoaId);
   const [codPessoa, setCodPessoa] = useState<number>(null);
@@ -57,12 +62,27 @@ const List: NextPage<Props> = (props: Props) => {
     false,
   );
 
-  const [dataCalibracao, setDataCalibracao] = React.useState<Date>(new Date());
-  const [laboratorio, setLaboratorio] = useState<string>('');
-  const [numeroCertificado, setNumeroCertificado] = useState<string>('');
-  const [arquivoCertificado, setArquivoCertificado] = useState<string>('');
+  const [dataCalibracaoInicial, setDataCalibracaoInicial] = useState<Date>(addDays(new Date(), -(new Date().getDate()-1)));
+  const [dataCalibracaoFinal, setDataCalibracaoFinal] = useState<Date>(new Date());
 
-  const [isSaving, setSaving] = useState<boolean>(false);
+  const [listaLaboratorios] = useState(laboratorios);
+  const [laboratorio, setLaboratorio] = useState<string>(' ');
+
+  const getWhere = () => {
+    let where = "1=1";
+
+    if (uuidPessoa) where += ` and i.pessoa_id = '${uuidPessoa}'`;
+    if (uuidInstrumento) where += ` and i.id = '${uuidInstrumento}'`;
+    if (dataCalibracaoInicial) where += ` and c.data_calibracao >= '${format(dataCalibracaoInicial, 'yyyy-MM-dd')}'`;
+    if (dataCalibracaoFinal) where += ` and c.data_calibracao <= '${format(dataCalibracaoFinal, 'yyyy-MM-dd')}'`;
+    if ((laboratorio || '').toUpperCase() === 'NÃO INFORMADO') {
+      where += ` and nullif(trim(c.laboratorio), '') is null`;
+    } else if ((laboratorio || '').length > 0 && laboratorio != ' ') {
+      where += ` and coalesce(upper(nullif(trim(c.laboratorio), '')), 'Não informado') = '${laboratorio}'`;
+    }
+
+    return where;
+  }
 
   const setStateCpfCnpjPessoa = (str) => {
     setCpfCnpjPessoa(FormatarCpfCnpj(str));
@@ -80,10 +100,6 @@ const List: NextPage<Props> = (props: Props) => {
     setUuidInstrumento('');
     setTagInstrumento('');
     setDescricaoInstrumento('');
-    setDataCalibracao(new Date());
-    setLaboratorio('');
-    setNumeroCertificado('');
-    setArquivoCertificado('');
   };
 
   const getEndItemBuscarCliente = () => {
@@ -132,71 +148,6 @@ const List: NextPage<Props> = (props: Props) => {
     } catch (err) {
       addToast(err.message, { appearance: 'error' });
     }
-  };
-
-  const salvarCalibracao = async () => {
-    setSaving(true);
-
-    if (!uuidPessoa || !uuidInstrumento) {
-      addToast('Selecione o cliente e o instrumento!', {
-        appearance: 'warning',
-      });
-    } else if (!dataCalibracao) {
-      addToast('Informe a data da calibração!', { appearance: 'warning' });
-    } else if (!numeroCertificado) {
-      addToast('Informe o número do certificado!', { appearance: 'warning' });
-    } else {
-      try {
-        const calibracao: Calibracao = {
-          id: null,
-          instrumento_id: uuidInstrumento || null,
-          data_calibracao: dataCalibracao || null,
-          numero_certificado: numeroCertificado || null,
-          laboratorio: laboratorio || null,
-          data_cadastro: null,
-        };
-
-        let response;
-        if (false) {
-          // Alteração ainda não criada
-          response = await api.put(
-            '/pessoas/' +
-              uuidPessoa +
-              '/instrumentos/' +
-              uuidInstrumento +
-              '/calibracoes/' +
-              calibracao.id,
-            calibracao,
-          );
-        } else {
-          response = await api.post(
-            '/pessoas/' +
-              uuidPessoa +
-              '/instrumentos/' +
-              uuidInstrumento +
-              '/calibracoes',
-            calibracao,
-          );
-        }
-
-        if (!response?.data?.error) {
-          addToast(
-            `Calibração ${
-              calibracao.id ? 'alterada' : 'cadastrada'
-            } com sucesso!`,
-            {
-              appearance: 'success',
-            },
-          );
-          limparCamposInstrumento();
-        } else {
-          throw new Error(response.data.error);
-        }
-      } catch (err) {
-        addToast(err.message, { appearance: 'error' });
-      }
-    }
-    setSaving(false);
   };
 
   const getDataInstrumento = async (insId: string) => {
@@ -280,57 +231,70 @@ const List: NextPage<Props> = (props: Props) => {
     );
   };
 
-  const getCamposLancamentoCalibracao = () => {
+  const getCamposFiltros = () => {
     return (
       <Paper className={classes.paper}>
         <Grid container spacing={2}>
-          <Grid item xs={12} sm={5} md={4} lg={3}>
+          <Grid item xs={6} sm={4} md={3} lg={2}>
             <DatePicker
-              label="Data da calibração"
-              value={dataCalibracao}
+              label="Calibração de"
+              value={dataCalibracaoInicial}
               maxValue={new Date()}
-              setValue={setDataCalibracao}
+              setValue={setDataCalibracaoInicial}
             />
           </Grid>
-          <Grid item xs={12} sm={7} md={8} lg={9}>
-            <TextField
+          <Grid item xs={6} sm={4} md={3} lg={2}>
+            <DatePicker
+              label="Calibração até"
+              value={dataCalibracaoFinal}
+              minValue={dataCalibracaoInicial}
+              maxValue={new Date()}
+              setValue={setDataCalibracaoFinal}
+            />
+          </Grid>
+          <Grid item xs={12} sm={8} md={6} lg={4}>
+            <Select
               label="Laboratório"
               value={laboratorio}
               setValue={setLaboratorio}
+              items={listaLaboratorios}
+              itemZero
+              textItemZero="Todos"
             />
-          </Grid>
-          <Grid item xs={12} sm={5} md={4} lg={3}>
-            <TextField
-              label="Número do certificado"
-              value={numeroCertificado}
-              setValue={setNumeroCertificado}
-            />
-          </Grid>
-          <Grid item xs={12} sm={7} md={8} lg={9}>
-            <TextField
-              label="Anexar certificado"
-              value={arquivoCertificado}
-              setValue={setArquivoCertificado}
-              disabled
-            />
-          </Grid>
+          </Grid>     
         </Grid>
       </Paper>
     );
-  };
+  }
+
+  const getButtons = () => {
+    return (
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={8} md={6} lg={3}>
+          <Box className={classes.btnBox}>
+            <CustomButton
+              className={classes.btnMargin}
+              label="Exportar"
+              icon={<GridIcon/>}
+            />
+            <CustomButton
+              label="Gerar PDF"
+              icon={<PrintIcon/>}
+              func={() => AbrirRelatorio(NomeRelatorio.listaCalibracoes, getWhere())}
+            />
+          </Box>
+        </Grid>
+      </Grid>
+    );
+  }
 
   return (
     <Box>
-      <PageHeader
-        title="Nova Calibração"
-        btnLabel={uuidInstrumento ? 'Salvar' : ''}
-        btnIcon={<SaveRoundedIcon />}
-        btnFunc={salvarCalibracao}
-        btnLoading={isSaving}
-      />
+      <PageHeader title="Relatório de Calibrações"/>
       {usuarioId && getCamposBuscaCliente()}
       {getCamposBuscaInstrumento()}
-      {uuidInstrumento && getCamposLancamentoCalibracao()}
+      {getCamposFiltros()}
+      {getButtons()}
       {consultandoPessoa && (
         <ConsultaPessoas
           isOpen={consultandoPessoa}
@@ -353,22 +317,32 @@ const List: NextPage<Props> = (props: Props) => {
         />
       )}
     </Box>
-  );
-};
+  )
+}
 
-export default List;
+export default ListaCalibracoes
 
-export const getServerSideProps: GetServerSideProps = async ({
-  req,
-  query,
-}) => {
-  const { pessoaId } = query;
+export const getServerSideProps: GetServerSideProps = async ({ req }) => {
   const jwt = GetDataFromJwtToken(req.cookies.token);
+
+  const laboratorios = await prisma.$queryRaw(`
+  select distinct
+    coalesce(upper(nullif(trim(c.laboratorio), '')), 'Não informado') as value,
+    coalesce(upper(nullif(trim(c.laboratorio), '')), 'Não informado') as text
+  from
+    instrumentos_calibracoes as c
+    inner join instrumentos i on (i.id = c.instrumento_id)
+  where ${jwt?.pessoaId ? `i.pessoa_id = '${jwt.pessoaId}'` : '1=1'}
+  order by
+    case when nullif(trim(c.laboratorio), '') = '' then 0 else 1 end, 
+    nullif(trim(c.laboratorio), '')
+  `);
 
   return {
     props: {
       usuarioId: jwt?.usuarioId || null,
-      pessoaId: jwt?.pessoaId ? jwt.pessoaId : pessoaId || null,
+      pessoaId: jwt?.pessoaId || null,
+      laboratorios
     },
   };
 };

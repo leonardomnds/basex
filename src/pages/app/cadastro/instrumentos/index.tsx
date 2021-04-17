@@ -131,7 +131,8 @@ const List: NextPage<Props> = (props: Props) => {
                   i.id,
                   i.tag,
                   i.descricao,
-                  i.ultima_calibracao ? format(addHours(new Date(i.ultima_calibracao), 3), 'dd/MM/yyyy') : '',
+                  i.ultima_calibracao ? format(new Date(i.ultima_calibracao), 'dd/MM/yyyy') : '',
+                  i.vencimento_calibracao ? format(new Date(i.vencimento_calibracao), 'dd/MM/yyyy') : '',
                   i.ativo ? 'Ativo' : 'Inativo',
                 ],
                 colunas,
@@ -243,6 +244,7 @@ export const getServerSideProps : GetServerSideProps = async ({ req, query }) =>
   colunas.push(getColumn('tag', 'TAG', 50, 'left'));
   colunas.push(getColumn('descricao', 'Descrição', 100, 'left'));
   colunas.push(getColumn('dtCalibracao', 'Última Calibração', 50, 'center'));
+  colunas.push(getColumn('vctoCalibracao', 'Vencimento', 50, 'center'));
   colunas.push(getColumn('ativo', 'Status', 30, 'center'));
 
   const { pessoaId } = query;
