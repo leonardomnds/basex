@@ -47,12 +47,9 @@ type Props = {
 
 const ListaClientes: NextPage<Props> = (props: Props) => {
   const classes = useStyles();
+  const router = useRouter();
   const { addToast } = useToasts();
   const { pessoaId, estados, grupos, categorias } = props;
-
-  if (pessoaId) {
-    useRouter().push('/app/home');
-  }
 
   const [isExport, setExport] = useState<boolean>(false);
 
@@ -306,6 +303,12 @@ const ListaClientes: NextPage<Props> = (props: Props) => {
     }        
     
   }, [cidade])
+
+  useEffect(() => {
+    if (pessoaId) {
+      router.push('/app/home');
+    }
+  }, [pessoaId])
 
   return (
     <Box>

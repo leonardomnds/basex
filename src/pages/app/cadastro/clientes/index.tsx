@@ -22,10 +22,6 @@ const PeopleList: NextPage<Props> = (props) => {
   const { addToast } = useToasts();
   const { pessoaId, colunas } = props;
 
-  if (pessoaId) {
-    router.push('/app/home');
-  }
-
   const [isLoading, setLoading] = useState<boolean>(false);
   const [deletingPerson, setDeletingPerson] = useState(null);
   const [linhas, setLinhas] = useState<Array<any>>([]);
@@ -116,6 +112,13 @@ const PeopleList: NextPage<Props> = (props) => {
 
     getData();
   }, [])
+
+  
+  useEffect(() => {
+    if (pessoaId) {
+      router.push('/app/home');
+    }
+  }, [pessoaId])
 
   return (
       <Box>

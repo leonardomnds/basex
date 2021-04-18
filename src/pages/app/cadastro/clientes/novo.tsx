@@ -75,10 +75,6 @@ const NewPeople: NextPage<Props> = (props) => {
   const router = useRouter();
   const { clienteLogado, pessoaId } = props;
 
-  if (clienteLogado) {
-    router.push('/app/home');
-  }
-
   const { addToast } = useToasts();
 
   // Geral
@@ -445,6 +441,12 @@ const NewPeople: NextPage<Props> = (props) => {
     getGrupos();
     getCategorias();
   }, []);
+
+  useEffect(() => {
+    if (clienteLogado) {
+      router.push('/app/home');
+    }
+  }, [clienteLogado])
 
   const TablePanel = () => {
     switch (currentTab) {

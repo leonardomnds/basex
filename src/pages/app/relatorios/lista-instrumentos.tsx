@@ -373,7 +373,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
       coalesce(upper(nullif(trim(${column}), '')), 'Não informado') as text
     from
       instrumentos
-    where ${jwt?.pessoaId ? `i.pessoa_id = '${jwt.pessoaId}'` : '1=1'}
+    where ${jwt?.pessoaId ? `pessoa_id = '${jwt.pessoaId}'` : '1=1'}
     order by
       case when nullif(trim(${column}), '') = '' then 0 else 1 end, 
       nullif(${column}, '')
