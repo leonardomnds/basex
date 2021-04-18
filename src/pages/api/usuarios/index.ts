@@ -1,36 +1,37 @@
 import { Usuario } from '.prisma/client';
 import bcrypt from 'bcrypt';
-/*
-import multer from 'multer';
 import fs from 'fs';
-const { v4: uuidv4 } = require('uuid');
-
 import nextConnect from 'next-connect';
-*/
+import { multerUpload } from "../../../util/middlewares";
+
 import { NextApiRequest, NextApiResponse } from 'next';
 
 import prisma from '../../../prisma/PrismaInstance';
 import cors from '../../../util/Cors';
-/*
-const upload = multer({
-  storage: multer.diskStorage({
-    destination: './public/uploads',
-    filename: (req, file, cb) => cb(null, uuidv4()+file.originalname.substr(file.originalname.lastIndexOf('.'))),
-  })
-});
 
 const Usuarios = nextConnect()
-  .use(upload.single('avatar'))
+  .get(async (req: NextApiRequest, res: NextApiResponse) => {
+    try {
+      await cors(req, res);
+
+      const json = await listarUsuarios();
+      res.status(200).json(json);
+      return;
+    } catch (err) {
+      res.status(500).json({error: err.message});
+    }
+  })
+  .use(multerUpload.single('avatar'))
   .post(async (req: NextApiRequest, res: NextApiResponse) => {
     try {
       await cors(req, res);
 
       const usuarioSalvar : Usuario = req.body;
       const retPost = await salvarUsuario(usuarioSalvar);
-
-      if (req['file'] && req['file'].path && retPost?.usuario?.id) {
+      if (req['file'] && req['file']?.path && retPost?.usuario?.id) {
         fs.readFile(req['file'].path, async (fsErr, data) => {
           if (!fsErr) await salvarAvatarUsuario(retPost.usuario.id, data);
+          fs.unlink(req['file'].path, () => {});
         });
       }
 
@@ -43,25 +44,6 @@ const Usuarios = nextConnect()
       return;
     } catch (err) {
       res.status(500).json({error: err.message});
-    } finally {
-      if (req['file'] && req['file'].path) {        
-        fs.unlink(req['file'].path, () => {});
-      }
-    }
-  })
-  .get(async (req: NextApiRequest, res: NextApiResponse) => {
-    try {
-      await cors(req, res);
-
-      const json = await listarUsuarios();
-      res.status(200).json(json);
-      return;
-    } catch (err) {
-      res.status(500).json({error: err.message});
-    } finally {
-      if (req['file'] && req['file'].path) {        
-        fs.unlink(req['file'].path, () => {});
-      }
     }
   })
   .all((req: NextApiRequest, res: NextApiResponse) => {
@@ -78,8 +60,8 @@ export const config = {
     bodyParser: false, // Disallow body parsing, consume as stream
   },
 };
-*/
 
+/*
 export default async function Login(req: NextApiRequest, res: NextApiResponse) {
   try {
 
@@ -111,7 +93,7 @@ export default async function Login(req: NextApiRequest, res: NextApiResponse) {
     res.status(500).json({error: err.message});
   }
 }
-
+*/
 const listarUsuarios = async () => {
   const users = await prisma.usuario.findMany({
     select: {
@@ -136,6 +118,8 @@ export const salvarUsuario = async (usuario: Usuario) => {
   delete usuario.id;
 
   usuario.usuario = usuario.usuario?.toUpperCase();
+  usuario.ativo = Boolean(usuario.ativo);
+  usuario.avatar = null; // Necessário chamar o método 'salvarAvatarUsuario'
 
   const existe = await prisma.usuario.findUnique({
     where: {
@@ -188,7 +172,7 @@ export const salvarUsuario = async (usuario: Usuario) => {
 
 }
 
-const salvarAvatarUsuario = async (usuarioId: string, avatar: Buffer) => {
+export const salvarAvatarUsuario = async (usuarioId: string, avatar: Buffer) => {
   await prisma.usuario.update({
     data: {
       avatar

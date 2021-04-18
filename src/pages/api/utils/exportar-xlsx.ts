@@ -7,11 +7,12 @@ import prisma from '../../../prisma/PrismaInstance';
 import { NomeRelatorio } from '../../../reports/nomesRelatorios';
 import ConsultasComuns from '../../../util/ConsultasComuns';
 import cors from '../../../util/Cors';
-import { JsonToCSV, ValidateAuth } from '../../../util/functions';
+import { JsonToCSV, JsonToXLSX, ValidateAuth } from '../../../util/functions';
 
 export default async function CamposExportar(req: NextApiRequest, res: NextApiResponse) {
   
-  const filePath = `./public/arquivos/Relatorio-${format(new Date(), 'yyyy-MM-dd-HH-mm-ss')}.csv`;
+  const filePath = `./public/arquivos/Relatorio-${format(new Date(), 'yyyy-MM-dd-HH-mm-ss')}.xlsx`;
+  // const filePath = `./public/arquivos/Relatorio-${format(new Date(), 'yyyy-MM-dd-HH-mm-ss')}.csv`;
 
   try {
 
@@ -93,18 +94,15 @@ export default async function CamposExportar(req: NextApiRequest, res: NextApiRe
         res.status(403).json({ error: 'Não há dados a exportar!'});
         return;
       } else {
-        const csvString = await JsonToCSV(dados);
+        await JsonToXLSX(dados, filePath);
 
-        fs.writeFile(filePath, csvString, async (writeErr) => {
-          if (writeErr) throw new Error(writeErr.message);
-          fs.readFile(filePath, async (readErr, file) => {
-            if (readErr) throw new Error(readErr.message);
-            fs.unlink(filePath, () => {})
-            res.setHeader('Content-disposition', 'attachment; filename='+filePath.slice(filePath.lastIndexOf('/')+1));
-            res.setHeader('Content-Type', 'text/csv');
-            res.status(200).send(file);
-            return;
-          });
+        fs.readFile(filePath, async (readErr, file) => {
+          if (readErr) throw new Error(readErr.message);
+          fs.unlink(filePath, () => {})
+          res.setHeader('Content-disposition', 'attachment; filename='+filePath.slice(filePath.lastIndexOf('/')+1));
+          res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+          res.status(200).send(file);
+          return;
         });
       }
     } else {

@@ -21,7 +21,7 @@ import {format} from 'date-fns';
 import CustomButton from '../../../components/CustomButton';
 import { NomeRelatorio } from '../../../reports/nomesRelatorios';
 import { Base64 } from 'js-base64';
-import ExportarCSV from '../../../components/CustomDialog/ExportarCSV';
+import ExportarXLSX from '../../../components/CustomDialog/ExportarXLSX';
 
 const useStyles = makeStyles((theme) => ({
   themeError: {
@@ -301,7 +301,7 @@ const ListaCalibracoes: NextPage<Props> = (props: Props) => {
       {getCamposFiltros()}
       {getButtons()}
       {isExport && (
-        <ExportarCSV
+        <ExportarXLSX
           relatorio={NomeRelatorio.listaCalibracoes}
           isOpen={isExport}
           onClose={() => setExport(false)}

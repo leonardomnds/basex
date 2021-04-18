@@ -60,22 +60,8 @@ model Pessoa {
   data_cadastro DateTime @default(now())  
   usuario_id String @db.VarChar(100)
   usuario Usuario @relation(fields: [usuario_id], references: [id])
-  contatos ContatoPessoa[]
   intrumentos Instrumento[]
   @@map("pessoas")
-}
-
-model ContatoPessoa {
-  id String @id @default(uuid()) @db.VarChar(100)
-  pessoa_id String @db.VarChar(100)
-  pessoa Pessoa @relation(fields: [pessoa_id], references: [id])
-  nome String @db.VarChar(100)
-  descricao String @db.VarChar(100)
-  telefone String? @db.VarChar(20)
-  celular String? @db.VarChar(20)
-  email String? @db.VarChar(255)
-  data_cadastro DateTime @default(now())
-  @@map("contatos_pessoas")
 }
 
 model Instrumento {
@@ -105,6 +91,7 @@ model Calibracao {
   instrumento Instrumento @relation(fields: [instrumento_id], references: [id])
   data_calibracao DateTime @db.Date
   numero_certificado String @db.VarChar(100)
+  pdfCertificado Bytes? @db.LongBlob
   laboratorio String? @db.VarChar(100)
   data_cadastro DateTime @default(now())
   @@map("instrumentos_calibracoes")

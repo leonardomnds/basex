@@ -19,14 +19,12 @@ import {
   Grid,
   TextField,
   InputAdornment,
-  IconButton,
 } from '@material-ui/core';
 
 import EditIcon from '@material-ui/icons/EditRounded';
 import DeleteIcon from '@material-ui/icons/DeleteRounded';
 import SearchIcon from '@material-ui/icons/SearchRounded';
 import CheckIcon from '@material-ui/icons/CheckCircleRounded';
-import PdfIcon from '@material-ui/icons/PrintRounded';
 
 import {
   SomenteNumeros,
@@ -152,8 +150,9 @@ type Props = {
   rows: Array<any>,
   editFunction?: (v: any) => void,
   deleteFunction?: (v: any) => void,
-  selectFunction?: (v: any) => void,  
-  pdfFunction?: () => void,
+  selectFunction?: (v: any) => void,
+  selectIcon?: any,
+  selectLabel?: string,
   clickFunction?: (v: any) => void,  
   naoPreencherLinhasVazias?: boolean,
   naoPesquisar?: boolean,
@@ -167,13 +166,16 @@ function CustomTable({
   editFunction,
   deleteFunction,
   selectFunction,
-  pdfFunction,
+  selectIcon,
+  selectLabel,
   clickFunction,
   naoPreencherLinhasVazias,
   naoPesquisar,
   linhasPorPagina = 10,
 }: Props) {
   const classes = useStyles();
+
+  const IconSelectIcon = selectIcon;
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(linhasPorPagina);
@@ -271,13 +273,6 @@ function CustomTable({
           backIconButtonText="Página anterior"
           labelDisplayedRows={paginationRowsInfo}
         />
-        {pdfFunction && (
-          <Tooltip title="Gerar PDF" placement="left" arrow>
-            <IconButton color='inherit' component="span" onClick={pdfFunction} >
-              <PdfIcon />
-            </IconButton>
-          </Tooltip>          
-        )}
       </Box>
     );
   };
@@ -403,7 +398,7 @@ function CustomTable({
                             </Tooltip>
                           )}
                           {selectFunction && (
-                            <Tooltip title="Selecionar" placement="top" arrow>
+                            <Tooltip title={selectLabel || "Selecionar"} placement="top" arrow>
                               <Button
                                 size="small"
                                 className={classes.btnEdit}
@@ -411,7 +406,7 @@ function CustomTable({
                                   selectFunction(row);
                                 }}
                               >
-                                <CheckIcon className={classes.btnIcon} />
+                                {selectIcon ?  <IconSelectIcon className={classes.btnIcon} /> : <CheckIcon className={classes.btnIcon} />}
                               </Button>
                             </Tooltip>
                           )}

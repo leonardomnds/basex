@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { useToasts } from 'react-toast-notifications';
 
-import { makeStyles, Box, Paper, Grid } from '@material-ui/core';
+import { makeStyles, Box, Paper, Grid, Hidden } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/SearchRounded';
 import CloseIcon from '@material-ui/icons/CloseRounded';
+import UploadIcon from '@material-ui/icons/AttachFileRounded';
 
 import PageHeader from '../../../components/Layout/PageHeader';
 
 import TextField, {
-  getEndItemIconButton,
-} from '../../../components/FormControl/TextField';
+  getEndItemIconButton } from '../../../components/FormControl/TextField';
 import DatePicker from '../../../components/FormControl/DatePicker';
 
 import { GetServerSideProps, NextPage } from 'next';
@@ -23,6 +23,8 @@ import ConsultaPessoas from '../../../components/CustomDialog/ConsultaPessoas';
 import ConsultaInstrumentos from '../../../components/CustomDialog/ConsultaInstrumentos';
 import { Calibracao } from '.prisma/client';
 import SaveRoundedIcon from '@material-ui/icons/SaveRounded';
+import CustomButton from '../../../components/CustomButton';
+import { format } from 'date-fns';
 
 const useStyles = makeStyles((theme) => ({
   themeError: {
@@ -32,6 +34,13 @@ const useStyles = makeStyles((theme) => ({
     padding: 20,
     marginBottom: 25,
   },
+  btnCertificado: {
+    minWidth: 140,
+    marginLeft: 15,
+  },  
+  input: {
+    display: 'none',
+  }
 }));
 
 type Props = {
@@ -60,7 +69,18 @@ const List: NextPage<Props> = (props: Props) => {
   const [dataCalibracao, setDataCalibracao] = React.useState<Date>(new Date());
   const [laboratorio, setLaboratorio] = useState<string>('');
   const [numeroCertificado, setNumeroCertificado] = useState<string>('');
-  const [arquivoCertificado, setArquivoCertificado] = useState<string>('');
+  const [arquivoCertificado, setArquivoCertificado] = useState<{file: any, preview: any}>(null);
+
+  const setSelectCertificado = (evt) => {
+    if (evt?.target?.files[0]?.name.toString().endsWith('.pdf')) {
+      setArquivoCertificado({
+        file: evt?.target?.files[0],
+        preview: URL.createObjectURL(evt?.target?.files[0])
+      });
+    } else {
+      addToast('O anexo deve ser um PDF', { appearance: 'warning' });
+    }
+  }
 
   const [isSaving, setSaving] = useState<boolean>(false);
 
@@ -83,7 +103,7 @@ const List: NextPage<Props> = (props: Props) => {
     setDataCalibracao(new Date());
     setLaboratorio('');
     setNumeroCertificado('');
-    setArquivoCertificado('');
+    setArquivoCertificado(null);
   };
 
   const getEndItemBuscarCliente = () => {
@@ -152,10 +172,25 @@ const List: NextPage<Props> = (props: Props) => {
           instrumento_id: uuidInstrumento || null,
           data_calibracao: dataCalibracao || null,
           numero_certificado: numeroCertificado || null,
+          pdfCertificado: null,
           laboratorio: laboratorio || null,
           data_cadastro: null,
         };
 
+        let response;
+        const formData = new FormData();
+        if (uuidInstrumento) formData.append('instrumento_id', uuidInstrumento);
+        if (dataCalibracao) formData.append('data_calibracao', format(dataCalibracao,'yyyy-MM-dd'));
+        if (numeroCertificado) formData.append('numero_certificado', numeroCertificado);
+        if (laboratorio) formData.append('laboratorio', laboratorio);
+        if (arquivoCertificado?.file) formData.append('pdfCertificado', arquivoCertificado?.file);
+
+        if (false) {
+          response = await api.put('/pessoas/'+uuidPessoa+'/instrumentos/'+uuidInstrumento+'/calibracoes/'+'id_aqui', formData);
+        } else {
+          response = await api.post('/pessoas/'+uuidPessoa+'/instrumentos/'+uuidInstrumento+'/calibracoes', formData);
+        }
+/*
         let response;
         if (false) {
           // Alteração ainda não criada
@@ -178,11 +213,11 @@ const List: NextPage<Props> = (props: Props) => {
             calibracao,
           );
         }
-
+*/
         if (!response?.data?.error) {
           addToast(
             `Calibração ${
-              calibracao.id ? 'alterada' : 'cadastrada'
+              false ? 'alterada' : 'cadastrada'
             } com sucesso!`,
             {
               appearance: 'success',
@@ -280,6 +315,55 @@ const List: NextPage<Props> = (props: Props) => {
     );
   };
 
+  const getButtonAnexo = () => {
+    if (arquivoCertificado?.file?.name) {
+      return (
+        <>
+          <CustomButton
+            label="Visualizar"
+            className={classes.btnCertificado}
+            color="inherit"
+            variant="outlined"
+            componentSpan
+            func={() => {
+              const win = window.open(arquivoCertificado?.preview, '_blank');
+              if (win) win.focus();
+            }}
+          />
+          <CustomButton
+            label="Remover"
+            className={classes.btnCertificado}
+            icon={< UploadIcon />}
+            color="secondary"
+            componentSpan
+            func={() => setArquivoCertificado(null)}
+          />
+        </>
+      );
+    } else {
+      return (
+        <>
+          <input
+            accept="application/pdf"
+            className={classes.input}
+            onChange={(evt) => setSelectCertificado(evt)}
+            id="inputCertificado"
+            type="file"
+          />
+          <label htmlFor="inputCertificado">
+            <CustomButton
+              label="Anexar"
+              className={classes.btnCertificado}
+              icon={< UploadIcon />}
+              color="secondary"
+              componentSpan
+            />
+          </label>
+        </>
+      );
+    }
+  }
+
   const getCamposLancamentoCalibracao = () => {
     return (
       <Paper className={classes.paper}>
@@ -308,11 +392,13 @@ const List: NextPage<Props> = (props: Props) => {
           </Grid>
           <Grid item xs={12} sm={7} md={8} lg={9}>
             <TextField
-              label="Anexar certificado"
-              value={arquivoCertificado}
-              setValue={setArquivoCertificado}
+              label="Certificado"
+              value={arquivoCertificado?.file?.name}
               disabled
             />
+          </Grid>
+          <Grid item xs={12} style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+            {getButtonAnexo()}  
           </Grid>
         </Grid>
       </Paper>

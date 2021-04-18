@@ -25,6 +25,7 @@ function Account(props: Props) {
   const router = useRouter()
   const [isOpen, setOpen] = useState(false);
   const [username, setUsername] = useState(null);
+  const [avatar, setAvatar] = useState(null);
 
   const { user } = props;
   const isAuthenticated = Boolean(user);
@@ -79,6 +80,9 @@ function Account(props: Props) {
   useEffect(() => {
     const getUser = () => {
       setUsername(JSON.parse(user)?.nome?.toUpperCase() || null);
+      if (JSON.parse(user)?.id) {
+        setAvatar(JSON.parse(user)?.cpf_cnpj ? null : `/api/usuarios/${JSON.parse(user)?.id}/avatar`);
+      }
     }
     if (Boolean(user)) {
       getUser();
@@ -93,7 +97,7 @@ function Account(props: Props) {
         className={classes.avatar}
         onClick={handleOpen}
         alt={username}
-        src="/"
+        src={avatar || '/'}
       />
       {isAuthenticated && 
       <Menu

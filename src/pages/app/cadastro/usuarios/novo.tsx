@@ -22,6 +22,7 @@ import api from '../../../../util/Api';
 
 import { GetServerSideProps, NextPage } from 'next';
 import { Usuario } from '.prisma/client';
+import { ConvertBlobToFile } from '../../../../util/functions';
 
 const useStyles = makeStyles((theme) => ({
   themeError: {
@@ -93,21 +94,18 @@ const NewUser: NextPage<Props> = (props) => {
     } else {
       try {
 
-        const user : Usuario = {
-          id: usuarioId,
-          nome,
-          usuario,
-          senha,
-          ativo: isAtivo,
-          avatar: null,
-          data_cadastro: null,
-        };
-
         let response;
-        if (user.id) {
-          response = await api.put('/usuarios/'+user.id, user);
+        const formData = new FormData();
+        if (nome) formData.append('nome', nome);
+        if (usuario) formData.append('usuario', usuario);
+        if (senha) formData.append('senha', senha);
+        formData.append('ativo', isAtivo ? '1' : '0');
+        if (avatar?.file) formData.append('avatar', avatar?.file);
+
+        if (usuarioId) {
+          response = await api.put('/usuarios/'+usuarioId, formData);
         } else {
-          response = await api.post('/usuarios', user);
+          response = await api.post('/usuarios', formData);
         }
 
         if (!response?.data?.error) {
@@ -139,10 +137,24 @@ const NewUser: NextPage<Props> = (props) => {
             setUsuario(u.usuario);
             setSenha('****');
             setAtivo(u.ativo);
-
           } else {
             router.push('/app/cadastro/usuarios');
           }
+
+          const avatar = await api.get('/usuarios/'+usuarioId+'/avatar', { responseType: 'blob' });
+
+          if (avatar?.status === 200) {      
+
+            const file = ConvertBlobToFile(avatar.data, `Avatar-${usuarioId}.jpeg`);
+
+            setAvatar({
+              file: file,
+              preview: URL.createObjectURL(file),
+            });
+          } else if (!(avatar?.status === 403)) {
+            throw new Error(avatar.data.error)
+          }
+
         } else {
           throw new Error(response.data.error);
         }
@@ -249,24 +261,24 @@ const NewUser: NextPage<Props> = (props) => {
   }
 
   return (
-      <Box>
-        <PageHeader
-          title={`${usuarioId ? 'Editar' : 'Novo'} usuário`}
-          btnLabel="Salvar"
-          btnIcon={<SaveRoundedIcon />}
-          btnFunc={handleSave}
-          btnLoading={isSaving}
-          btnBack
-        />
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={5} lg={3}>
-            {getAvatarBox()}
-          </Grid>
-          <Grid item xs={12} sm={7} lg={9}>
-            {getFieldsBox()}
-          </Grid>
+    <Box>
+      <PageHeader
+        title={`${usuarioId ? 'Editar' : 'Novo'} usuário`}
+        btnLabel="Salvar"
+        btnIcon={<SaveRoundedIcon />}
+        btnFunc={handleSave}
+        btnLoading={isSaving}
+        btnBack
+      />
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={5} lg={3}>
+          {getAvatarBox()}
         </Grid>
-      </Box>
+        <Grid item xs={12} sm={7} lg={9}>
+          {getFieldsBox()}
+        </Grid>
+      </Grid>
+    </Box>
   );
 }
 

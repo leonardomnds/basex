@@ -9,8 +9,7 @@ import CustomTable, { getColumn, getRow } from '../../../../components/Table';
 import CustomDialog from '../../../../components/CustomDialog';
 import { GetServerSideProps, NextPage } from 'next';
 import api from '../../../../util/Api';
-import { AbrirRelatorio, GetDataFromJwtToken } from '../../../../util/functions';
-import { NomeRelatorio } from '../../../../reports/nomesRelatorios';
+import { GetDataFromJwtToken } from '../../../../util/functions';
 
 type Props = {
   pessoaId: string,
@@ -129,7 +128,6 @@ const PeopleList: NextPage<Props> = (props) => {
           rows={linhas}
           editFunction={handleEditPerson}
           // deleteFunction={handleDeletePerson}
-          pdfFunction={() => AbrirRelatorio(NomeRelatorio.listaClientes)}
         />
         {deletingPerson && (
           <CustomDialog

@@ -10,8 +10,6 @@ import CustomDialog from '../../../../components/CustomDialog';
 import { GetServerSideProps, NextPage } from 'next';
 import api from '../../../../util/Api';
 import { Usuario } from '.prisma/client';
-import { NomeRelatorio } from '../../../../reports/nomesRelatorios';
-import { AbrirRelatorio } from '../../../../util/functions';
 
 type Props = {
   colunas: []
@@ -88,7 +86,6 @@ const PeopleList: NextPage<Props> = (props) => {
           columns={colunas}
           rows={linhas}
           editFunction={handleEditUser}
-          pdfFunction={() => AbrirRelatorio(NomeRelatorio.listaUsuarios)}
         />
         {deletingUser && (
           <CustomDialog

@@ -33,6 +33,8 @@ const useStyles = makeStyles((theme) => ({
   },
   btn: {
     minWidth: 160,
+    marginLeft: 20,
+    marginRight: 22,
   },
 }));
 
@@ -58,13 +60,13 @@ function ExportarCSV(props: Props) {
     coluna: string
   }[]>([]);
 
-  const handleCheckbox = (id: string) => {    
+  const handleCheckbox = (id?: string) => {    
     let newItem;
     const newItems = [];
 
     items.map((item) => {
       newItem = item;
-      if (newItem.id === id) newItem.checked = !newItem.checked;
+      if (!id || newItem.id === id) newItem.checked = !newItem.checked;
       newItems.push(newItem);
     });
 
@@ -88,15 +90,15 @@ function ExportarCSV(props: Props) {
         return;
       }
 
-      const response = await api.post(`/utils/exportar-csv?ref=${(relatorio || 0)}&filter=${filter}`, bodyData);
+      const response = await api.post(`/utils/exportar-xlsx?ref=${(relatorio || 0)}&filter=${filter}`, bodyData, { responseType: 'blob' });
 
       if (response?.status === 200) {
-        fileDownload(response.data, `Relatorio-${format(new Date(), 'yyyy-MM-dd-HH-mm-ss')}.csv`);
+        fileDownload(response.data, `Relatorio-${format(new Date(), 'yyyy-MM-dd-HH-mm-ss')}.xlsx`);
         onClose();
       } else if (response?.status === 403) {
-        addToast(response.data.error, { appearance: 'warning' });
+        addToast("Não há dados a exportar!", { appearance: 'warning' });
       } else {
-        throw new Error(response.data.error)
+        throw new Error("Ocorreu um erro ao gerar o arquivo!")
       }
     } catch (err) {
       addToast(err.message, { appearance: 'error' });
@@ -153,6 +155,13 @@ function ExportarCSV(props: Props) {
         </List>
       </DialogContent>
       <DialogActions className={classes.actions}>
+        <CustomButton
+          className={classes.btn}
+          label="Inverter seleção"
+          color='primary'
+          variant="outlined"
+          func={() => handleCheckbox()}
+        />
         <CustomButton
           className={classes.btn}
           label={isLoading ? "Exportando" : "Exportar"}

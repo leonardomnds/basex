@@ -17,9 +17,8 @@ import CustomTable, { getColumn, getRow } from '../../../../components/Table';
 import CustomDialog from '../../../../components/CustomDialog';
 import { GetServerSideProps, NextPage } from 'next';
 import api from '../../../../util/Api';
-import { AbrirRelatorio, FormatarCpfCnpj, GetDataFromJwtToken, ZerosLeft } from '../../../../util/functions';
+import { FormatarCpfCnpj, GetDataFromJwtToken, ZerosLeft } from '../../../../util/functions';
 import ConsultaPessoas from '../../../../components/CustomDialog/ConsultaPessoas';
-import { NomeRelatorio } from '../../../../reports/nomesRelatorios';
 
 const useStyles = makeStyles((theme) => ({
   themeError: {
@@ -208,9 +207,6 @@ const List: NextPage<Props> = (props: Props) => {
           columns={colunas}
           rows={linhas}
           editFunction={handleEditInstrument}
-          pdfFunction={() => {
-            AbrirRelatorio(NomeRelatorio.listaInstrumentos, (uuidPessoa ? `p.id = '${uuidPessoa}'` : ''))
-          }}
         />
         {deletingInstrument && (
           <CustomDialog

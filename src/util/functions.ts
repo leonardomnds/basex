@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import { NextApiRequest } from 'next';
 import { NomeRelatorio } from '../reports/nomesRelatorios';
 import { format } from 'date-fns';
+import xlsx from 'xlsx';
 
 export const SomenteNumeros = (str: string) => {
   let onlyNumbers = '';
@@ -238,32 +239,35 @@ export const PascalCase = (str: string = '', qtdeNotCapitalize: number = 0) => {
   return word;
 }
 
+const FormatToExport = (key, value) => {
+  try {
+    if (value === null || value === undefined) {
+      return '';
+    }  
+
+    if (typeof value === 'string') {
+      // Validando se é uma data
+      if ((value.length === 10 || value.length === 25 || value.length === 29)
+        && value.indexOf('-') === 4
+        && value.lastIndexOf('-') === 7
+      ) {
+        return format(new Date(value.substring(0,10)), 'dd/MM/yyyy');
+      }
+
+      // Removendo caracteres que possam quebrar o arquivo CSV gerado
+      return value.split(';').join(' ').split('\r\n').join(' ').split('\n').join(' ').split('\t').join(' ').trim();
+    } else if (key.includes('.ativo') && typeof value === 'number') {
+      return value === 1 ? "Sim" : "Não";
+    }
+  } catch (err) {
+    return value;
+  }
+  return value;
+}
+
 export const JsonToCSV = async (json: Object[]) => {
   // Caractere que separa cada campo
   const separator = ';';
-
-  // Função para formatar os dados de acordo com cada tipo
-  const formater = (key, value) => {
-    try {
-      if (value === null || value === undefined) {
-        return '';
-      }  
-      if (typeof value === 'string') {
-        // Validando se é uma data
-        if ((value.length === 10 || value.length === 29) && value.indexOf('-') === 4 && value.lastIndexOf('-') === 7) {
-          return format(new Date(value.substring(0,10)), 'dd/MM/yyyy');
-        }
-
-        // Removendo caracteres que possam quebrar o arquivo CSV gerado
-        return value.split(';').join(' ').split('\r\n').join(' ').split('\n').join(' ').split('\t').join(' ').trim();
-      } else if (key.includes('.ativo') && typeof value === 'number') {
-        return value === 1 ? "Sim" : "Não";
-      }
-    } catch (err) {
-      return value;
-    }
-    return value;
-  }
 
   // Nomes das colunas
   const header = Object.keys(json[0]);
@@ -272,10 +276,51 @@ export const JsonToCSV = async (json: Object[]) => {
     header.join(separator),
     ...json.map((row) => {
       return header.map((collName) => {
-        return formater(collName, row[collName]);
+        return FormatToExport(collName, row[collName]);
       }).join(separator)
     })
   ].join('\r\n');
 
   return csv;
+}
+
+export const JsonToXLSX = async (json: Object[], filePath: string, sheetName?: string) => {
+  // Nomes das colunas
+  const header = Object.keys(json[0]);
+
+  let oneRow = [];
+  const allRows = [];
+
+  // Transforma Objeto em Array, e adiciona tudo dentro de outro Array
+  json.forEach((item) => {
+    oneRow = [];
+
+    header.forEach((coluna) => {
+      oneRow.push(FormatToExport(coluna, item[coluna]))
+    });
+
+    allRows.push(oneRow);
+  });
+
+  try {
+    // Criando planilha Excel
+    const workBook = xlsx.utils.book_new();
+    const workSheet = xlsx.utils.aoa_to_sheet([header, ... allRows]);
+    
+    // Criando arquivo na pasta passada por parâmetro
+    xlsx.utils.book_append_sheet(workBook, workSheet, sheetName || 'Dados');
+    xlsx.writeFile(workBook, filePath);
+  } catch (err) {
+    throw new Error(err.message);
+  }
+}
+
+export const ConvertBlobToFile = (blob: Blob, fileName: string) => {
+  let b: any = blob;
+
+  b.lastModifiedDate = new Date();
+  b.name = fileName;
+
+  // Cast to a File() type
+  return <File>blob;
 }

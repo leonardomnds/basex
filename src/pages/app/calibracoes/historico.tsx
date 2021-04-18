@@ -6,6 +6,7 @@ import { addDays, addHours, format } from 'date-fns';
 import { makeStyles, Box, Paper, Grid, Hidden } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/SearchRounded';
 import CloseIcon from '@material-ui/icons/CloseRounded';
+import PdfIcon from '@material-ui/icons/FindInPageRounded';
 
 import PageHeader from '../../../components/Layout/PageHeader';
 
@@ -18,10 +19,9 @@ import DatePicker from '../../../components/FormControl/DatePicker';
 import CustomTable, { getColumn, getRow } from '../../../components/Table';
 import { GetServerSideProps, NextPage } from 'next';
 import api from '../../../util/Api';
-import { AbrirRelatorio, FormatarCpfCnpj, GetDataFromJwtToken, ZerosLeft } from '../../../util/functions';
+import { ConvertBlobToFile, FormatarCpfCnpj, GetDataFromJwtToken, ZerosLeft } from '../../../util/functions';
 import ConsultaPessoas from '../../../components/CustomDialog/ConsultaPessoas';
 import ConsultaInstrumentos from '../../../components/CustomDialog/ConsultaInstrumentos';
-import { NomeRelatorio } from '../../../reports/nomesRelatorios';
 
 const useStyles = makeStyles((theme) => ({
   themeError: {
@@ -169,6 +169,7 @@ const List: NextPage<Props> = (props: Props) => {
               getRow(
                 [
                   c.id,
+                  c.instrumento.id,
                   c.data_calibracao ? format(addHours(new Date(c.data_calibracao), 3), 'dd/MM/yyyy') : '',
                   c.instrumento?.tag || '',
                   c.instrumento?.descricao || '',
@@ -281,6 +282,25 @@ const List: NextPage<Props> = (props: Props) => {
     );
   }
 
+  const openPdf = async (calibracao: any) => {
+    try {
+      const response = await api.get('/pessoas/'+uuidPessoa+'/instrumentos/'
+        +calibracao.instrumento_id+'/calibracoes/'+calibracao.id+'/certificado', { responseType: 'blob' });
+
+      if (response?.status === 200) {
+        const file = ConvertBlobToFile(response.data, `Certificado-${calibracao.id}.pdf`);
+        const win = window.open(URL.createObjectURL(file), '_blank');
+        if (win) win.focus();
+      } else if (response?.status === 403) {
+        addToast('Essa calibração não tem Certificado anexado!', { appearance: 'info' });
+      } else {
+        throw new Error(response.data.error)
+      }
+    } catch (err) {
+      addToast(err.message, { appearance: 'error' });
+    }
+  }
+
   return (
       <Box>
         <PageHeader title="Histórico de calibrações" btnLabel="Nova" btnFunc={novaCalibracao} />
@@ -290,18 +310,9 @@ const List: NextPage<Props> = (props: Props) => {
           isLoading={isLoading}
           columns={colunas}
           rows={linhas}
-          pdfFunction={() => {
-            if (uuidPessoa) {
-
-              let where = `i.pessoa_id = '${uuidPessoa}'`;
-              where += ` and c.data_calibracao between '${format(dataInicial, 'yyyy-MM-dd')}' and '${format(dataFinal, 'yyyy-MM-dd')}'`;
-              if (uuidInstrumento) where += ` and i.id = '${uuidInstrumento}'`;
-
-              AbrirRelatorio(NomeRelatorio.listaCalibracoes, where);
-            } else {
-              addToast('É necessário selecionar o cliente!', { appearance: 'warning' });
-            }
-          }}
+          selectFunction={openPdf}
+          selectIcon={PdfIcon}
+          selectLabel="Visualizar Certificado"
         />
         {consultandoPessoa && (
           <ConsultaPessoas
@@ -334,6 +345,7 @@ export const getServerSideProps : GetServerSideProps = async ({ req, query }) =>
 
   const colunas = [];
   colunas.push(getColumn('id', 'Id', 0, 'center', null, true));
+  colunas.push(getColumn('instrumento_id', 'instrumento_id', 0, 'center', null, true));
   colunas.push(getColumn('dtCalibracao', 'Data', 50, 'center'));
   colunas.push(getColumn('tagInst', 'TAG Inst.', 50, 'left'));
   colunas.push(getColumn('descInst', 'Instrumento', 100, 'left'));
