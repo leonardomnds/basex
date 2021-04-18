@@ -9,17 +9,22 @@ import CustomTable, { getColumn, getRow } from '../../../../components/Table';
 import CustomDialog from '../../../../components/CustomDialog';
 import { GetServerSideProps, NextPage } from 'next';
 import api from '../../../../util/Api';
-import { AbrirRelatorio } from '../../../../util/functions';
+import { AbrirRelatorio, GetDataFromJwtToken } from '../../../../util/functions';
 import { NomeRelatorio } from '../../../../reports/nomesRelatorios';
 
 type Props = {
+  pessoaId: string,
   colunas: []
 }
 
 const PeopleList: NextPage<Props> = (props) => {
   const router = useRouter();
   const { addToast } = useToasts();
-  const { colunas } = props;
+  const { pessoaId, colunas } = props;
+
+  if (pessoaId) {
+    router.push('/app/home');
+  }
 
   const [isLoading, setLoading] = useState<boolean>(false);
   const [deletingPerson, setDeletingPerson] = useState(null);
@@ -138,7 +143,8 @@ const PeopleList: NextPage<Props> = (props) => {
 
 export default PeopleList;
 
-export const getServerSideProps : GetServerSideProps = async () => {
+export const getServerSideProps : GetServerSideProps = async ({ req }) => {
+  const jwt = GetDataFromJwtToken(req.cookies.token);
 
   const colunas = [];
   colunas.push(getColumn('id', 'Id', 0, 'center', null, true));
@@ -151,6 +157,7 @@ export const getServerSideProps : GetServerSideProps = async () => {
 
   return {
     props: {
+      pessoaId: jwt?.pessoaId || null,
       colunas
     }
   }

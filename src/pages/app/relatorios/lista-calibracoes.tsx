@@ -20,6 +20,8 @@ import prisma from '../../../prisma/PrismaInstance';
 import {format} from 'date-fns';
 import CustomButton from '../../../components/CustomButton';
 import { NomeRelatorio } from '../../../reports/nomesRelatorios';
+import { Base64 } from 'js-base64';
+import ExportarCSV from '../../../components/CustomDialog/ExportarCSV';
 
 const useStyles = makeStyles((theme) => ({
   themeError: {
@@ -49,6 +51,8 @@ const ListaCalibracoes: NextPage<Props> = (props: Props) => {
   const { addToast } = useToasts();
   const { usuarioId, pessoaId, laboratorios } = props;
 
+  const [isExport, setExport] = useState<boolean>(false);
+
   const [uuidPessoa, setUuidPessoa] = useState<string>(pessoaId);
   const [codPessoa, setCodPessoa] = useState<number>(null);
   const [cpfCnpjPessoa, setCpfCnpjPessoa] = useState<string>('');
@@ -68,17 +72,17 @@ const ListaCalibracoes: NextPage<Props> = (props: Props) => {
   const [listaLaboratorios] = useState(laboratorios);
   const [laboratorio, setLaboratorio] = useState<string>(' ');
 
-  const getWhere = () => {
+  const getWhere = (csv: boolean = false) => {
     let where = "1=1";
 
-    if (uuidPessoa) where += ` and i.pessoa_id = '${uuidPessoa}'`;
-    if (uuidInstrumento) where += ` and i.id = '${uuidInstrumento}'`;
-    if (dataCalibracaoInicial) where += ` and c.data_calibracao >= '${format(dataCalibracaoInicial, 'yyyy-MM-dd')}'`;
-    if (dataCalibracaoFinal) where += ` and c.data_calibracao <= '${format(dataCalibracaoFinal, 'yyyy-MM-dd')}'`;
+    if (uuidPessoa) where += ` and ${csv ? 'instrumentos' : 'i'}.pessoa_id = '${uuidPessoa}'`;
+    if (uuidInstrumento) where += ` and ${csv ? 'instrumentos' : 'i'}.id = '${uuidInstrumento}'`;
+    if (dataCalibracaoInicial) where += ` and ${csv ? 'calibracoes' : 'c'}.data_calibracao >= '${format(dataCalibracaoInicial, 'yyyy-MM-dd')}'`;
+    if (dataCalibracaoFinal) where += ` and ${csv ? 'calibracoes' : 'c'}.data_calibracao <= '${format(dataCalibracaoFinal, 'yyyy-MM-dd')}'`;
     if ((laboratorio || '').toUpperCase() === 'NÃO INFORMADO') {
-      where += ` and nullif(trim(c.laboratorio), '') is null`;
+      where += ` and nullif(trim(${csv ? 'calibracoes' : 'c'}.laboratorio), '') is null`;
     } else if ((laboratorio || '').length > 0 && laboratorio != ' ') {
-      where += ` and coalesce(upper(nullif(trim(c.laboratorio), '')), 'Não informado') = '${laboratorio}'`;
+      where += ` and coalesce(upper(nullif(trim(${csv ? 'calibracoes' : 'c'}.laboratorio), '')), 'Não informado') = '${laboratorio.trim().toUpperCase()}'`;
     }
 
     return where;
@@ -276,6 +280,7 @@ const ListaCalibracoes: NextPage<Props> = (props: Props) => {
               className={classes.btnMargin}
               label="Exportar"
               icon={<GridIcon/>}
+              func={() => setExport(true)}
             />
             <CustomButton
               label="Gerar PDF"
@@ -295,6 +300,14 @@ const ListaCalibracoes: NextPage<Props> = (props: Props) => {
       {getCamposBuscaInstrumento()}
       {getCamposFiltros()}
       {getButtons()}
+      {isExport && (
+        <ExportarCSV
+          relatorio={NomeRelatorio.listaCalibracoes}
+          isOpen={isExport}
+          onClose={() => setExport(false)}
+          filter={encodeURI(Base64.btoa(getWhere(true)))}
+        />
+      )}
       {consultandoPessoa && (
         <ConsultaPessoas
           isOpen={consultandoPessoa}

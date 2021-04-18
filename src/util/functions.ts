@@ -3,6 +3,7 @@ import { Base64 } from 'js-base64';
 import jwt from 'jsonwebtoken';
 import { NextApiRequest } from 'next';
 import { NomeRelatorio } from '../reports/nomesRelatorios';
+import { format } from 'date-fns';
 
 export const SomenteNumeros = (str: string) => {
   let onlyNumbers = '';
@@ -217,7 +218,6 @@ export const ValidateAuth = (req: NextApiRequest, type: 'user' | 'person') => {
 
 export const AbrirRelatorio = (relatorio: NomeRelatorio, filters?: string) => {
   let url = `/app/pdf?ref=${relatorio.toString()}`;
-  //if (filters?.length > 0) url += '&filters='+btoa(filters);
   if (filters?.length > 0) url += '&filters='+encodeURI(Base64.btoa(filters));
   const win = window.open(url, '_blank');
   if (win) win.focus();
@@ -236,4 +236,46 @@ export const PascalCase = (str: string = '', qtdeNotCapitalize: number = 0) => {
   });
 
   return word;
+}
+
+export const JsonToCSV = async (json: Object[]) => {
+  // Caractere que separa cada campo
+  const separator = ';';
+
+  // Função para formatar os dados de acordo com cada tipo
+  const formater = (key, value) => {
+    try {
+      if (value === null || value === undefined) {
+        return '';
+      }  
+      if (typeof value === 'string') {
+        // Validando se é uma data
+        if ((value.length === 10 || value.length === 29) && value.indexOf('-') === 4 && value.lastIndexOf('-') === 7) {
+          return format(new Date(value.substring(0,10)), 'dd/MM/yyyy');
+        }
+
+        // Removendo caracteres que possam quebrar o arquivo CSV gerado
+        return value.split(';').join(' ').split('\r\n').join(' ').split('\n').join(' ').split('\t').join(' ').trim();
+      } else if (key.includes('.ativo') && typeof value === 'number') {
+        return value === 1 ? "Sim" : "Não";
+      }
+    } catch (err) {
+      return value;
+    }
+    return value;
+  }
+
+  // Nomes das colunas
+  const header = Object.keys(json[0]);
+
+  const csv = [
+    header.join(separator),
+    ...json.map((row) => {
+      return header.map((collName) => {
+        return formater(collName, row[collName]);
+      }).join(separator)
+    })
+  ].join('\r\n');
+
+  return csv;
 }

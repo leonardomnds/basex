@@ -351,7 +351,7 @@ function CustomTable({
               .map((row, rowKey) => {
                 return (
                   // eslint-disable-next-line react/no-array-index-key
-                  <TableRow hover role="checkbox" tabIndex={-1} key={rowKey} onClick={() => clickFunction(row)}>
+                  <TableRow hover role="checkbox" tabIndex={-1} key={rowKey} onClick={clickFunction ? () => clickFunction(row) : ()=>{}}>
                     {columns.map((column) => {
                       const value = row[column.id];
                       return (

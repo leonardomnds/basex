@@ -16,7 +16,7 @@ export default async function Estados(req: NextApiRequest, res: NextApiResponse)
   }
 }
 
-const listarEstados = () => {
+export const listarEstados = () => {
   return [
     { uf: 'AC', descricao: 'ACRE' },
     { uf: 'AL', descricao: 'ALAGOAS' },

@@ -34,6 +34,7 @@ import {
   FormatarCep,
   FormatarTelefone,
   ZerosLeft,
+  GetDataFromJwtToken,
 } from '../../../../util/functions';
 import { GetServerSideProps, NextPage } from 'next';
 import { CategoriaPessoa, GrupoPessoa, Pessoa } from '.prisma/client';
@@ -65,13 +66,18 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 type Props = {
+  clienteLogado: string,
   pessoaId: string
 }
 
 const NewPeople: NextPage<Props> = (props) => {
   const classes = useStyles();
   const router = useRouter();
-  const { pessoaId } = props;
+  const { clienteLogado, pessoaId } = props;
+
+  if (clienteLogado) {
+    router.push('/app/home');
+  }
 
   const { addToast } = useToasts();
 
@@ -693,9 +699,11 @@ const NewPeople: NextPage<Props> = (props) => {
 
 export default NewPeople;
 
-export const getServerSideProps : GetServerSideProps = async ({ params }) => {
+export const getServerSideProps : GetServerSideProps = async ({ req, params }) => {
+  const jwt = GetDataFromJwtToken(req.cookies.token);
   return {
     props: {
+      clienteLogado: jwt?.pessoaId || null,
       pessoaId: params?.id || null,
     }
   }

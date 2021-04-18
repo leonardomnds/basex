@@ -18,6 +18,8 @@ import prisma from '../../../prisma/PrismaInstance';
 import {format} from 'date-fns';
 import CustomButton from '../../../components/CustomButton';
 import { NomeRelatorio } from '../../../reports/nomesRelatorios';
+import { Base64 } from 'js-base64';
+import ExportarCSV from '../../../components/CustomDialog/ExportarCSV';
 
 const useStyles = makeStyles((theme) => ({
   themeError: {
@@ -51,6 +53,8 @@ const ListaInstrumentos: NextPage<Props> = (props: Props) => {
   const { addToast } = useToasts();
   const { usuarioId, pessoaId, responsaveis, areas, subareas, fabricantes, modelos } = props;
 
+  const [isExport, setExport] = useState<boolean>(false);
+
   const [uuidPessoa, setUuidPessoa] = useState<string>(pessoaId);
   const [codPessoa, setCodPessoa] = useState<number>(null);
   const [cpfCnpjPessoa, setCpfCnpjPessoa] = useState<string>('');
@@ -70,41 +74,42 @@ const ListaInstrumentos: NextPage<Props> = (props: Props) => {
   const [fabricante, setFabricante] = useState<string>(' ');
   const [listaModelos] = useState(modelos);
   const [modelo, setModelo] = useState<string>(' ');
+  const [status, setStatus] = useState<number>(-1);
 
-  const [dataCalibracaoInicial, setDataCalibracaoInicial] = useState<Date>(new Date());
-  const [dataCalibracaoFinal, setDataCalibracaoFinal] = useState<Date>(new Date());
+  const [dataCalibracaoInicial, setDataCalibracaoInicial] = useState<Date>(null);
+  const [dataCalibracaoFinal, setDataCalibracaoFinal] = useState<Date>(null);
 
-  const [dataVencimentoInicial, setDataVencimentoInicial] = useState<Date>(new Date());
-  const [dataVencimentoFinal, setDataVencimentoFinal] = useState<Date>(new Date());
+  const [dataVencimentoInicial, setDataVencimentoInicial] = useState<Date>(null);
+  const [dataVencimentoFinal, setDataVencimentoFinal] = useState<Date>(null);
 
-  const getWhere = () => {
+  const getWhere = (csv: boolean = false) => {
     let where = "1=1";
 
     const getWhereListBoxes = (column: string, value: string) => {
       if ((value || '').toUpperCase() === 'NÃO INFORMADO') {
         where += ` and nullif(trim(${column}), '') is null`;
       } else if ((value || '').length > 0 && value != ' ') {
-        where += ` and coalesce(upper(nullif(trim(${column}), '')), 'Não informado') = '${value}'`;
+        where += ` and coalesce(upper(nullif(trim(${column}), '')), 'Não informado') = '${value.trim().toUpperCase()}'`;
       }
     }
 
-    if (uuidPessoa) where += ` and i.pessoa_id = '${uuidPessoa}'`;
-    if (tag) where += ` and i.tag like '%${tag}%'`;
-    if (descricao) where += ` and i.descricao like '%${descricao}%'`;
+    if (uuidPessoa) where += ` and ${csv ? 'instrumentos' : 'i'}.pessoa_id = '${uuidPessoa}'`;
+    if (tag) where += ` and upper(trim(${csv ? 'instrumentos' : 'i'}.tag)) like '%${tag.trim().toUpperCase()}%'`;
+    if (descricao) where += ` and upper(trim(${csv ? 'instrumentos' : 'i'}.descricao)) like '%${descricao.trim().toUpperCase()}%'`;
+    if (status === 0 || status === 1) where += ` and ${csv ? 'instrumentos' : 'i'}.ativo = ${status}`;
 
-    getWhereListBoxes('i.responsavel', responsavel);
-    getWhereListBoxes('i.area', area);
-    getWhereListBoxes('i.subarea', subarea);
-    getWhereListBoxes('i.fabricante', fabricante);
-    getWhereListBoxes('i.modelo', modelo);
+    getWhereListBoxes(`${csv ? 'instrumentos' : 'i'}.responsavel`, responsavel);
+    getWhereListBoxes(`${csv ? 'instrumentos' : 'i'}.area`, area);
+    getWhereListBoxes(`${csv ? 'instrumentos' : 'i'}.subarea`, subarea);
+    getWhereListBoxes(`${csv ? 'instrumentos' : 'i'}.fabricante`, fabricante);
+    getWhereListBoxes(`${csv ? 'instrumentos' : 'i'}.modelo`, modelo);
 
-    if (dataCalibracaoInicial) where += ` and v.ultima_calibracao >= '${format(dataCalibracaoInicial, 'yyyy-MM-dd')}'`;
-    if (dataCalibracaoFinal) where += ` and v.ultima_calibracao <= '${format(dataCalibracaoFinal, 'yyyy-MM-dd')}'`;
+    if (dataCalibracaoInicial) where += ` and ${csv ? 'instrumentos' : 'v'}.ultima_calibracao >= '${format(dataCalibracaoInicial, 'yyyy-MM-dd')}'`;
+    if (dataCalibracaoFinal) where += ` and ${csv ? 'instrumentos' : 'v'}.ultima_calibracao <= '${format(dataCalibracaoFinal, 'yyyy-MM-dd')}'`;
 
-    if (dataVencimentoInicial) where += ` and v.vencimento_calibracao >= '${format(dataCalibracaoInicial, 'yyyy-MM-dd')}'`;
-    if (dataVencimentoFinal) where += ` and v.vencimento_calibracao <= '${format(dataCalibracaoFinal, 'yyyy-MM-dd')}'`;
-
-    console.log(where);
+    if (dataVencimentoInicial) where += ` and ${csv ? 'instrumentos' : 'v'}.vencimento_calibracao >= '${format(dataCalibracaoInicial, 'yyyy-MM-dd')}'`;
+    if (dataVencimentoFinal) where += ` and ${csv ? 'instrumentos' : 'v'}.vencimento_calibracao <= '${format(dataCalibracaoFinal, 'yyyy-MM-dd')}'`;
+    
     return where;
   }
 
@@ -233,7 +238,7 @@ const ListaInstrumentos: NextPage<Props> = (props: Props) => {
               textItemZero="Todas"
             />
           </Grid>
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12} sm={6} md={4}>
             <Select
               label="Fabricante"
               value={fabricante}
@@ -243,7 +248,7 @@ const ListaInstrumentos: NextPage<Props> = (props: Props) => {
               textItemZero="Todos"
             />
           </Grid>
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12} sm={6} md={4}>
             <Select
               label="Modelo"
               value={modelo}
@@ -253,7 +258,20 @@ const ListaInstrumentos: NextPage<Props> = (props: Props) => {
               textItemZero="Todos"
             />
           </Grid>
-          <Grid item xs={6} sm={4} md={3} lg={3}>
+          <Grid item xs={12} sm={6} md={4}>
+            <Select
+              label="Status"
+              value={status}
+              setValue={setStatus}
+              itemZero={false}
+              items={[
+                { value: -1, text: 'Ambos' },
+                { value: 1, text: 'Somente Ativos' },
+                { value: 0, text: 'Somente Inativos' },
+              ]}
+            />
+          </Grid>
+          <Grid item xs={6} sm={5} md={3} lg={3}>
             <DatePicker
               label="Calibração de"
               value={dataCalibracaoInicial}
@@ -261,27 +279,30 @@ const ListaInstrumentos: NextPage<Props> = (props: Props) => {
               setValue={setDataCalibracaoInicial}
             />
           </Grid>
-          <Grid item xs={6} sm={4} md={3} lg={3}>
+          <Grid item xs={6} sm={5} md={3} lg={3}>
             <DatePicker
               label="Calibração até"
               value={dataCalibracaoFinal}
-              minValue={dataCalibracaoInicial}
+              minValue={dataCalibracaoInicial && dataCalibracaoInicial}
               maxValue={new Date()}
               setValue={setDataCalibracaoFinal}
             />
           </Grid>
-          <Grid item xs={6} sm={4} md={3} lg={3}>
+          <Hidden mdUp xsDown>
+            <Grid item xs={6} sm={2} md={3} lg={3}/>
+          </Hidden>
+          <Grid item xs={6} sm={5} md={3} lg={3}>
             <DatePicker
               label="Vencimento de"
               value={dataVencimentoInicial}
               setValue={setDataVencimentoInicial}
             />
           </Grid>
-          <Grid item xs={6} sm={4} md={3} lg={3}>
+          <Grid item xs={6} sm={5} md={3} lg={3}>
             <DatePicker
               label="Vencimento até"
               value={dataVencimentoFinal}
-              minValue={dataVencimentoInicial}
+              minValue={dataVencimentoInicial && dataVencimentoInicial}
               setValue={setDataVencimentoFinal}
             />
           </Grid>
@@ -299,6 +320,7 @@ const ListaInstrumentos: NextPage<Props> = (props: Props) => {
               className={classes.btnMargin}
               label="Exportar"
               icon={<GridIcon/>}
+              func={() => setExport(true)}
             />
             <CustomButton
               label="Gerar PDF"
@@ -317,6 +339,14 @@ const ListaInstrumentos: NextPage<Props> = (props: Props) => {
       {usuarioId && getCamposBuscaCliente()}
       {getCamposFiltros()}
       {getButtons()}
+      {isExport && (
+        <ExportarCSV
+          relatorio={NomeRelatorio.listaInstrumentos}
+          isOpen={isExport}
+          onClose={() => setExport(false)}
+          filter={encodeURI(Base64.btoa(getWhere(true)))}
+        />
+      )}
       {consultandoPessoa && (
         <ConsultaPessoas
           isOpen={consultandoPessoa}
