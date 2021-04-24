@@ -431,6 +431,7 @@ const NewPeople: NextPage<Props> = (props) => {
 
             //Acesso
             setSenhaAcesso('****');
+            setSenhaAcesso2('****');
 
           } else {
             router.push('/app/cadastro/clientes');

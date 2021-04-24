@@ -156,7 +156,7 @@ const List: NextPage<Props> = (props: Props) => {
 
   const salvarCalibracao = async () => {
     setSaving(true);
-    const editing = !isSaving;
+    const editing = false;
 
     if (!uuidPessoa || !uuidInstrumento) {
       addToast('Selecione o cliente e o instrumento!', {

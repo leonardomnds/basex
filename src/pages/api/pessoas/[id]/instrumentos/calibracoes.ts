@@ -48,7 +48,7 @@ const listarCalibracoes = async (query: { [key: string]: string | string[] }) =>
   if (query?.id) {
     instrumento.pessoa_id = query?.id?.toString();
   }
-  if (query?.instrumentoId) {
+  if (query?.instrumento_id) {
     instrumento.id = query?.instrumento_id?.toString();
   }
 
