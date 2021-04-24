@@ -2,12 +2,14 @@ import HomeIcon from '@material-ui/icons/HomeRounded';
 import CategoryIcon from '@material-ui/icons/CategoryRounded';
 import TuneIcon from '@material-ui/icons/TuneRounded';
 import DescriptionIcon from '@material-ui/icons/DescriptionRounded';
+import SettingsIcon from '@material-ui/icons/SettingsRounded';
 
 export type SubMenu = {
   label: string,
   path: string,
   user?: boolean,
   client?: boolean,
+  adm?: boolean,
 }
 
 export type Menu = {
@@ -15,6 +17,7 @@ export type Menu = {
   path: string,  
   user?: boolean,
   client?: boolean,
+  adm?: boolean,
   icon: any,
   items: SubMenu[]
 }
@@ -50,6 +53,7 @@ const sidebarItems : Menu[] = [
         label: 'Usuários',
         path: 'usuarios',
         user: true,
+        adm: true,
       }
     ],
   },
@@ -100,6 +104,14 @@ const sidebarItems : Menu[] = [
         client: true,
       },
     ],
+  },
+  {
+    label: 'Configurações',
+    path: '/app/configuracoes',
+    user: true,
+    adm: true,
+    icon: SettingsIcon,
+    items: null,
   },
 ];
 

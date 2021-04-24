@@ -48,18 +48,7 @@ export default async function CamposExportar(req: NextApiRequest, res: NextApiRe
         if (!pessoaId) dados = await getColunasTabela('categorias_pessoa', dados);
       }
 
-      const camposRetornar = [];
-      dados.map((d) => {
-        if (
-          d.coluna != 'id'
-          && !d.coluna.includes('_id')
-          && !d.coluna.includes('senha')
-        ) {
-          camposRetornar.push(d);
-        }
-      });
-
-      res.status(200).json(camposRetornar);
+      res.status(200).json(removerColunasSensiveis(dados));
       return;
     } else {
       res.status(405).json({error: 'Método não suportado!'});
@@ -74,4 +63,20 @@ export default async function CamposExportar(req: NextApiRequest, res: NextApiRe
     }
     res.status(500).json({error: err.message});
   }
+}
+
+export const removerColunasSensiveis = (dados: any[]) => {
+  const camposRetornar = [];
+  (dados || []).map((d) => {
+    if (
+      d.coluna != 'id'
+      && !d.coluna.includes('_id')
+      && !d.coluna.includes('senha')
+      && !d.coluna.includes('avatar')
+      && !d.coluna.includes('pdfCert')
+    ) {
+      camposRetornar.push(d);
+    }
+  });
+  return camposRetornar;
 }

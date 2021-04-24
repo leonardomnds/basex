@@ -7,7 +7,8 @@ import prisma from '../../../prisma/PrismaInstance';
 import { NomeRelatorio } from '../../../reports/nomesRelatorios';
 import ConsultasComuns from '../../../util/ConsultasComuns';
 import cors from '../../../util/Cors';
-import { JsonToCSV, JsonToXLSX, ValidateAuth } from '../../../util/functions';
+import { JsonToXLSX, ValidateAuth } from '../../../util/functions';
+import { removerColunasSensiveis } from './campos-exportar';
 
 export default async function CamposExportar(req: NextApiRequest, res: NextApiResponse) {
   
@@ -34,7 +35,8 @@ export default async function CamposExportar(req: NextApiRequest, res: NextApiRe
       where = `${(where || '').toString().length === 0 ? '1=1' : Base64.atob(decodeURI(where))}`;
 
       let sqlColunas = '';
-      (req.body || []).map((item, index) => {
+
+      removerColunasSensiveis(req.body).map((item, index) => {
         if (index !== 0) sqlColunas += ', ';
 
         if (item.tabela === 'instrumentos' && (item.coluna === 'ultima_calibracao' || item.coluna === 'vencimento_calibracao')) {

@@ -39,7 +39,7 @@ export const getEndItemIconButton = (
 
 type Props = {
   label: string,
-  type?: string,
+  type?: 'text' | 'password',
   disabled?: boolean,
   value: string,
   setValue?: (v: any) => void,

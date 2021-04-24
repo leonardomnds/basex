@@ -207,13 +207,16 @@ export const GetDataFromJwtToken = (token: string) => {
   return null;
 }
 
-export const ValidateAuth = (req: NextApiRequest, type: 'user' | 'person') => {
+export const ValidateAuth = (req: NextApiRequest, type: 'user' | 'person' | 'adm') => {
   let idAuth: string = null;
   const jwtData = GetDataFromJwtToken(req?.headers?.authorization);
   if (jwtData) {
-    idAuth = jwtData[(type === 'person') ? 'pessoaId' : 'usuarioId'];
-  }
-  
+    if (type === 'user' || (type === 'adm' && jwtData['usuarioAdm'])) {
+      idAuth = jwtData['usuarioId'];
+    } else if (type === 'person') {
+      idAuth = jwtData['pessoaId'];
+    }
+  }  
   return idAuth;
 }
 

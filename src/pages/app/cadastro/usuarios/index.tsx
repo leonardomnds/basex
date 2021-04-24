@@ -56,7 +56,7 @@ const PeopleList: NextPage<Props> = (props) => {
                   u.id,
                   u.nome,
                   u.usuario,
-                  '********',
+                  u.administrador ? 'Sim' : 'Não',
                   dateCadastro,
                   u.ativo ? 'Ativo' : 'Inativo',
                 ],
@@ -108,7 +108,7 @@ export const getServerSideProps : GetServerSideProps = async () => {
   colunas.push(getColumn('id', 'Id', 0, 'center', null, true));
   colunas.push(getColumn('nome', 'Nome/Razão', 100, 'left'));
   colunas.push(getColumn('usuario', 'Usuário', 50, 'left'));
-  colunas.push(getColumn('senha', 'Senha', 50, 'left'));
+  colunas.push(getColumn('adm', 'Administrador', 50, 'center'));
   colunas.push(getColumn('dataCadastro', 'Cadastro', 50, 'center'));
   colunas.push(getColumn('ativo', 'Status', 30, 'center'));
 

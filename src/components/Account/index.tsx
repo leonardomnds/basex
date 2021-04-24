@@ -45,36 +45,24 @@ function Account(props: Props) {
     router.replace('/login');
   };
 
-  // const handleSignIn = () => {
-  //   handleClose();
-  //   router.replace('/');
-  // };
+  const handlePass = () => {
+    handleClose();
+    router.push('/app/alterar-senha')
+  }
 
   const items = [
-    // {
-    //   id: 1,
-    //   label: 'Meu Perfil',
-    //   auth: true,
-    //   onClick: () => {},
-    // },
+    {
+      id: 1,
+      label: 'Alterar senha',
+      auth: true,
+      onClick: handlePass,
+    },
     {
       id: 2,
       label: 'Sair',
       auth: true,
       onClick: handleSignOut,
     },
-    // {
-    //   id: 3,
-    //   label: 'Registrar',
-    //   auth: false,
-    //   onClick: () => {},
-    // },
-    // {
-    //   id: 1,
-    //   label: 'Fazer Login',
-    //   auth: false,
-    //   onClick: handleSignIn,
-    // },
   ];
 
   useEffect(() => {

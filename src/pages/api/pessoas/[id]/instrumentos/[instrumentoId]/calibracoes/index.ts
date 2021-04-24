@@ -47,8 +47,6 @@ const Calibracoes = nextConnect()
         return;
       }
 
-      console.log(req.body);
-
       const calibracaoSalvar : Calibracao = req.body;
       const retPost = await salvarCalibracao(calibracaoSalvar, instrumentoId);
 
@@ -145,8 +143,6 @@ export const salvarCalibracao = async (calibracao: Calibracao, instrumentoId: st
   if (typeof calibracao.data_calibracao === 'string') {
     calibracao.data_calibracao = new Date(calibracao.data_calibracao);
   }
-
-  console.log(calibracao);
 
   let json;
   if (id) { // Update

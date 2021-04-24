@@ -8,11 +8,19 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 import prisma from '../../../prisma/PrismaInstance';
 import cors from '../../../util/Cors';
+import { ValidateAuth } from '../../../util/functions';
 
 const Usuarios = nextConnect()
   .get(async (req: NextApiRequest, res: NextApiResponse) => {
     try {
       await cors(req, res);
+
+      const usuarioId = ValidateAuth(req, 'adm');
+
+      if (!usuarioId) {
+        res.status(401).json({error: 'Acesso não autorizado!'});
+        return;
+      }  
 
       const json = await listarUsuarios();
       res.status(200).json(json);
@@ -26,7 +34,18 @@ const Usuarios = nextConnect()
     try {
       await cors(req, res);
 
+      const usuarioId = ValidateAuth(req, 'adm');
+
+      if (!usuarioId) {
+        if (req['file'] && req['file'].path) {        
+          fs.unlink(req['file'].path, () => {});
+        }
+        res.status(401).json({error: 'Acesso não autorizado!'});
+        return;
+      }
+
       const usuarioSalvar : Usuario = req.body;
+
       const retPost = await salvarUsuario(usuarioSalvar);
       if (req['file'] && req['file']?.path && retPost?.usuario?.id) {
         fs.readFile(req['file'].path, async (fsErr, data) => {
@@ -61,48 +80,9 @@ export const config = {
   },
 };
 
-/*
-export default async function Login(req: NextApiRequest, res: NextApiResponse) {
-  try {
-
-    await cors(req, res);
-    
-    switch (req.method) {
-      case 'POST':
-        const usuarioSalvar : Usuario = req.body;
-        const retPost = await salvarUsuario(usuarioSalvar);
-
-        if (retPost.error) {
-          res.status(retPost.code).json({error: retPost.error});
-          return;
-        }
-
-        res.status(201).json(retPost.usuario);
-        return;
-
-      case 'GET':
-        const json = await listarUsuarios();
-        res.status(200).json(json);
-        return;
-
-      default:
-        res.status(405).json({error: 'Método não suportado!'});
-    }
-
-  } catch (err) {
-    res.status(500).json({error: err.message});
-  }
-}
-*/
 const listarUsuarios = async () => {
   const users = await prisma.usuario.findMany({
-    select: {
-      id: true,
-      nome: true,
-      usuario: true,
-      ativo: true,
-      data_cadastro: true
-    },
+    select: getUsuarioJsonReturn(),
     where: {
       usuario: {
         not: 'admin'
@@ -119,7 +99,10 @@ export const salvarUsuario = async (usuario: Usuario) => {
 
   usuario.usuario = usuario.usuario?.toUpperCase();
   usuario.ativo = Boolean(usuario.ativo);
+  usuario.administrador = Boolean(usuario.administrador);
   usuario.avatar = null; // Necessário chamar o método 'salvarAvatarUsuario'
+  usuario.expiracao_url_senha = null;
+  usuario.url_senha = null;
 
   const existe = await prisma.usuario.findUnique({
     where: {
@@ -188,7 +171,9 @@ export const getUsuarioJsonReturn = () => {
     id: true,
     usuario: true,
     nome: true,
+    email: true,
     ativo: true,
+    administrador: true,
     data_cadastro: true,
   }
 }

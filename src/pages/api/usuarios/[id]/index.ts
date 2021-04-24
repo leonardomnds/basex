@@ -8,11 +8,20 @@ import cors from '../../../../util/Cors';
 import nextConnect from 'next-connect';
 
 import { multerUpload } from "../../../../util/middlewares";
+import { ValidateAuth } from '../../../../util/functions';
 
 const Usuarios = nextConnect()
   .get(async (req: NextApiRequest, res: NextApiResponse) => {
     try {
       await cors(req, res);
+
+      const usuarioId = ValidateAuth(req, 'adm');
+
+      if (!usuarioId) {
+        res.status(401).json({error: 'Acesso não autorizado!'});
+        return;
+      }  
+
       const id = req.query.id.toString();
 
       const getPes = await getUsuario(id);
@@ -25,6 +34,14 @@ const Usuarios = nextConnect()
   .delete(async (req: NextApiRequest, res: NextApiResponse) => {
     try {
       await cors(req, res);
+
+      const usuarioId = ValidateAuth(req, 'adm');
+
+      if (!usuarioId) {
+        res.status(401).json({error: 'Acesso não autorizado!'});
+        return;
+      }  
+
       const id = req.query.id.toString();
 
       const json = await deletarUsuario(id);
@@ -38,6 +55,16 @@ const Usuarios = nextConnect()
   .put(async (req: NextApiRequest, res: NextApiResponse) => {
     try {
       await cors(req, res);
+
+      const usuarioId = ValidateAuth(req, 'adm');
+
+      if (!usuarioId) {
+        if (req['file'] && req['file'].path) {        
+          fs.unlink(req['file'].path, () => {});
+        }
+        res.status(401).json({error: 'Acesso não autorizado!'});
+        return;
+      }  
 
       const id = req.query.id.toString();
       
@@ -78,48 +105,6 @@ export const config = {
   },
 };
 
-/*
-export default async function Grupo(req: NextApiRequest, res: NextApiResponse) {
-  try {
-
-    await cors(req, res);
-
-    const id = req.query.id.toString();
-    
-    switch (req.method) {
-      case 'GET':
-        const getPes = await getUsuario(id);
-        res.status(200).json(getPes);
-        return;
-
-      case 'PUT':
-        const usuarioSalvar : Usuario = req.body;
-        usuarioSalvar.id = id;
-
-        const retPost = await salvarUsuario(usuarioSalvar);
-
-        if (retPost.error) {
-          res.status(retPost.code).json({error: retPost.error});
-          return;
-        }
-
-        res.status(200).json(retPost.usuario);
-        return;
-
-      case 'DELETE':
-        const json = await deletarUsuario(id);
-        res.status(202).json(json);
-        return;
-
-      default:
-        res.status(405).json({ error: 'Método não suportado!' });
-    }
-
-  } catch (err) {
-    res.status(500).json({error: err.message});
-  }
-}
-*/
 const deletarUsuario = async (id: string) => {
   const elimina = await prisma.usuario.delete({
     where: {

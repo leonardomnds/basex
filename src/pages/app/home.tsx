@@ -12,7 +12,6 @@ import {
 
 import PageHeader from '../../components/Layout/PageHeader';
 
-import { GetServerSideProps } from 'next';
 import api from '../../util/Api';
 import { AbrirRelatorio, GetDataFromJwtToken } from '../../util/functions';
 import { NomeRelatorio } from '../../reports/nomesRelatorios';
@@ -198,9 +197,3 @@ const Indicadores = () => {
 }
 
 export default Indicadores;
-
-export const getServerSideProps : GetServerSideProps = async () => {
-  return {
-    props: {}
-  }
-}

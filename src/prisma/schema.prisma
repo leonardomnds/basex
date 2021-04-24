@@ -12,9 +12,13 @@ model Usuario {
   usuario String @unique @db.VarChar(100)
   senha String @db.VarChar(100)
   nome String @db.VarChar(100)
+  email String? @db.VarChar(100)
   ativo Boolean @default(true)
+  administrador Boolean @default(false)
   data_cadastro DateTime @default(now())
   avatar Bytes? @db.LongBlob
+  url_senha String? @db.VarChar(100)
+  expiracao_url_senha DateTime?
   pessoas Pessoa[]
   @@map("usuarios")
 }
@@ -43,7 +47,7 @@ model Pessoa {
   insc_municipal String? @db.VarChar(50)
   telefone String? @db.VarChar(20)
   celular String? @db.VarChar(20)
-  email String? @db.VarChar(255)
+  email String? @db.VarChar(4000)
   cep String? @db.VarChar(9)
   logradouro String? @db.VarChar(255)
   numero String? @db.VarChar(50)
@@ -57,7 +61,10 @@ model Pessoa {
   categoria_id String? @db.VarChar(100)
   categoria CategoriaPessoa? @relation(fields: [categoria_id], references: [id])
   ativo Boolean @default(true)
-  data_cadastro DateTime @default(now())  
+  data_cadastro DateTime @default(now())
+  url_senha String? @db.VarChar(100)
+  expiracao_url_senha DateTime?
+  email_recuperacao String? @db.VarChar(255)
   usuario_id String @db.VarChar(100)
   usuario Usuario @relation(fields: [usuario_id], references: [id])
   intrumentos Instrumento[]
@@ -95,4 +102,15 @@ model Calibracao {
   laboratorio String? @db.VarChar(100)
   data_cadastro DateTime @default(now())
   @@map("instrumentos_calibracoes")
+}
+
+model Configuracao {
+  id String @id @default(uuid()) @db.VarChar(100)
+  email_smtp String? @db.VarChar(100)
+  email_porta Int? @db.Int
+  email_ssl Boolean @default(false)
+  email_tls Boolean @default(false)
+  email_usuario String? @db.VarChar(100)
+  email_senha String? @db.VarChar(100)
+  @@map("configuracoes")
 }

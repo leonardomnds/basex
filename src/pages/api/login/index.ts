@@ -55,6 +55,7 @@ const efetuarLogin = async (usuario: string, senha: string) => {
         nome: true,
         usuario: true,
         senha: true,
+        administrador: true,
       }
     });
 
@@ -72,6 +73,7 @@ const efetuarLogin = async (usuario: string, senha: string) => {
       const token = await jwt.sign(
         {
           usuarioId: user.id,
+          usuarioAdm: user.administrador,
           pessoaId: null
         },
         process.env.JWT_KEY,
@@ -117,7 +119,9 @@ const efetuarLoginPessoa = async (usuario: string, senha: string) => {
       const token = await jwt.sign(
         {
           usuarioId: null,
+          usuarioAdm: null,
           pessoaId: people.id
+
         },
         process.env.JWT_KEY,
         {
@@ -141,7 +145,8 @@ const criarUsuarioAdmin = async () => {
     data: {
       nome: 'Administrador',
       usuario: 'ADMIN',
-      senha: '$2b$10$K.8mjdRixKhxQy1XcjTol.x7W5mXjcdKy9ehZIsdxKORcr5Sw4Sqi'
+      senha: '$2b$10$K.8mjdRixKhxQy1XcjTol.x7W5mXjcdKy9ehZIsdxKORcr5Sw4Sqi',
+      administrador: true,
     }
   });
   return false;

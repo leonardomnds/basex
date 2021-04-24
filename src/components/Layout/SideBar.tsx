@@ -85,9 +85,8 @@ const useStyles = makeStyles((theme) => ({
     paddingLeft: theme.spacing(2),
   },
   logo: {
-    cursor: 'pointer',
     color: 'white',
-    height: 18,
+    height: 16,
     marginLeft: theme.spacing(2),
   },
   listItem: {
@@ -168,6 +167,7 @@ const Sidebar = (props: Props) => {
 
   const userLogged = !isClientLogged;
   const clientLogged = isClientLogged;
+  const userAdmin = userLogged && Boolean(GetDataFromJwtToken(token)?.usuarioAdm);
 
   const [opennedItem, setOpennedItem] = useState(false);
   const [descOpennedItem, setDescOpennedItem] = useState('');
@@ -202,8 +202,10 @@ const Sidebar = (props: Props) => {
 
     let listaSubMenus: Array<SubMenu>;
 
-    if (userLogged) {
+    if (userAdmin) {
       listaSubMenus = subMenus.filter((item) => item.user);
+    } else if (userLogged) {
+      listaSubMenus = subMenus.filter((item) => item.user && !item.adm);
     } else if (clientLogged) {
       listaSubMenus = subMenus.filter((item) => item.client);
     }
@@ -264,10 +266,12 @@ const Sidebar = (props: Props) => {
 
     let listaMenus: Array<Menu>;
 
-    if (userLogged) {
+    if (userAdmin) {
       listaMenus = sidebarItems.filter((item) => item.user);
+    } else if (userLogged) {
+      listaMenus = sidebarItems.filter((item) => item.user && !item.adm);
     } else if (clientLogged) {
-      listaMenus = sidebarItems.filter((item) => item.client)
+      listaMenus = sidebarItems.filter((item) => item.client);
     }
 
     return (
@@ -361,7 +365,7 @@ const Sidebar = (props: Props) => {
             />
           </Tooltip>
           <img
-            src="/assets/images/logo.svg"
+            src="/assets/images/Logo_Nizatech_Branco.png"
             alt="logo"
             className={classes.logo}
           />

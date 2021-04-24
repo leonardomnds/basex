@@ -156,6 +156,7 @@ const List: NextPage<Props> = (props: Props) => {
 
   const salvarCalibracao = async () => {
     setSaving(true);
+    const editing = !isSaving;
 
     if (!uuidPessoa || !uuidInstrumento) {
       addToast('Selecione o cliente e o instrumento!', {
@@ -167,15 +168,6 @@ const List: NextPage<Props> = (props: Props) => {
       addToast('Informe o número do certificado!', { appearance: 'warning' });
     } else {
       try {
-        const calibracao: Calibracao = {
-          id: null,
-          instrumento_id: uuidInstrumento || null,
-          data_calibracao: dataCalibracao || null,
-          numero_certificado: numeroCertificado || null,
-          pdfCertificado: null,
-          laboratorio: laboratorio || null,
-          data_cadastro: null,
-        };
 
         let response;
         const formData = new FormData();
@@ -185,35 +177,12 @@ const List: NextPage<Props> = (props: Props) => {
         if (laboratorio) formData.append('laboratorio', laboratorio);
         if (arquivoCertificado?.file) formData.append('pdfCertificado', arquivoCertificado?.file);
 
-        if (false) {
-          response = await api.put('/pessoas/'+uuidPessoa+'/instrumentos/'+uuidInstrumento+'/calibracoes/'+'id_aqui', formData);
+        if (editing) {
+          response = await api.put(`/pessoas/${uuidPessoa}/instrumentos/${uuidInstrumento}/calibracoes/${editing}`, formData);
         } else {
-          response = await api.post('/pessoas/'+uuidPessoa+'/instrumentos/'+uuidInstrumento+'/calibracoes', formData);
+          response = await api.post(`/pessoas/${uuidPessoa}/instrumentos/${uuidInstrumento}/calibracoes`, formData);
         }
-/*
-        let response;
-        if (false) {
-          // Alteração ainda não criada
-          response = await api.put(
-            '/pessoas/' +
-              uuidPessoa +
-              '/instrumentos/' +
-              uuidInstrumento +
-              '/calibracoes/' +
-              calibracao.id,
-            calibracao,
-          );
-        } else {
-          response = await api.post(
-            '/pessoas/' +
-              uuidPessoa +
-              '/instrumentos/' +
-              uuidInstrumento +
-              '/calibracoes',
-            calibracao,
-          );
-        }
-*/
+
         if (!response?.data?.error) {
           addToast(
             `Calibração ${

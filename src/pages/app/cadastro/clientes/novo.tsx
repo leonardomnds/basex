@@ -119,6 +119,7 @@ const NewPeople: NextPage<Props> = (props) => {
 
   // Dados de Acesso
   const [senhaAcesso, setSenhaAcesso] = useState<string>('');
+  const [senhaAcesso2, setSenhaAcesso2] = useState<string>('');
 
   const handleChangeTab = (event, newValue) => {
     setCurrentTab(newValue);
@@ -155,6 +156,11 @@ const NewPeople: NextPage<Props> = (props) => {
         appearance: 'warning',
       });
       setCurrentTab(2);
+    } else if (senhaAcesso != senhaAcesso2) {
+      addToast('As senhas informadas não são iguais!', {
+        appearance: 'warning',
+      });
+      setCurrentTab(2);
     } else {
       try {
 
@@ -182,6 +188,9 @@ const NewPeople: NextPage<Props> = (props) => {
           ativo: isAtivo,
           data_cadastro: null,
           usuario_id: null,
+          expiracao_url_senha: null,
+          email_recuperacao: null,
+          url_senha: null,
         };
 
         let response;
@@ -507,6 +516,15 @@ const NewPeople: NextPage<Props> = (props) => {
                 label="Senha"
                 value={senhaAcesso}
                 setValue={setSenhaAcesso}
+                type='password'
+              />
+            </Grid>
+            <Grid item xs={6} sm={8} md={10} />
+            <Grid item xs={6} sm={4} md={2}>
+              <TextField
+                label="Confirmar senha"
+                value={senhaAcesso2}
+                setValue={setSenhaAcesso2}
                 type='password'
               />
             </Grid>

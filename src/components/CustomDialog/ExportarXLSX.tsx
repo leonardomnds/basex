@@ -116,7 +116,7 @@ function ExportarCSV(props: Props) {
           response.data.forEach((i) => {
             dados.push({
               id: uuidv4(),
-              checked: true,
+              checked: false,
               tabela: i.tabela,
               coluna: i.coluna
             });

@@ -15,9 +15,9 @@ import {
   Link,
 } from '@material-ui/core';
 
-import api from '../util/Api';
+import api from '../../util/Api';
 import { GetServerSideProps, NextPage } from 'next';
-import { FormatarCpfCnpj } from '../util/functions';
+import { FormatarCpfCnpj } from '../../util/functions';
 
 const useStyles = makeStyles((theme) => ({
   themeError: {
@@ -87,7 +87,7 @@ const useStyles = makeStyles((theme) => ({
     width: '100%',
     fontSize: 15,
     display: 'flex',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
   input: {
@@ -231,7 +231,15 @@ const SignIn: NextPage<Props> = (props) => {
                   setSenha('');
                 }}
               >
-                { loginCliente ? 'Não sou cliente! Fazer login como funcionário.' : 'É cliente? Clique aqui para fazer Login.'}
+                { loginCliente ? 'Sou funcionário.' : 'É cliente? Clique aqui.'}
+              </Link>
+              <Link
+                className={classes.alternarLogin}
+                onClick={() => {
+                  router.push('/login/redefinir')
+                }}
+              >
+                Esqueci minha senha!
               </Link>
             </Box>
           </form>

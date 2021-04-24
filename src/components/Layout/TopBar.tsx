@@ -37,9 +37,8 @@ const useStyles = makeStyles((theme) => ({
     paddingLeft: theme.spacing(2),
   },
   logo: {
-    cursor: 'pointer',
     color: 'black',
-    height: 25,
+    height: 16,
     marginLeft: theme.spacing(2),
   },
   accountSection: {
@@ -86,10 +85,9 @@ function TopBar(props: Props) {
             />
           </Tooltip>
           <img
-            src={'/assets/images/logo.svg'}
+            src={'/assets/images/Logo_Nizatech_Azul.png'}
             alt="logo"
             className={classes.logo}
-            style={{ height: 18 }}
           />
         </Box>
         <Box className={classes.accountSection}>

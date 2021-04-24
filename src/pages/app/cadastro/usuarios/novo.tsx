@@ -15,6 +15,7 @@ import SaveRoundedIcon from '@material-ui/icons/SaveRounded';
 import PageHeader from '../../../../components/Layout/PageHeader';
 import TextField from '../../../../components/FormControl/TextField';
 import Select from '../../../../components/FormControl/Select';
+import Checkbox from '../../../../components/FormControl/Checkbox';
 
 import CustomButton from '../../../../components/CustomButton';
 
@@ -48,7 +49,11 @@ const useStyles = makeStyles((theme) => ({
   },
   input: {
     display: 'none',
-  }
+  },
+  gridCheckAdmin: {
+    display: 'flex',
+    alignItems: 'center',
+  },
 }));
 
 type Props = {
@@ -67,6 +72,9 @@ const NewUser: NextPage<Props> = (props) => {
   const [nome, setNome] = useState<string>('');
   const [usuario, setUsuario] = useState<string>('');
   const [senha, setSenha] = useState<string>('');
+  const [senha2, setSenha2] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
+  const [isAdmin, setAdmin] = useState<boolean>(false);
   const [isAtivo, setAtivo] = useState<boolean>(true);
   const [avatar, setAvatar] = useState<{file: any, preview: any}>(null);
 
@@ -91,6 +99,10 @@ const NewUser: NextPage<Props> = (props) => {
       addToast('Senha informada não é permitida!', {
         appearance: 'warning',
       });
+    } else if (senha != senha2) {
+      addToast('As senhas informadas não são iguais!', {
+        appearance: 'warning',
+      });
     } else {
       try {
 
@@ -98,8 +110,10 @@ const NewUser: NextPage<Props> = (props) => {
         const formData = new FormData();
         if (nome) formData.append('nome', nome);
         if (usuario) formData.append('usuario', usuario);
+        if (email) formData.append('email', email);
         if (senha) formData.append('senha', senha);
-        formData.append('ativo', isAtivo ? '1' : '0');
+        if (isAtivo) formData.append('ativo', '1');
+        if (isAdmin) formData.append('administrador', '1');
         if (avatar?.file) formData.append('avatar', avatar?.file);
 
         if (usuarioId) {
@@ -135,15 +149,19 @@ const NewUser: NextPage<Props> = (props) => {
             // Dados Gerais
             setNome(u.nome);
             setUsuario(u.usuario);
+            setEmail(u.email);
             setSenha('****');
+            setSenha2('****');
             setAtivo(u.ativo);
+            setAdmin(u.administrador)
           } else {
             router.push('/app/cadastro/usuarios');
+            return;
           }
 
           const avatar = await api.get('/usuarios/'+usuarioId+'/avatar', { responseType: 'blob' });
 
-          if (avatar?.status === 200) {      
+          if (avatar?.status === 200) {
 
             const file = ConvertBlobToFile(avatar.data, `Avatar-${usuarioId}.jpeg`);
 
@@ -246,10 +264,32 @@ const NewUser: NextPage<Props> = (props) => {
           </Grid>
           <Grid item xs={12} md={6}>
             <TextField
+              label="E-mail para recuperação de senha"
+              value={email}
+              setValue={setEmail}
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
               label="Senha"
               value={senha}
               setValue={setSenha}
               type="password"
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+              label="Confirmar senha"
+              value={senha2}
+              setValue={setSenha2}
+              type="password"
+            />
+          </Grid>
+          <Grid item xs={12}className={classes.gridCheckAdmin}>
+            <Checkbox
+              label="Administrador"
+              checked={isAdmin}
+              onChange={() => setAdmin(!isAdmin)}
             />
           </Grid>
           <Hidden mdUp>
