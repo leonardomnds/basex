@@ -1,8 +1,8 @@
-import axios from 'axios';
-import { GetTokenFromCookie } from './functions';
+import axios from "axios";
+import { GetTokenFromCookie } from "./functions";
 
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: "/api",
 });
 
 api.interceptors.request.use(async (request) => {
@@ -10,7 +10,7 @@ api.interceptors.request.use(async (request) => {
     const token = GetTokenFromCookie();
     if (token) {
       request.headers.Authorization = `Bearer ${token}`;
-    }    
+    }
   } catch (err) {}
   return request;
 });
@@ -25,7 +25,7 @@ api.interceptors.response.use(
     return new Promise((reject) => {
       reject(error.response || error);
     });
-  },
+  }
 );
 
 export default api;

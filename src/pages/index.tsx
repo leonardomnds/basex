@@ -1,17 +1,16 @@
-import React, { useEffect } from 'react';
-import { useRouter } from 'next/router';
+import React, { useEffect } from "react";
+import { useRouter } from "next/router";
 
 function index() {
   const router = useRouter();
 
   useEffect(() => {
-    if (router.pathname === '/') {
-      router.replace('/login');
+    if (router.pathname === "/") {
+      router.replace("/login");
     }
-  }, [])
+  }, []);
 
   return <></>;
-
 }
 
-export default index
+export default index;

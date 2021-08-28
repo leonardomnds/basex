@@ -8,12 +8,11 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "npm run release && next start -p $PORT",
+    "start": "next start -p $PORT",
     "migrate": "npx prisma migrate dev --schema ./src/prisma/schema.prisma",
     "release": "npx prisma migrate deploy --schema ./src/prisma/schema.prisma",
     "generate": "npx prisma generate --schema ./src/prisma/schema.prisma",
-    "postinstall": "npm run generate && npm run build",
-    "heroku-postbuild": "npm run generate && npm run build"
+    "aws": "npm run generate && npm run release && npm run migrate && npm run build && npm run start"
   },
   "browser": {
     "child_process": false
