@@ -24,67 +24,62 @@ export default async function RedefinirSenha(
       let user;
       let email;
 
-      if (loginPessoa) {
-        user = await prisma.pessoa.findFirst({
-          select: {
-            id: true,
-            ativo: true,
-            nome: true,
-            email_recuperacao: true,
-          },
-          where: {
-            cpf_cnpj: FormatarCpfCnpj(usuario),
-          },
-        });
+      if (`${usuario}`.toUpperCase() !== "ADMIN") {
+        if (loginPessoa) {
+          user = await prisma.pessoa.findFirst({
+            select: {
+              id: true,
+              ativo: true,
+              nome: true,
+              email: true,
+            },
+            where: {
+              cpf_cnpj: FormatarCpfCnpj(usuario),
+            },
+          });
 
-        if (user) email = user.email_recuperacao;
-      } else {
-        user = await prisma.usuario.findFirst({
-          select: {
-            id: true,
-            ativo: true,
-            nome: true,
-            email: true,
-          },
-          where: {
-            OR: [
-              {
-                usuario: usuario.trim().toUpperCase(),
-              },
-              {
-                email: usuario.trim().toLowerCase(),
-              },
-            ],
-          },
-        });
+          if (user) email = user.email;
+        } else {
+          user = await prisma.usuario.findFirst({
+            select: {
+              id: true,
+              ativo: true,
+              nome: true,
+              email: true,
+            },
+            where: {
+              OR: [
+                {
+                  usuario: usuario.trim().toUpperCase(),
+                },
+                {
+                  email: usuario.trim().toLowerCase(),
+                },
+              ],
+            },
+          });
 
-        if (user) email = user.email;
+          if (user) email = user.email;
+        }
       }
 
       if (!user) {
-        res
-          .status(404)
-          .json({
-            error: `Não localizamos nenhum cadastro com esse ${
-              loginPessoa ? "CPF/CNPJ" : "Usuário/E-mail"
-            }!`,
-          });
+        res.status(404).json({
+          error: `Não localizamos nenhum cadastro com esse ${
+            loginPessoa ? "CPF/CNPJ" : "Usuário/E-mail"
+          }!`,
+        });
         return;
       } else if (!user.ativo) {
-        res
-          .status(401)
-          .json({
-            error:
-              "Esse cadastro foi inativado! Entre em contato com a empresa.",
-          });
+        res.status(401).json({
+          error: "Esse cadastro foi inativado! Entre em contato com a empresa.",
+        });
         return;
-      } else if (!user.email) {
-        res
-          .status(401)
-          .json({
-            error:
-              "Cadastro sem e-mail de recuperação informado! Entre em contato com a empresa.",
-          });
+      } else if (!email) {
+        res.status(401).json({
+          error:
+            "Cadastro sem e-mail de recuperação informado! Entre em contato com a empresa.",
+        });
         return;
       } else {
         const hash = uuidv4();
@@ -115,12 +110,10 @@ export default async function RedefinirSenha(
 
         await enviarEmailRecuperacao(email, dados);
 
-        res
-          .status(200)
-          .json({
-            message:
-              "Você receberá um e-mail com instruções para redefinir sua senha!",
-          });
+        res.status(200).json({
+          message:
+            "Você receberá um e-mail com instruções para redefinir sua senha!",
+        });
         return;
       }
     } else {

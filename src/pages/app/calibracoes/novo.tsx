@@ -1,30 +1,31 @@
-import React, { useState } from 'react';
-import { useToasts } from 'react-toast-notifications';
+import React, { useState } from "react";
+import { useToasts } from "react-toast-notifications";
 
-import { makeStyles, Box, Paper, Grid, Hidden } from '@material-ui/core';
-import SearchIcon from '@material-ui/icons/SearchRounded';
-import CloseIcon from '@material-ui/icons/CloseRounded';
-import UploadIcon from '@material-ui/icons/AttachFileRounded';
+import { makeStyles, Box, Paper, Grid, Hidden } from "@material-ui/core";
+import SearchIcon from "@material-ui/icons/SearchRounded";
+import CloseIcon from "@material-ui/icons/CloseRounded";
+import UploadIcon from "@material-ui/icons/AttachFileRounded";
 
-import PageHeader from '../../../components/Layout/PageHeader';
+import PageHeader from "../../../components/Layout/PageHeader";
 
 import TextField, {
-  getEndItemIconButton } from '../../../components/FormControl/TextField';
-import DatePicker from '../../../components/FormControl/DatePicker';
+  getEndItemIconButton,
+} from "../../../components/FormControl/TextField";
+import DatePicker from "../../../components/FormControl/DatePicker";
 
-import { GetServerSideProps, NextPage } from 'next';
-import api from '../../../util/Api';
+import { GetServerSideProps, NextPage } from "next";
+import api from "../../../util/Api";
 import {
   FormatarCpfCnpj,
   GetDataFromJwtToken,
   ZerosLeft,
-} from '../../../util/functions';
-import ConsultaPessoas from '../../../components/CustomDialog/ConsultaPessoas';
-import ConsultaInstrumentos from '../../../components/CustomDialog/ConsultaInstrumentos';
-import { Calibracao } from '.prisma/client';
-import SaveRoundedIcon from '@material-ui/icons/SaveRounded';
-import CustomButton from '../../../components/CustomButton';
-import { format } from 'date-fns';
+} from "../../../util/functions";
+import ConsultaPessoas from "../../../components/CustomDialog/ConsultaPessoas";
+import ConsultaInstrumentos from "../../../components/CustomDialog/ConsultaInstrumentos";
+import { Calibracao } from ".prisma/client";
+import SaveRoundedIcon from "@material-ui/icons/SaveRounded";
+import CustomButton from "../../../components/CustomButton";
+import { format } from "date-fns";
 
 const useStyles = makeStyles((theme) => ({
   themeError: {
@@ -37,10 +38,10 @@ const useStyles = makeStyles((theme) => ({
   btnCertificado: {
     minWidth: 140,
     marginLeft: 15,
-  },  
+  },
   input: {
-    display: 'none',
-  }
+    display: "none",
+  },
 }));
 
 type Props = {
@@ -55,32 +56,32 @@ const List: NextPage<Props> = (props: Props) => {
 
   const [uuidPessoa, setUuidPessoa] = useState<string>(pessoaId);
   const [codPessoa, setCodPessoa] = useState<number>(null);
-  const [cpfCnpjPessoa, setCpfCnpjPessoa] = useState<string>('');
-  const [nomePessoa, setNomePessoa] = useState<string>('');
+  const [cpfCnpjPessoa, setCpfCnpjPessoa] = useState<string>("");
+  const [nomePessoa, setNomePessoa] = useState<string>("");
   const [consultandoPessoa, setConsultandoPessoa] = useState<boolean>(false);
 
-  const [uuidInstrumento, setUuidInstrumento] = useState<string>('');
-  const [tagInstrumento, setTagInstrumento] = useState<string>('');
-  const [descricaoInstrumento, setDescricaoInstrumento] = useState<string>('');
-  const [consultandoInstrumento, setConsultandoInstrumento] = useState<boolean>(
-    false,
-  );
+  const [uuidInstrumento, setUuidInstrumento] = useState<string>("");
+  const [tagInstrumento, setTagInstrumento] = useState<string>("");
+  const [descricaoInstrumento, setDescricaoInstrumento] = useState<string>("");
+  const [consultandoInstrumento, setConsultandoInstrumento] =
+    useState<boolean>(false);
 
   const [dataCalibracao, setDataCalibracao] = React.useState<Date>(new Date());
-  const [laboratorio, setLaboratorio] = useState<string>('');
-  const [numeroCertificado, setNumeroCertificado] = useState<string>('');
-  const [arquivoCertificado, setArquivoCertificado] = useState<{file: any, preview: any}>(null);
+  const [laboratorio, setLaboratorio] = useState<string>("");
+  const [numeroCertificado, setNumeroCertificado] = useState<string>("");
+  const [arquivoCertificado, setArquivoCertificado] =
+    useState<{ file: any; preview: any }>(null);
 
   const setSelectCertificado = (evt) => {
-    if (evt?.target?.files[0]?.name.toString().endsWith('.pdf')) {
+    if (evt?.target?.files[0]?.name.toString().endsWith(".pdf")) {
       setArquivoCertificado({
         file: evt?.target?.files[0],
-        preview: URL.createObjectURL(evt?.target?.files[0])
+        preview: URL.createObjectURL(evt?.target?.files[0]),
       });
     } else {
-      addToast('O anexo deve ser um PDF', { appearance: 'warning' });
+      addToast("O anexo deve ser um PDF", { appearance: "warning" });
     }
-  }
+  };
 
   const [isSaving, setSaving] = useState<boolean>(false);
 
@@ -89,20 +90,20 @@ const List: NextPage<Props> = (props: Props) => {
   };
 
   const limparCamposPessoa = () => {
-    setUuidPessoa('');
+    setUuidPessoa("");
     setCodPessoa(null);
-    setCpfCnpjPessoa('');
-    setNomePessoa('');
+    setCpfCnpjPessoa("");
+    setNomePessoa("");
     limparCamposInstrumento();
   };
 
   const limparCamposInstrumento = () => {
-    setUuidInstrumento('');
-    setTagInstrumento('');
-    setDescricaoInstrumento('');
+    setUuidInstrumento("");
+    setTagInstrumento("");
+    setDescricaoInstrumento("");
     setDataCalibracao(new Date());
-    setLaboratorio('');
-    setNumeroCertificado('');
+    setLaboratorio("");
+    setNumeroCertificado("");
     setArquivoCertificado(null);
   };
 
@@ -114,7 +115,7 @@ const List: NextPage<Props> = (props: Props) => {
         : () => {
             setConsultandoPessoa(true);
           },
-      uuidPessoa ? 'Remover seleção' : 'Consultar',
+      uuidPessoa ? "Remover seleção" : "Consultar"
     );
   };
 
@@ -127,12 +128,12 @@ const List: NextPage<Props> = (props: Props) => {
             if (uuidPessoa) {
               setConsultandoInstrumento(true);
             } else {
-              addToast('É necessário selecionar o cliente!', {
-                appearance: 'warning',
+              addToast("É necessário selecionar o cliente!", {
+                appearance: "warning",
               });
             }
           },
-      uuidPessoa ? 'Remover seleção' : 'Consultar',
+      uuidInstrumento ? "Remover seleção" : "Consultar"
     );
   };
 
@@ -150,7 +151,7 @@ const List: NextPage<Props> = (props: Props) => {
         throw new Error(response.data.error);
       }
     } catch (err) {
-      addToast(err.message, { appearance: 'error' });
+      addToast(err.message, { appearance: "error" });
     }
   };
 
@@ -159,45 +160,54 @@ const List: NextPage<Props> = (props: Props) => {
     const editing = false;
 
     if (!uuidPessoa || !uuidInstrumento) {
-      addToast('Selecione o cliente e o instrumento!', {
-        appearance: 'warning',
+      addToast("Selecione o cliente e o instrumento!", {
+        appearance: "warning",
       });
     } else if (!dataCalibracao) {
-      addToast('Informe a data da calibração!', { appearance: 'warning' });
+      addToast("Informe a data da calibração!", { appearance: "warning" });
     } else if (!numeroCertificado) {
-      addToast('Informe o número do certificado!', { appearance: 'warning' });
+      addToast("Informe o número do certificado!", { appearance: "warning" });
     } else {
       try {
-
         let response;
         const formData = new FormData();
-        if (uuidInstrumento) formData.append('instrumento_id', uuidInstrumento);
-        if (dataCalibracao) formData.append('data_calibracao', format(dataCalibracao,'yyyy-MM-dd'));
-        if (numeroCertificado) formData.append('numero_certificado', numeroCertificado);
-        if (laboratorio) formData.append('laboratorio', laboratorio);
-        if (arquivoCertificado?.file) formData.append('pdfCertificado', arquivoCertificado?.file);
+        if (uuidInstrumento) formData.append("instrumento_id", uuidInstrumento);
+        if (dataCalibracao)
+          formData.append(
+            "data_calibracao",
+            format(dataCalibracao, "yyyy-MM-dd")
+          );
+        if (numeroCertificado)
+          formData.append("numero_certificado", numeroCertificado);
+        if (laboratorio) formData.append("laboratorio", laboratorio);
+        if (arquivoCertificado?.file)
+          formData.append("pdfCertificado", arquivoCertificado?.file);
 
         if (editing) {
-          response = await api.put(`/pessoas/${uuidPessoa}/instrumentos/${uuidInstrumento}/calibracoes/${editing}`, formData);
+          response = await api.put(
+            `/pessoas/${uuidPessoa}/instrumentos/${uuidInstrumento}/calibracoes/${editing}`,
+            formData
+          );
         } else {
-          response = await api.post(`/pessoas/${uuidPessoa}/instrumentos/${uuidInstrumento}/calibracoes`, formData);
+          response = await api.post(
+            `/pessoas/${uuidPessoa}/instrumentos/${uuidInstrumento}/calibracoes`,
+            formData
+          );
         }
 
         if (!response?.data?.error) {
           addToast(
-            `Calibração ${
-              false ? 'alterada' : 'cadastrada'
-            } com sucesso!`,
+            `Calibração ${false ? "alterada" : "cadastrada"} com sucesso!`,
             {
-              appearance: 'success',
-            },
+              appearance: "success",
+            }
           );
           limparCamposInstrumento();
         } else {
           throw new Error(response.data.error);
         }
       } catch (err) {
-        addToast(err.message, { appearance: 'error' });
+        addToast(err.message, { appearance: "error" });
       }
     }
     setSaving(false);
@@ -206,7 +216,7 @@ const List: NextPage<Props> = (props: Props) => {
   const getDataInstrumento = async (insId: string) => {
     try {
       const response = await api.get(
-        `/pessoas/${uuidPessoa}/instrumentos/${insId}`,
+        `/pessoas/${uuidPessoa}/instrumentos/${insId}`
       );
 
       if (!response?.data?.error) {
@@ -218,7 +228,7 @@ const List: NextPage<Props> = (props: Props) => {
         throw new Error(response.data.error);
       }
     } catch (err) {
-      addToast(err.message, { appearance: 'error' });
+      addToast(err.message, { appearance: "error" });
     }
   };
 
@@ -229,7 +239,7 @@ const List: NextPage<Props> = (props: Props) => {
           <Grid item xs={4} sm={3} md={2}>
             <TextField
               label="Cliente"
-              value={codPessoa ? ZerosLeft(codPessoa.toString(), 4) : ''}
+              value={codPessoa ? ZerosLeft(codPessoa.toString(), 4) : ""}
               setValue={setCodPessoa}
               disabled
               endItem={getEndItemBuscarCliente()}
@@ -246,7 +256,7 @@ const List: NextPage<Props> = (props: Props) => {
           <Grid item xs={12} sm={12} md={7} lg={8}>
             <TextField
               label={`${
-                cpfCnpjPessoa.length > 14 ? 'Razão Social' : 'Nome'
+                cpfCnpjPessoa.length > 14 ? "Razão Social" : "Nome"
               } do cliente`}
               value={nomePessoa}
               setValue={setNomePessoa}
@@ -295,14 +305,14 @@ const List: NextPage<Props> = (props: Props) => {
             variant="outlined"
             componentSpan
             func={() => {
-              const win = window.open(arquivoCertificado?.preview, '_blank');
+              const win = window.open(arquivoCertificado?.preview, "_blank");
               if (win) win.focus();
             }}
           />
           <CustomButton
             label="Remover"
             className={classes.btnCertificado}
-            icon={< UploadIcon />}
+            icon={<UploadIcon />}
             color="secondary"
             componentSpan
             func={() => setArquivoCertificado(null)}
@@ -323,7 +333,7 @@ const List: NextPage<Props> = (props: Props) => {
             <CustomButton
               label="Anexar"
               className={classes.btnCertificado}
-              icon={< UploadIcon />}
+              icon={<UploadIcon />}
               color="secondary"
               componentSpan
             />
@@ -331,7 +341,7 @@ const List: NextPage<Props> = (props: Props) => {
         </>
       );
     }
-  }
+  };
 
   const getCamposLancamentoCalibracao = () => {
     return (
@@ -366,8 +376,16 @@ const List: NextPage<Props> = (props: Props) => {
               disabled
             />
           </Grid>
-          <Grid item xs={12} style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-            {getButtonAnexo()}  
+          <Grid
+            item
+            xs={12}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-end",
+            }}
+          >
+            {getButtonAnexo()}
           </Grid>
         </Grid>
       </Paper>
@@ -378,7 +396,7 @@ const List: NextPage<Props> = (props: Props) => {
     <Box>
       <PageHeader
         title="Nova Calibração"
-        btnLabel={uuidInstrumento ? 'Salvar' : ''}
+        btnLabel={uuidInstrumento ? "Salvar" : ""}
         btnIcon={<SaveRoundedIcon />}
         btnFunc={salvarCalibracao}
         btnLoading={isSaving}

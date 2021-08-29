@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
-import { useToasts } from 'react-toast-notifications';
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/router";
+import { useToasts } from "react-toast-notifications";
 import {
   makeStyles,
   TextField,
@@ -11,93 +11,93 @@ import {
   Button,
   CircularProgress,
   Link,
-} from '@material-ui/core';
+} from "@material-ui/core";
 
-import api from '../../util/Api';
-import { GetServerSideProps, NextPage } from 'next';
-import { FormatarCpfCnpj } from '../../util/functions';
+import api from "../../util/Api";
+import { GetServerSideProps, NextPage } from "next";
+import { FormatarCpfCnpj } from "../../util/functions";
 
 const useStyles = makeStyles((theme) => ({
   themeError: {
     color: theme.palette.background.paper,
   },
   root: {
-    width: '100%',
-    margin: '0 auto',
+    width: "100%",
+    margin: "0 auto",
   },
   loginContainer: {
-    width: '100%',
-    minHeight: '100vh',
-    display: 'flex',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: "100%",
+    minHeight: "100vh",
+    display: "flex",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    alignItems: "center",
     padding: 20,
-    background: '#EBEEEF',
+    background: "#EBEEEF",
   },
   loginWrap: {
     width: 550,
-    background: '#FFFFFF',
+    background: "#FFFFFF",
     borderRadius: 10,
-    overflow: 'hidden',
-    position: 'relative',
+    overflow: "hidden",
+    position: "relative",
   },
   loginTitle: {
     marginTop: 40,
     fontSize: 24,
     fontWeight: 500,
-    color: '#000',
-    textTransform: 'uppercase',
+    color: "#000",
+    textTransform: "uppercase",
     lineHeight: 1.2,
-    textAlign: 'center',
+    textAlign: "center",
   },
   form: {
-    width: '100%',
-    display: 'flex',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    padding: '40px',
+    width: "100%",
+    display: "flex",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    padding: "40px",
   },
   options: {
-    width: '100%',
+    width: "100%",
     fontSize: 15,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
   },
   input: {
     fontSize: 15,
-    color: '#555555',
+    color: "#555555",
     lineHeight: 1.2,
-    display: 'block',
-    width: '100%',
+    display: "block",
+    width: "100%",
     paddingBottom: 15,
-    background: 'transparent',
+    background: "transparent",
   },
   loginButtonWrapper: {
-    width: '100%',
-    position: 'relative',
+    width: "100%",
+    position: "relative",
   },
   loginButton: {
-    width: '100%',
+    width: "100%",
     padding: 15,
     marginBottom: 30,
   },
   buttonProgress: {
-    top: '50%',
-    left: '50%',
+    top: "50%",
+    left: "50%",
     marginLeft: -18,
     marginTop: -18,
-    position: 'absolute',
+    position: "absolute",
   },
   alternarLogin: {
-    cursor: 'pointer',
-  }
+    cursor: "pointer",
+  },
 }));
 
 type Props = {
-  hash: string,
-}
+  hash: string;
+};
 
 const Redefinir: NextPage<Props> = (props: Props) => {
   const classes = useStyles();
@@ -106,9 +106,9 @@ const Redefinir: NextPage<Props> = (props: Props) => {
 
   const { addToast, removeAllToasts } = useToasts();
 
-  const [usuario, setUsuario] = useState('');
-  const [senha, setSenha] = useState('');
-  const [senha2, setSenha2] = useState('');
+  const [usuario, setUsuario] = useState("");
+  const [senha, setSenha] = useState("");
+  const [senha2, setSenha2] = useState("");
   const [loading, setLoading] = useState(false);
 
   const [loginCliente, setLoginCliente] = useState(true);
@@ -118,44 +118,53 @@ const Redefinir: NextPage<Props> = (props: Props) => {
     removeAllToasts();
 
     if (!hash && !usuario) {
-      addToast(`Informe seu ${ loginCliente ? 'CPF/CNPJ' : 'usuário ou e-mail' } para continuar!`, {
-        appearance: 'warning',
-      });
+      addToast(
+        `Informe seu ${
+          loginCliente ? "CPF/CNPJ" : "usuário ou e-mail"
+        } para continuar!`,
+        {
+          appearance: "warning",
+        }
+      );
     } else if (hash && (!senha || !senha2)) {
-      addToast('Preencha a nova senha', {
-        appearance: 'warning',
+      addToast("Preencha a nova senha", {
+        appearance: "warning",
       });
     } else if (hash && senha !== senha2) {
-      addToast('As senhas não conferem!', {
-        appearance: 'warning',
+      addToast("As senhas não conferem!", {
+        appearance: "warning",
       });
     } else {
       try {
-
         let response;
 
         if (hash) {
           response = await api.post(`/login/${hash}/redefinir`, { senha });
         } else {
-          response = await api.post(`/login/recuperar`, { usuario });
+          response = await api.post(
+            `/login/recuperar?pessoa=${loginCliente ? "true" : "false"}`,
+            { usuario }
+          );
         }
 
         if (!response?.data?.error) {
-          addToast(response.data.message, { appearance: hash ? 'success' : 'info' });
+          addToast(response.data.message, {
+            appearance: hash ? "success" : "info",
+          });
           setTimeout(() => {}, 5000);
-          router.replace('/login');
+          router.replace("/login");
           return;
         }
 
         throw new Error(response.data.error);
       } catch (err) {
-        addToast(err.message, { appearance: 'error' });
+        addToast(err.message, { appearance: "error" });
       }
     }
     setLoading(false);
-  }
+  };
 
-  useEffect(() => {    
+  useEffect(() => {
     const getData = async () => {
       try {
         const response = await api.get(`/login/${hash}/redefinir`);
@@ -166,19 +175,18 @@ const Redefinir: NextPage<Props> = (props: Props) => {
 
         throw new Error(response.data.error);
       } catch (err) {
-        addToast(err.message, { appearance: 'error' });
+        addToast(err.message, { appearance: "error" });
       }
     };
 
     if (hash) {
       getData();
     }
-
-  }, [])
+  }, []);
 
   const getCampos = () => {
-
-    if (hash) { // Trocar senha
+    if (hash) {
+      // Trocar senha
       return (
         <>
           <TextField
@@ -201,18 +209,19 @@ const Redefinir: NextPage<Props> = (props: Props) => {
             value={senha2}
             onChange={(event) => setSenha2(event.target.value)}
             onKeyPress={(event) => {
-              if (event.key === 'Enter' && senha && senha2) {
+              if (event.key === "Enter" && senha && senha2) {
                 handleSignIn();
               }
             }}
           />
         </>
       );
-    } else { // Solicitar recuperação
+    } else {
+      // Solicitar recuperação
       return (
         <TextField
           variant="outlined"
-          label={ loginCliente ? "CPF/CNPJ" : "Usuário ou e-mail"}
+          label={loginCliente ? "CPF/CNPJ" : "Usuário ou e-mail"}
           type="text"
           name="usuario"
           className={classes.input}
@@ -227,21 +236,21 @@ const Redefinir: NextPage<Props> = (props: Props) => {
             }
           }}
           onKeyPress={(event) => {
-            if (event.key === 'Enter' && usuario) {
+            if (event.key === "Enter" && usuario) {
               handleSignIn();
             }
           }}
         />
       );
     }
-  }
+  };
 
   return (
     <Box className={classes.root}>
       <Box className={classes.loginContainer}>
         <Paper className={classes.loginWrap}>
           <Typography variant="body2" className={classes.loginTitle}>
-            { `${hash ? 'Redefinir' : 'Recuperar'} Senha`}
+            {`${hash ? "Redefinir" : "Recuperar"} Senha`}
           </Typography>
           <form className={classes.form}>
             {getCampos()}
@@ -253,7 +262,7 @@ const Redefinir: NextPage<Props> = (props: Props) => {
                 className={classes.loginButton}
                 onClick={handleSignIn}
               >
-                {loading ? 'Recuperando' : 'Recuperar'}
+                {loading ? "Recuperando" : "Recuperar"}
                 {loading && (
                   <CircularProgress
                     size={36}
@@ -263,33 +272,38 @@ const Redefinir: NextPage<Props> = (props: Props) => {
                 )}
               </Button>
             </Box>
-            {!hash && 
-            <Box className={classes.options}>
-              <Link
-                className={classes.alternarLogin}
-                onClick={() => {
-                  setLoginCliente(!loginCliente);
-                  setUsuario('');
-                  setSenha('');
-                  setSenha2('');
-                }}
-              >
-                { loginCliente ? 'Não sou cliente.' : 'É cliente? Clique aqui para recuperar sua senha.'}
-              </Link>
-            </Box>}
+            {!hash && (
+              <Box className={classes.options}>
+                <Link
+                  className={classes.alternarLogin}
+                  onClick={() => {
+                    setLoginCliente((prevState) => !prevState);
+                    setUsuario("");
+                    setSenha("");
+                    setSenha2("");
+                  }}
+                >
+                  {loginCliente
+                    ? "Não sou cliente."
+                    : "É cliente? Clique aqui para recuperar sua senha."}
+                </Link>
+              </Box>
+            )}
           </form>
         </Paper>
       </Box>
     </Box>
   );
-}
+};
 
 export default Redefinir;
 
-export const getServerSideProps : GetServerSideProps = async ({ query: { hash } }) => {
+export const getServerSideProps: GetServerSideProps = async ({
+  query: { hash },
+}) => {
   return {
     props: {
       hash: hash || null,
-    }
-  }
-}
+    },
+  };
+};

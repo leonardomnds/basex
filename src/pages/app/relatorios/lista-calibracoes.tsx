@@ -1,27 +1,34 @@
-import { makeStyles, Box, Grid, Paper, Hidden } from '@material-ui/core';
-import SearchIcon from '@material-ui/icons/SearchRounded';
-import CloseIcon from '@material-ui/icons/CloseRounded';
-import PrintIcon from '@material-ui/icons/PrintRounded';
-import GridIcon from '@material-ui/icons/GridOnRounded';
+import { makeStyles, Box, Grid, Paper, Hidden } from "@material-ui/core";
+import SearchIcon from "@material-ui/icons/SearchRounded";
+import CloseIcon from "@material-ui/icons/CloseRounded";
+import PrintIcon from "@material-ui/icons/PrintRounded";
+import GridIcon from "@material-ui/icons/GridOnRounded";
 
-import { useToasts } from 'react-toast-notifications';
-import React, { useState } from 'react'
-import TextField, { getEndItemIconButton } from '../../../components/FormControl/TextField';
-import Select from '../../../components/FormControl/Select';
-import DatePicker from '../../../components/FormControl/DatePicker';
-import PageHeader from '../../../components/Layout/PageHeader';
-import { GetServerSideProps, NextPage } from 'next';
-import { AbrirRelatorio, FormatarCpfCnpj, GetDataFromJwtToken, ZerosLeft } from '../../../util/functions';
-import ConsultaPessoas from '../../../components/CustomDialog/ConsultaPessoas';
-import ConsultaInstrumentos from '../../../components/CustomDialog/ConsultaInstrumentos';
-import api from '../../../util/Api';
-import { addDays } from 'date-fns';
-import prisma from '../../../prisma/PrismaInstance';
-import {format} from 'date-fns';
-import CustomButton from '../../../components/CustomButton';
-import { NomeRelatorio } from '../../../reports/nomesRelatorios';
-import { Base64 } from 'js-base64';
-import ExportarXLSX from '../../../components/CustomDialog/ExportarXLSX';
+import { useToasts } from "react-toast-notifications";
+import React, { useState } from "react";
+import TextField, {
+  getEndItemIconButton,
+} from "../../../components/FormControl/TextField";
+import Select from "../../../components/FormControl/Select";
+import DatePicker from "../../../components/FormControl/DatePicker";
+import PageHeader from "../../../components/Layout/PageHeader";
+import { GetServerSideProps, NextPage } from "next";
+import {
+  AbrirRelatorio,
+  FormatarCpfCnpj,
+  GetDataFromJwtToken,
+  ZerosLeft,
+} from "../../../util/functions";
+import ConsultaPessoas from "../../../components/CustomDialog/ConsultaPessoas";
+import ConsultaInstrumentos from "../../../components/CustomDialog/ConsultaInstrumentos";
+import api from "../../../util/Api";
+import { addDays } from "date-fns";
+import prisma from "../../../prisma/PrismaInstance";
+import { format } from "date-fns";
+import CustomButton from "../../../components/CustomButton";
+import { NomeRelatorio } from "../../../reports/nomesRelatorios";
+import { Base64 } from "js-base64";
+import ExportarXLSX from "../../../components/CustomDialog/ExportarXLSX";
 
 const useStyles = makeStyles((theme) => ({
   themeError: {
@@ -32,18 +39,18 @@ const useStyles = makeStyles((theme) => ({
     marginBottom: 25,
   },
   btnBox: {
-    display: 'flex',
-    alignItems: 'center',
+    display: "flex",
+    alignItems: "center",
     marginBottom: 20,
   },
   btnMargin: {
     marginRight: 10,
-  }
+  },
 }));
 type Props = {
   usuarioId: string;
   pessoaId: string;
-  laboratorios: { value: string, text: string }[]
+  laboratorios: { value: string; text: string }[];
 };
 
 const ListaCalibracoes: NextPage<Props> = (props: Props) => {
@@ -55,55 +62,74 @@ const ListaCalibracoes: NextPage<Props> = (props: Props) => {
 
   const [uuidPessoa, setUuidPessoa] = useState<string>(pessoaId);
   const [codPessoa, setCodPessoa] = useState<number>(null);
-  const [cpfCnpjPessoa, setCpfCnpjPessoa] = useState<string>('');
-  const [nomePessoa, setNomePessoa] = useState<string>('');
+  const [cpfCnpjPessoa, setCpfCnpjPessoa] = useState<string>("");
+  const [nomePessoa, setNomePessoa] = useState<string>("");
   const [consultandoPessoa, setConsultandoPessoa] = useState<boolean>(false);
 
-  const [uuidInstrumento, setUuidInstrumento] = useState<string>('');
-  const [tagInstrumento, setTagInstrumento] = useState<string>('');
-  const [descricaoInstrumento, setDescricaoInstrumento] = useState<string>('');
-  const [consultandoInstrumento, setConsultandoInstrumento] = useState<boolean>(
-    false,
+  const [uuidInstrumento, setUuidInstrumento] = useState<string>("");
+  const [tagInstrumento, setTagInstrumento] = useState<string>("");
+  const [descricaoInstrumento, setDescricaoInstrumento] = useState<string>("");
+  const [consultandoInstrumento, setConsultandoInstrumento] =
+    useState<boolean>(false);
+
+  const [dataCalibracaoInicial, setDataCalibracaoInicial] = useState<Date>(
+    addDays(new Date(), -(new Date().getDate() - 1))
+  );
+  const [dataCalibracaoFinal, setDataCalibracaoFinal] = useState<Date>(
+    new Date()
   );
 
-  const [dataCalibracaoInicial, setDataCalibracaoInicial] = useState<Date>(addDays(new Date(), -(new Date().getDate()-1)));
-  const [dataCalibracaoFinal, setDataCalibracaoFinal] = useState<Date>(new Date());
-
   const [listaLaboratorios] = useState(laboratorios);
-  const [laboratorio, setLaboratorio] = useState<string>(' ');
+  const [laboratorio, setLaboratorio] = useState<string>(" ");
 
   const getWhere = (csv: boolean = false) => {
     let where = "1=1";
 
-    if (uuidPessoa) where += ` and ${csv ? 'instrumentos' : 'i'}.pessoa_id = '${uuidPessoa}'`;
-    if (uuidInstrumento) where += ` and ${csv ? 'instrumentos' : 'i'}.id = '${uuidInstrumento}'`;
-    if (dataCalibracaoInicial) where += ` and ${csv ? 'calibracoes' : 'c'}.data_calibracao >= '${format(dataCalibracaoInicial, 'yyyy-MM-dd')}'`;
-    if (dataCalibracaoFinal) where += ` and ${csv ? 'calibracoes' : 'c'}.data_calibracao <= '${format(dataCalibracaoFinal, 'yyyy-MM-dd')}'`;
-    if ((laboratorio || '').toUpperCase() === 'NÃO INFORMADO') {
-      where += ` and nullif(trim(${csv ? 'calibracoes' : 'c'}.laboratorio), '') is null`;
-    } else if ((laboratorio || '').length > 0 && laboratorio != ' ') {
-      where += ` and coalesce(upper(nullif(trim(${csv ? 'calibracoes' : 'c'}.laboratorio), '')), 'Não informado') = '${laboratorio.trim().toUpperCase()}'`;
+    if (uuidPessoa)
+      where += ` and ${csv ? "instrumentos" : "i"}.pessoa_id = '${uuidPessoa}'`;
+    if (uuidInstrumento)
+      where += ` and ${csv ? "instrumentos" : "i"}.id = '${uuidInstrumento}'`;
+    if (dataCalibracaoInicial)
+      where += ` and ${csv ? "calibracoes" : "c"}.data_calibracao >= '${format(
+        dataCalibracaoInicial,
+        "yyyy-MM-dd"
+      )}'`;
+    if (dataCalibracaoFinal)
+      where += ` and ${csv ? "calibracoes" : "c"}.data_calibracao <= '${format(
+        dataCalibracaoFinal,
+        "yyyy-MM-dd"
+      )}'`;
+    if ((laboratorio || "").toUpperCase() === "NÃO INFORMADO") {
+      where += ` and nullif(trim(${
+        csv ? "calibracoes" : "c"
+      }.laboratorio), '') is null`;
+    } else if ((laboratorio || "").length > 0 && laboratorio != " ") {
+      where += ` and coalesce(upper(nullif(trim(${
+        csv ? "calibracoes" : "c"
+      }.laboratorio), '')), 'Não informado') = '${laboratorio
+        .trim()
+        .toUpperCase()}'`;
     }
 
     return where;
-  }
+  };
 
   const setStateCpfCnpjPessoa = (str) => {
     setCpfCnpjPessoa(FormatarCpfCnpj(str));
   };
 
   const limparCamposPessoa = () => {
-    setUuidPessoa('');
+    setUuidPessoa("");
     setCodPessoa(null);
-    setCpfCnpjPessoa('');
-    setNomePessoa('');
+    setCpfCnpjPessoa("");
+    setNomePessoa("");
     limparCamposInstrumento();
   };
 
   const limparCamposInstrumento = () => {
-    setUuidInstrumento('');
-    setTagInstrumento('');
-    setDescricaoInstrumento('');
+    setUuidInstrumento("");
+    setTagInstrumento("");
+    setDescricaoInstrumento("");
   };
 
   const getEndItemBuscarCliente = () => {
@@ -114,7 +140,7 @@ const ListaCalibracoes: NextPage<Props> = (props: Props) => {
         : () => {
             setConsultandoPessoa(true);
           },
-      uuidPessoa ? 'Remover seleção' : 'Consultar',
+      uuidPessoa ? "Remover seleção" : "Consultar"
     );
   };
 
@@ -127,12 +153,12 @@ const ListaCalibracoes: NextPage<Props> = (props: Props) => {
             if (uuidPessoa) {
               setConsultandoInstrumento(true);
             } else {
-              addToast('É necessário selecionar o cliente!', {
-                appearance: 'warning',
+              addToast("É necessário selecionar o cliente!", {
+                appearance: "warning",
               });
             }
           },
-      uuidPessoa ? 'Remover seleção' : 'Consultar',
+      uuidInstrumento ? "Remover seleção" : "Consultar"
     );
   };
 
@@ -150,14 +176,14 @@ const ListaCalibracoes: NextPage<Props> = (props: Props) => {
         throw new Error(response.data.error);
       }
     } catch (err) {
-      addToast(err.message, { appearance: 'error' });
+      addToast(err.message, { appearance: "error" });
     }
   };
 
   const getDataInstrumento = async (insId: string) => {
     try {
       const response = await api.get(
-        `/pessoas/${uuidPessoa}/instrumentos/${insId}`,
+        `/pessoas/${uuidPessoa}/instrumentos/${insId}`
       );
 
       if (!response?.data?.error) {
@@ -169,7 +195,7 @@ const ListaCalibracoes: NextPage<Props> = (props: Props) => {
         throw new Error(response.data.error);
       }
     } catch (err) {
-      addToast(err.message, { appearance: 'error' });
+      addToast(err.message, { appearance: "error" });
     }
   };
 
@@ -180,7 +206,7 @@ const ListaCalibracoes: NextPage<Props> = (props: Props) => {
           <Grid item xs={4} sm={3} md={2}>
             <TextField
               label="Cliente"
-              value={codPessoa ? ZerosLeft(codPessoa.toString(), 4) : ''}
+              value={codPessoa ? ZerosLeft(codPessoa.toString(), 4) : ""}
               setValue={setCodPessoa}
               disabled
               endItem={getEndItemBuscarCliente()}
@@ -197,7 +223,7 @@ const ListaCalibracoes: NextPage<Props> = (props: Props) => {
           <Grid item xs={12} sm={12} md={7} lg={8}>
             <TextField
               label={`${
-                cpfCnpjPessoa.length > 14 ? 'Razão Social' : 'Nome'
+                cpfCnpjPessoa.length > 14 ? "Razão Social" : "Nome"
               } do cliente`}
               value={nomePessoa}
               setValue={setNomePessoa}
@@ -265,11 +291,11 @@ const ListaCalibracoes: NextPage<Props> = (props: Props) => {
               itemZero
               textItemZero="Todos"
             />
-          </Grid>     
+          </Grid>
         </Grid>
       </Paper>
     );
-  }
+  };
 
   const getButtons = () => {
     return (
@@ -279,23 +305,25 @@ const ListaCalibracoes: NextPage<Props> = (props: Props) => {
             <CustomButton
               className={classes.btnMargin}
               label="Exportar"
-              icon={<GridIcon/>}
+              icon={<GridIcon />}
               func={() => setExport(true)}
             />
             <CustomButton
               label="Gerar PDF"
-              icon={<PrintIcon/>}
-              func={() => AbrirRelatorio(NomeRelatorio.listaCalibracoes, getWhere())}
+              icon={<PrintIcon />}
+              func={() =>
+                AbrirRelatorio(NomeRelatorio.listaCalibracoes, getWhere())
+              }
             />
           </Box>
         </Grid>
       </Grid>
     );
-  }
+  };
 
   return (
     <Box>
-      <PageHeader title="Relatório de Calibrações"/>
+      <PageHeader title="Relatório de Calibrações" />
       {usuarioId && getCamposBuscaCliente()}
       {getCamposBuscaInstrumento()}
       {getCamposFiltros()}
@@ -330,32 +358,38 @@ const ListaCalibracoes: NextPage<Props> = (props: Props) => {
         />
       )}
     </Box>
-  )
-}
+  );
+};
 
-export default ListaCalibracoes
+export default ListaCalibracoes;
 
 export const getServerSideProps: GetServerSideProps = async ({ req }) => {
   const jwt = GetDataFromJwtToken(req.cookies.token);
 
   const laboratorios = await prisma.$queryRaw(`
-  select distinct
-    coalesce(upper(nullif(trim(c.laboratorio), '')), 'Não informado') as value,
-    coalesce(upper(nullif(trim(c.laboratorio), '')), 'Não informado') as text
+  SELECT
+    value,
+    text
+  FROM (
+    select distinct
+      case when nullif(trim(c.laboratorio), '') is null then 0 else 1 end as ordem,
+      coalesce(upper(nullif(trim(c.laboratorio), '')), 'Não informado') as value,
+      coalesce(upper(nullif(trim(c.laboratorio), '')), 'Não informado') as text
   from
     instrumentos_calibracoes as c
     inner join instrumentos i on (i.id = c.instrumento_id)
-  where ${jwt?.pessoaId ? `i.pessoa_id = '${jwt.pessoaId}'` : '1=1'}
+  where
+    ${jwt?.pessoaId ? `i.pessoa_id = '${jwt.pessoaId}'` : "1=1"}
+  ) as t
   order by
-    case when nullif(trim(c.laboratorio), '') = '' then 0 else 1 end, 
-    nullif(trim(c.laboratorio), '')
+    t.ordem, t.text
   `);
 
   return {
     props: {
       usuarioId: jwt?.usuarioId || null,
       pessoaId: jwt?.pessoaId || null,
-      laboratorios
+      laboratorios,
     },
   };
 };
