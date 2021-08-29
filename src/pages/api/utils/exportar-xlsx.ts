@@ -12,8 +12,8 @@ import { removerColunasSensiveis } from './campos-exportar';
 
 export default async function CamposExportar(req: NextApiRequest, res: NextApiResponse) {
   
-  const filePath = `./public/arquivos/Relatorio-${format(new Date(), 'yyyy-MM-dd-HH-mm-ss')}.xlsx`;
-  // const filePath = `./public/arquivos/Relatorio-${format(new Date(), 'yyyy-MM-dd-HH-mm-ss')}.csv`;
+  const filePath = `./tmp/Relatorio-${format(new Date(), 'yyyy-MM-dd-HH-mm-ss')}.xlsx`;
+  // const filePath = `./tmp/Relatorio-${format(new Date(), 'yyyy-MM-dd-HH-mm-ss')}.csv`;
 
   try {
 
