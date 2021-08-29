@@ -6,7 +6,7 @@ import fs from 'fs';
 export default async function Certificado(req: NextApiRequest, res: NextApiResponse) {
 
   const id = req.query.calibracaoId.toString();
-  const filePath = `./tmp/Certificado-${id}.pdf`;
+  const filePath = `/tmp/Certificado-${id}.pdf`;
 
   try {
 

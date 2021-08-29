@@ -5,7 +5,7 @@ import fs from "fs";
 
 export default async function Login(req: NextApiRequest, res: NextApiResponse) {
   const id = req.query.id.toString();
-  const filePath = `./tmp/Avatar-${id}.jpeg`;
+  const filePath = `/tmp/Avatar-${id}.jpeg`;
 
   try {
     await cors(req, res);

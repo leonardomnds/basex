@@ -1,45 +1,59 @@
-import { format } from 'date-fns';
-import { Base64 } from 'js-base64';
+import { format } from "date-fns";
+import { Base64 } from "js-base64";
 import fs from "fs";
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextApiRequest, NextApiResponse } from "next";
 
-import prisma from '../../../prisma/PrismaInstance';
-import { NomeRelatorio } from '../../../reports/nomesRelatorios';
-import ConsultasComuns from '../../../util/ConsultasComuns';
-import cors from '../../../util/Cors';
-import { JsonToXLSX, ValidateAuth } from '../../../util/functions';
-import { removerColunasSensiveis } from './campos-exportar';
+import prisma from "../../../prisma/PrismaInstance";
+import { NomeRelatorio } from "../../../reports/nomesRelatorios";
+import ConsultasComuns from "../../../util/ConsultasComuns";
+import cors from "../../../util/Cors";
+import { JsonToXLSX, ValidateAuth } from "../../../util/functions";
+import { removerColunasSensiveis } from "./campos-exportar";
 
-export default async function CamposExportar(req: NextApiRequest, res: NextApiResponse) {
-  
-  const filePath = `./tmp/Relatorio-${format(new Date(), 'yyyy-MM-dd-HH-mm-ss')}.xlsx`;
-  // const filePath = `./tmp/Relatorio-${format(new Date(), 'yyyy-MM-dd-HH-mm-ss')}.csv`;
+export default async function CamposExportar(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  const filePath = `/tmp/Relatorio-${format(
+    new Date(),
+    "yyyy-MM-dd-HH-mm-ss"
+  )}.xlsx`;
+  // const filePath = `/tmp/Relatorio-${format(new Date(), 'yyyy-MM-dd-HH-mm-ss')}.csv`;
 
   try {
-
     await cors(req, res);
 
-    if (req.method === 'POST') {
+    if (req.method === "POST") {
+      const usuarioId = ValidateAuth(req, "user");
+      const pessoaId = ValidateAuth(req, "person");
+      const relatorio = parseInt(req.query?.ref?.toString() || "-1", 10);
 
-      const usuarioId = ValidateAuth(req, 'user');
-      const pessoaId = ValidateAuth(req, 'person');
-      const relatorio = parseInt((req.query?.ref?.toString() || '-1'), 10);
-  
-      if ((!usuarioId && !pessoaId) || (pessoaId && relatorio === NomeRelatorio.listaClientes)) {
-        res.status(401).json({error: 'Acesso não autorizado!'});
+      if (
+        (!usuarioId && !pessoaId) ||
+        (pessoaId && relatorio === NomeRelatorio.listaClientes)
+      ) {
+        res.status(401).json({ error: "Acesso não autorizado!" });
         return;
       }
 
       let where = req.query?.filter as string;
-      where = where.split(' ').join('+');
-      where = `${(where || '').toString().length === 0 ? '1=1' : Base64.atob(decodeURI(where))}`;
+      where = where.split(" ").join("+");
+      where = `${
+        (where || "").toString().length === 0
+          ? "1=1"
+          : Base64.atob(decodeURI(where))
+      }`;
 
-      let sqlColunas = '';
+      let sqlColunas = "";
 
       removerColunasSensiveis(req.body).map((item, index) => {
-        if (index !== 0) sqlColunas += ', ';
+        if (index !== 0) sqlColunas += ", ";
 
-        if (item.tabela === 'instrumentos' && (item.coluna === 'ultima_calibracao' || item.coluna === 'vencimento_calibracao')) {
+        if (
+          item.tabela === "instrumentos" &&
+          (item.coluna === "ultima_calibracao" ||
+            item.coluna === "vencimento_calibracao")
+        ) {
           sqlColunas += `view_instrumentos.${item.coluna} as "${item.tabela}.${item.coluna}"`;
         } else {
           sqlColunas += `${item.tabela}.${item.coluna} as "${item.tabela}.${item.coluna}"`;
@@ -93,27 +107,33 @@ export default async function CamposExportar(req: NextApiRequest, res: NextApiRe
       }
 
       if (dados.length === 0) {
-        res.status(403).json({ error: 'Não há dados a exportar!'});
+        res.status(403).json({ error: "Não há dados a exportar!" });
         return;
       } else {
         await JsonToXLSX(dados, filePath);
 
         fs.readFile(filePath, async (readErr, file) => {
           if (readErr) throw new Error(readErr.message);
-          fs.unlink(filePath, () => {})
-          res.setHeader('Content-disposition', 'attachment; filename='+filePath.slice(filePath.lastIndexOf('/')+1));
-          res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+          fs.unlink(filePath, () => {});
+          res.setHeader(
+            "Content-disposition",
+            "attachment; filename=" +
+              filePath.slice(filePath.lastIndexOf("/") + 1)
+          );
+          res.setHeader(
+            "Content-Type",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+          );
           res.status(200).send(file);
           return;
         });
       }
     } else {
-      res.status(405).json({error: 'Método não suportado!'});
+      res.status(405).json({ error: "Método não suportado!" });
       return;
     }
-  
   } catch (err) {
     fs.unlink(filePath, () => {});
-    res.status(500).json({error: err.message});
+    res.status(500).json({ error: err.message });
   }
 }

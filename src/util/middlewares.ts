@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 
 export const multerUpload = multer({
   storage: multer.diskStorage({
-    destination: "./tmp",
+    destination: "/tmp",
     filename: (req, file, cb) =>
       cb(
         null,
