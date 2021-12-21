@@ -471,7 +471,7 @@ const NewPeople: NextPage<Props> = (props) => {
                 label="CEP"
                 value={cep}
                 setValue={maskCep}
-                endItem={cep.length === 9 ? getEndItemCep() : null}
+                endItem={cep?.length === 9 ? getEndItemCep() : null}
               />
             </Grid>
             <Grid item xs={4} sm={6} md={9} />
@@ -618,7 +618,7 @@ const NewPeople: NextPage<Props> = (props) => {
               label="CPF / CNPJ"
               value={cpfCnpj}
               setValue={maskCpfCnpj}
-              endItem={cpfCnpj.length === 18 ? getEndItemCnpj() : null}
+              endItem={cpfCnpj?.length === 18 ? getEndItemCnpj() : null}
             />
           </Grid>
           <Hidden xsDown>
