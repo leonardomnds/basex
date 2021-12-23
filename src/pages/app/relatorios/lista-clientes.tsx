@@ -352,7 +352,7 @@ export default ListaClientes;
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const jwt = GetDataFromJwtToken(req.cookies.token);
 
-  const jsonEstados = await prisma.$queryRawUnsafe(`
+  const jsonEstados: any[] = await prisma.$queryRawUnsafe(`
   select
 	  uf
   from (
@@ -381,7 +381,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
     }
   });
 
-  const grupos = await prisma.$queryRawUnsafe(`
+  const grupos: any[] = await prisma.$queryRawUnsafe(`
   SELECT
 	  value,
 	  text
@@ -398,7 +398,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
 	  t.ordem, t.text
   `);
 
-  const categorias = await prisma.$queryRawUnsafe(`
+  const categorias: any[] = await prisma.$queryRawUnsafe(`
   SELECT
 	  value,
 	  text

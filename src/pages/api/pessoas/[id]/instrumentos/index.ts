@@ -45,7 +45,7 @@ export default async function Instrumentos(
 }
 
 const listarInstrumentos = async (pessoaId: string) => {
-  const instrumentos = await prisma.$queryRawUnsafe(
+  const instrumentos: any[] = await prisma.$queryRawUnsafe(
     `
       SELECT
         i.id,

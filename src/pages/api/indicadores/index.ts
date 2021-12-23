@@ -30,7 +30,7 @@ export default async function Indicadores(
     }
 
     if (req.method === "GET") {
-      let sqlResult;
+      let sqlResult: any[];
       const json: IndicadoresType = {};
 
       // Quantidade de Clientes Ativos

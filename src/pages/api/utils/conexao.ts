@@ -10,7 +10,7 @@ export default async function TestarConexao(
   try {
     await cors(req, res);
 
-    const sql = await prisma.$queryRawUnsafe(
+    const sql: any[] = await prisma.$queryRawUnsafe(
       "select database(), current_timestamp as datetime"
     );
 

@@ -26,10 +26,10 @@ export default async function CamposExportar(
       }
 
       const getColunasTabela = async (tabela: string, arrayCompletar = []) => {
-        const dadosBD = await prisma.$queryRawUnsafe(
+        const dadosBD: any[] = await prisma.$queryRawUnsafe(
           `show columns from ${tabela}`
         );
-        (dadosBD as any[]).map((d) =>
+        dadosBD.map((d) =>
           arrayCompletar.push({
             tabela: tabela
               .replace("pessoa", "cliente")

@@ -413,7 +413,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
   const jwt = GetDataFromJwtToken(req.cookies.token);
 
   const getData = async (column: string) => {
-    const json = await prisma.$queryRawUnsafe(`
+    const json: any[] = await prisma.$queryRawUnsafe(`
     SELECT
 	    value,
 	    text
