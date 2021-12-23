@@ -11,7 +11,7 @@ export default async function Grupo(req: NextApiRequest, res: NextApiResponse) {
     const cidade = req.query.cidade.toString();
 
     if (req.method === "GET") {
-      const bairros = await prisma.$queryRaw(`
+      const bairros = await prisma.$queryRawUnsafe(`
       select
         bairro
       from (

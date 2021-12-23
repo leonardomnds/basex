@@ -10,7 +10,7 @@ export default async function Grupo(req: NextApiRequest, res: NextApiResponse) {
     const uf = req.query.uf.toString();
 
     if (req.method === "GET") {
-      const cidades = await prisma.$queryRaw(`
+      const cidades = await prisma.$queryRawUnsafe(`
       select
         cidade
       from (

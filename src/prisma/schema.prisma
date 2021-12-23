@@ -57,9 +57,9 @@ model Pessoa {
   complemento String? @db.VarChar(255)
   senha_acesso String @db.VarChar(100) @default("")
   grupo_id String? @db.VarChar(100)
-  grupo GrupoPessoa? @relation(fields: [grupo_id], references: [id])
+  grupo GrupoPessoa? @relation(fields: [grupo_id], references: [id], onDelete: SetNull)
   categoria_id String? @db.VarChar(100)
-  categoria CategoriaPessoa? @relation(fields: [categoria_id], references: [id])
+  categoria CategoriaPessoa? @relation(fields: [categoria_id], references: [id], onDelete: SetNull)
   ativo Boolean @default(true)
   data_cadastro DateTime @default(now())
   url_senha String? @db.VarChar(100)
@@ -84,6 +84,8 @@ model Instrumento {
   subarea String? @db.VarChar(100)
   fabricante String? @db.VarChar(100)
   modelo String? @db.VarChar(100)
+  faixa String? @db.VarChar(100)
+  resolucao String? @db.VarChar(100)
   observacoes String? @db.Text
   ativo Boolean @default(true)
   data_cadastro DateTime @default(now())
@@ -95,7 +97,7 @@ model Instrumento {
 model Calibracao {
   id String @id @default(uuid()) @db.VarChar(100)
   instrumento_id String @db.VarChar(100)
-  instrumento Instrumento @relation(fields: [instrumento_id], references: [id])
+  instrumento Instrumento @relation(fields: [instrumento_id], references: [id], onDelete: Cascade)
   data_calibracao DateTime @db.Date
   numero_certificado String @db.VarChar(100)
   pdfCertificado Bytes? @db.LongBlob
