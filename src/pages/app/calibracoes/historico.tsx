@@ -27,6 +27,7 @@ import {
 } from "../../../util/functions";
 import ConsultaPessoas from "../../../components/CustomDialog/ConsultaPessoas";
 import ConsultaInstrumentos from "../../../components/CustomDialog/ConsultaInstrumentos";
+import CustomDialog from "../../../components/CustomDialog";
 
 const useStyles = makeStyles((theme) => ({
   themeError: {
@@ -66,6 +67,8 @@ const List: NextPage<Props> = (props: Props) => {
     addDays(new Date(), -(new Date().getDate() - 1))
   );
   const [dataFinal, setDataFinal] = useState<Date>(new Date());
+
+  const [deletingCalibracao, setDeletingCalibracao] = useState(null);
 
   const [isLoading, setLoading] = useState<boolean>(false);
   const [linhas, setLinhas] = useState<Array<any>>([]);
@@ -334,6 +337,53 @@ const List: NextPage<Props> = (props: Props) => {
     }
   };
 
+  const editarCalibracao = (calibracao) => {
+    if (uuidPessoa) {
+      router.push(
+        `/app/calibracoes/${calibracao.id}?pessoaId=${uuidPessoa}&instrumentoId=${calibracao.instrumento_id}`
+      );
+    } else {
+      addToast("É necessário selecionar o cliente!", { appearance: "warning" });
+    }
+  };
+
+  const deletarCalibracao = (calibracao) => {
+    setDeletingCalibracao(calibracao);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setDeletingCalibracao(null);
+  };
+
+  const handleConfirmDeleteCalibracao = async () => {
+    try {
+      const response = await api.delete(
+        "/pessoas/" +
+          uuidPessoa +
+          "/instrumentos/" +
+          deletingCalibracao.instrumento_id +
+          "/calibracoes/" +
+          deletingCalibracao.id
+      );
+
+      if (!response?.data?.error) {
+        addToast("Calibração eliminada com sucesso!", {
+          appearance: "success",
+        });
+
+        setLinhas(() => linhas.filter((x) => x.id !== deletingCalibracao.id));
+
+        setDeletingCalibracao(null);
+
+        return;
+      }
+      throw new Error(response.data.error);
+    } catch (err) {
+      setDeletingCalibracao(null);
+      addToast(err.message, { appearance: "error" });
+    }
+  };
+
   return (
     <Box>
       <PageHeader
@@ -350,6 +400,8 @@ const List: NextPage<Props> = (props: Props) => {
         selectFunction={openPdf}
         selectIcon={PdfIcon}
         selectLabel="Visualizar Certificado"
+        editFunction={editarCalibracao}
+        deleteFunction={deletarCalibracao}
       />
       {consultandoPessoa && (
         <ConsultaPessoas
@@ -370,6 +422,15 @@ const List: NextPage<Props> = (props: Props) => {
             setUuidInstrumento(insId);
             getDataInstrumento(insId);
           }}
+        />
+      )}
+      {deletingCalibracao && (
+        <CustomDialog
+          title="Excluir calibração"
+          text={`Confirma a exclusão dessa calibração?`}
+          isOpen={Boolean(deletingCalibracao)}
+          onClose={handleCloseDeleteDialog}
+          onConfirm={handleConfirmDeleteCalibracao}
         />
       )}
     </Box>

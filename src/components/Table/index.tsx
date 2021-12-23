@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 import {
   makeStyles,
@@ -19,34 +19,34 @@ import {
   Grid,
   TextField,
   InputAdornment,
-} from '@material-ui/core';
+} from "@material-ui/core";
 
-import EditIcon from '@material-ui/icons/EditRounded';
-import DeleteIcon from '@material-ui/icons/DeleteRounded';
-import SearchIcon from '@material-ui/icons/SearchRounded';
-import CheckIcon from '@material-ui/icons/CheckCircleRounded';
+import EditIcon from "@material-ui/icons/EditRounded";
+import DeleteIcon from "@material-ui/icons/DeleteRounded";
+import SearchIcon from "@material-ui/icons/SearchRounded";
+import CheckIcon from "@material-ui/icons/CheckCircleRounded";
 
 import {
   SomenteNumeros,
   StringToDouble,
   FormatarStringToMoney,
   ZerosLeft,
-} from '../../util/functions';
+} from "../../util/functions";
 
 const useStyles = makeStyles((theme) => ({
   themeError: {
     backgroundColor: theme.palette.background.paper,
   },
   root: {
-    width: '100%',
+    width: "100%",
   },
   head: {
     minHeight: 100,
   },
   headerItems: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
     margin: 10,
   },
   cell: {
@@ -55,9 +55,9 @@ const useStyles = makeStyles((theme) => ({
     paddingRight: 0,
   },
   contentCell: {
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
     padding: 6,
     paddingLeft: 20,
     paddingRight: 0,
@@ -67,13 +67,13 @@ const useStyles = makeStyles((theme) => ({
   },
   noDataContainer: {
     padding: 20,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
   },
   actionCell: {
     width: 20,
-    position: 'sticky',
+    position: "sticky",
     zIndex: 1,
     // right: -18,
     right: -10,
@@ -83,7 +83,7 @@ const useStyles = makeStyles((theme) => ({
     padding: 2,
     color: theme.palette.primary.contrastText,
     backgroundColor: theme.palette.primary.main,
-    '&:hover': {
+    "&:hover": {
       backgroundColor: theme.palette.primary.main,
     },
   },
@@ -92,7 +92,7 @@ const useStyles = makeStyles((theme) => ({
     padding: 2,
     color: theme.palette.error.contrastText,
     backgroundColor: theme.palette.error.main,
-    '&:hover': {
+    "&:hover": {
       backgroundColor: theme.palette.error.main,
     },
   },
@@ -104,17 +104,17 @@ const useStyles = makeStyles((theme) => ({
   searchInput: {
     marginTop: 10,
     paddingRight: 20,
-    width: '100%',
+    width: "100%",
   },
   iconSearch: {
-    color: 'gray',
+    color: "gray",
   },
   paginationBox: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "flex-end",
     paddingRight: 15,
-  }
+  },
 }));
 
 export const getColumn = (
@@ -122,7 +122,7 @@ export const getColumn = (
   label: string,
   minWidth: number,
   align: "center" | "left" | "right",
-  formatar?: "none" | "upper" | "padleft4" ,
+  formatar?: "none" | "upper" | "padleft4",
   ocultar: boolean = false
 ) => {
   return { id, label, minWidth, align, formatar: formatar || "none", ocultar };
@@ -145,19 +145,19 @@ export const getRow = (rowItems: Array<any>, columnsList: Array<any>) => {
 };
 
 type Props = {
-  isLoading?: boolean,
-  columns: Array<any>,
-  rows: Array<any>,
-  editFunction?: (v: any) => void,
-  deleteFunction?: (v: any) => void,
-  selectFunction?: (v: any) => void,
-  selectIcon?: any,
-  selectLabel?: string,
-  clickFunction?: (v: any) => void,  
-  naoPreencherLinhasVazias?: boolean,
-  naoPesquisar?: boolean,
-  linhasPorPagina?: number,
-}
+  isLoading?: boolean;
+  columns: Array<any>;
+  rows: Array<any>;
+  editFunction?: (v: any) => void;
+  deleteFunction?: (v: any) => void;
+  selectFunction?: (v: any) => void;
+  selectIcon?: any;
+  selectLabel?: string;
+  clickFunction?: (v: any) => void;
+  naoPreencherLinhasVazias?: boolean;
+  naoPesquisar?: boolean;
+  linhasPorPagina?: number;
+};
 
 function CustomTable({
   isLoading,
@@ -179,7 +179,7 @@ function CustomTable({
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(linhasPorPagina);
-  const [pesquisa, setPesquisa] = useState('');
+  const [pesquisa, setPesquisa] = useState("");
   const [filteredRows, setFilteredRows] = useState([]);
 
   let emptyRows =
@@ -200,13 +200,13 @@ function CustomTable({
           if (index > 0) {
             const value = row[column.id];
 
-            if (typeof value === 'string') {
+            if (typeof value === "string") {
               incluir = value.toLowerCase().includes(consulta.toLowerCase());
 
               if (!incluir && SomenteNumeros(value)) {
                 incluir = SomenteNumeros(value).includes(consulta);
               }
-            } else if (typeof value === 'number') {
+            } else if (typeof value === "number") {
               incluir = Number(consulta) === value;
 
               if (!incluir) {
@@ -214,7 +214,9 @@ function CustomTable({
               }
 
               if (!incluir) {
-                incluir = FormatarStringToMoney(consulta) === FormatarStringToMoney(value.toString());
+                incluir =
+                  FormatarStringToMoney(consulta) ===
+                  FormatarStringToMoney(value.toString());
               }
             }
           }
@@ -235,14 +237,14 @@ function CustomTable({
 
   const formatarString = (value: any, type: string) => {
     switch (type) {
-      case 'padleft4':
-        return ZerosLeft(value || '0', 4);
-      case 'upper':
-        return (value || '').toString().toUpperCase();
+      case "padleft4":
+        return ZerosLeft(value || "0", 4);
+      case "upper":
+        return (value || "").toString().toUpperCase();
       default:
-        return (value || '').toString();
+        return (value || "").toString();
     }
-  }
+  };
 
   const handleChangePage = (evt, numPage) => {
     setPage(numPage);
@@ -325,7 +327,7 @@ function CustomTable({
                   className={classes.cell}
                   style={{
                     minWidth: column.minWidth,
-                    display: column.ocultar ? 'none' : '',
+                    display: column.ocultar ? "none" : "",
                   }}
                 >
                   {column.label}
@@ -346,7 +348,15 @@ function CustomTable({
               .map((row, rowKey) => {
                 return (
                   // eslint-disable-next-line react/no-array-index-key
-                  <TableRow hover role="checkbox" tabIndex={-1} key={rowKey} onClick={clickFunction ? () => clickFunction(row) : ()=>{}}>
+                  <TableRow
+                    hover
+                    role="checkbox"
+                    tabIndex={-1}
+                    key={rowKey}
+                    onClick={
+                      clickFunction ? () => clickFunction(row) : () => {}
+                    }
+                  >
                     {columns.map((column) => {
                       const value = row[column.id];
                       return (
@@ -356,7 +366,7 @@ function CustomTable({
                           className={classes.contentCell}
                           style={{
                             minWidth: column.minWidth,
-                            display: column.ocultar ? 'none' : '',
+                            display: column.ocultar ? "none" : "",
                           }}
                         >
                           {formatarString(value, column.formatar)}
@@ -398,7 +408,11 @@ function CustomTable({
                             </Tooltip>
                           )}
                           {selectFunction && (
-                            <Tooltip title={selectLabel || "Selecionar"} placement="top" arrow>
+                            <Tooltip
+                              title={selectLabel || "Selecionar"}
+                              placement="top"
+                              arrow
+                            >
                               <Button
                                 size="small"
                                 className={classes.btnEdit}
@@ -406,7 +420,11 @@ function CustomTable({
                                   selectFunction(row);
                                 }}
                               >
-                                {selectIcon ?  <IconSelectIcon className={classes.btnIcon} /> : <CheckIcon className={classes.btnIcon} />}
+                                {selectIcon ? (
+                                  <IconSelectIcon className={classes.btnIcon} />
+                                ) : (
+                                  <CheckIcon className={classes.btnIcon} />
+                                )}
                               </Button>
                             </Tooltip>
                           )}
@@ -428,9 +446,7 @@ function CustomTable({
       </TableContainer>
       {!filteredRows.length && (
         <Box className={classes.noDataContainer}>
-          <Typography variant="body2">
-            Não há dados para exibir
-          </Typography>
+          <Typography variant="body2">Não há dados para exibir</Typography>
         </Box>
       )}
     </Paper>

@@ -3,7 +3,7 @@ import ConsultasComuns from "../util/ConsultasComuns";
 
 export default {
   async listaUsuarios(where: string) {
-    const json = await prisma.$queryRaw(`
+    const json: any[] = await prisma.$queryRawUnsafe(`
     select
       u.usuario,
       u.nome,
@@ -18,7 +18,7 @@ export default {
     return json;
   },
   async listaClientes(where: string) {
-    const json = await prisma.$queryRaw(`
+    const json: any[] = await prisma.$queryRawUnsafe(`
     select
       p.codigo,
       p.cpf_cnpj,
@@ -35,7 +35,7 @@ export default {
     return json;
   },
   async listaInstrumentos(where: string) {
-    const json = await prisma.$queryRaw(`    
+    const json: any[] = await prisma.$queryRawUnsafe(`    
     select
       p.codigo as codigo_cliente,
       p.nome as nome_cliente,
@@ -58,7 +58,7 @@ export default {
     return json;
   },
   async listaCalibracoes(where: string) {
-    const json = await prisma.$queryRaw(`
+    const json: any[] = await prisma.$queryRawUnsafe(`
     select
       i.tag,
       i.descricao,
@@ -75,6 +75,4 @@ export default {
     `);
     return json;
   },
-
 };
-

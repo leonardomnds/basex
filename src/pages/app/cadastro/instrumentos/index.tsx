@@ -1,24 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
-import { useToasts } from 'react-toast-notifications';
-import { addHours, format } from 'date-fns';
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/router";
+import { useToasts } from "react-toast-notifications";
+import { addHours, format } from "date-fns";
 
-import { makeStyles, Box, Paper, Tabs, Tab, Grid } from '@material-ui/core';
-import SearchIcon from '@material-ui/icons/SearchRounded';
-import CloseIcon from '@material-ui/icons/CloseRounded';
+import { makeStyles, Box, Paper, Tabs, Tab, Grid } from "@material-ui/core";
+import SearchIcon from "@material-ui/icons/SearchRounded";
+import CloseIcon from "@material-ui/icons/CloseRounded";
 
-import PageHeader from '../../../../components/Layout/PageHeader';
+import PageHeader from "../../../../components/Layout/PageHeader";
 
 import TextField, {
   getEndItemIconButton,
-} from '../../../../components/FormControl/TextField';
+} from "../../../../components/FormControl/TextField";
 
-import CustomTable, { getColumn, getRow } from '../../../../components/Table';
-import CustomDialog from '../../../../components/CustomDialog';
-import { GetServerSideProps, NextPage } from 'next';
-import api from '../../../../util/Api';
-import { FormatarCpfCnpj, GetDataFromJwtToken, ZerosLeft } from '../../../../util/functions';
-import ConsultaPessoas from '../../../../components/CustomDialog/ConsultaPessoas';
+import CustomTable, { getColumn, getRow } from "../../../../components/Table";
+import CustomDialog from "../../../../components/CustomDialog";
+import { GetServerSideProps, NextPage } from "next";
+import api from "../../../../util/Api";
+import {
+  FormatarCpfCnpj,
+  GetDataFromJwtToken,
+  ZerosLeft,
+} from "../../../../util/functions";
+import ConsultaPessoas from "../../../../components/CustomDialog/ConsultaPessoas";
 
 const useStyles = makeStyles((theme) => ({
   themeError: {
@@ -31,10 +35,10 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 type Props = {
-  usuarioId: string,
-  pessoaId: string,
-  colunas: []
-}
+  usuarioId: string;
+  pessoaId: string;
+  colunas: [];
+};
 
 const List: NextPage<Props> = (props: Props) => {
   const classes = useStyles();
@@ -44,8 +48,8 @@ const List: NextPage<Props> = (props: Props) => {
 
   const [uuidPessoa, setUuidPessoa] = useState<string>(pessoaId);
   const [codPessoa, setCodPessoa] = useState<number>(null);
-  const [cpfCnpjPessoa, setCpfCnpjPessoa] = useState<string>('');
-  const [nomePessoa, setNomePessoa] = useState<string>('');
+  const [cpfCnpjPessoa, setCpfCnpjPessoa] = useState<string>("");
+  const [nomePessoa, setNomePessoa] = useState<string>("");
   const [consultandoPessoa, setConsultandoPessoa] = useState<boolean>(false);
 
   const [isLoading, setLoading] = useState<boolean>(false);
@@ -60,16 +64,20 @@ const List: NextPage<Props> = (props: Props) => {
     if (uuidPessoa) {
       router.push(`${router.pathname}/${uuidPessoa}/novo`);
     } else {
-      addToast('É necessário selecionar o cliente!', { appearance: 'warning' });
-    }    
+      addToast("É necessário selecionar o cliente!", { appearance: "warning" });
+    }
   };
 
-  const handleEditInstrument = (instrument) => {    
+  const handleEditInstrument = (instrument) => {
     if (uuidPessoa) {
       router.push(`${router.pathname}/${uuidPessoa}/${instrument.id}`);
     } else {
-      addToast('É necessário selecionar o cliente!', { appearance: 'warning' });
-    }  
+      addToast("É necessário selecionar o cliente!", { appearance: "warning" });
+    }
+  };
+
+  const handleDeleteInstrument = (instrument) => {
+    setDeletingInstrument(instrument);
   };
 
   const handleCloseDialog = () => {
@@ -77,10 +85,10 @@ const List: NextPage<Props> = (props: Props) => {
   };
 
   const limparCamposPessoa = () => {
-    setUuidPessoa('');
+    setUuidPessoa("");
     setCodPessoa(null);
-    setCpfCnpjPessoa('');
-    setNomePessoa('');
+    setCpfCnpjPessoa("");
+    setNomePessoa("");
   };
 
   const getEndItemBuscarCliente = () => {
@@ -91,7 +99,7 @@ const List: NextPage<Props> = (props: Props) => {
         : () => {
             setConsultandoPessoa(true);
           },
-         uuidPessoa ? 'Remover seleção' : 'Consultar',
+      uuidPessoa ? "Remover seleção" : "Consultar"
     );
   };
 
@@ -102,56 +110,84 @@ const List: NextPage<Props> = (props: Props) => {
       if (!response?.data?.error) {
         const { codigo, cpf_cnpj, nome } = response.data;
 
-        setCodPessoa(codigo),
-        setCpfCnpjPessoa(cpf_cnpj);
+        setCodPessoa(codigo), setCpfCnpjPessoa(cpf_cnpj);
         setNomePessoa(nome);
       } else {
         throw new Error(response.data.error);
       }
     } catch (err) {
-      addToast(err.message, { appearance: 'error' });
+      addToast(err.message, { appearance: "error" });
+    }
+  };
+
+  const handleConfirmDeleteInstrument = async () => {
+    try {
+      const response = await api.delete(
+        "/pessoas/" + uuidPessoa + "/instrumentos/" + deletingInstrument.id
+      );
+
+      if (!response?.data?.error) {
+        addToast("Instrumento eliminado com sucesso!", {
+          appearance: "success",
+        });
+
+        setLinhas(() => linhas.filter((x) => x.id !== deletingInstrument.id));
+
+        setDeletingInstrument(null);
+
+        return;
+      }
+      throw new Error(response.data.error);
+    } catch (err) {
+      setDeletingInstrument(null);
+      addToast(err.message, { appearance: "error" });
     }
   };
 
   useEffect(() => {
-
     const getData = async () => {
       const instrumentos = [];
       setLoading(true);
 
       try {
-        const response = await api.get('/pessoas/'+uuidPessoa+'/instrumentos');
+        const response = await api.get(
+          "/pessoas/" + uuidPessoa + "/instrumentos"
+        );
 
         if (!response?.data?.error) {
-          response.data.forEach((i) => {            
+          response.data.forEach((i) => {
             instrumentos.push(
               getRow(
                 [
                   i.id,
                   i.tag,
                   i.descricao,
-                  i.ultima_calibracao ? format(new Date(i.ultima_calibracao), 'dd/MM/yyyy') : '',
-                  i.vencimento_calibracao ? format(new Date(i.vencimento_calibracao), 'dd/MM/yyyy') : '',
-                  i.ativo ? 'Ativo' : 'Inativo',
+                  i.ultima_calibracao
+                    ? format(new Date(i.ultima_calibracao), "dd/MM/yyyy")
+                    : "",
+                  i.vencimento_calibracao
+                    ? format(new Date(i.vencimento_calibracao), "dd/MM/yyyy")
+                    : "",
+                  i.ativo ? "Ativo" : "Inativo",
                 ],
-                colunas,
-              ),
+                colunas
+              )
             );
           });
         } else {
-          throw new Error(response.data.error)
+          throw new Error(response.data.error);
         }
       } catch (err) {
-        addToast(err.message, { appearance: 'error' });
+        addToast(err.message, { appearance: "error" });
       }
 
       setLinhas(instrumentos);
       setLoading(false);
-    }
+    };
 
     if (uuidPessoa) {
       if (router.query?.pessoaId && Boolean(window)) {
-        window.history.replaceState(null, '', router.pathname)
+        window.history.replaceState(null, "", router.pathname);
       }
       if (usuarioId) {
         getDataPessoa(uuidPessoa);
@@ -160,7 +196,7 @@ const List: NextPage<Props> = (props: Props) => {
     } else {
       setLinhas([]);
     }
-  }, [uuidPessoa])
+  }, [uuidPessoa]);
 
   const getCamposBuscaCliente = () => {
     return (
@@ -169,7 +205,7 @@ const List: NextPage<Props> = (props: Props) => {
           <Grid item xs={4} sm={3} md={2}>
             <TextField
               label="Cliente"
-              value={codPessoa ? ZerosLeft(codPessoa.toString(), 4) : ''}
+              value={codPessoa ? ZerosLeft(codPessoa.toString(), 4) : ""}
               setValue={setCodPessoa}
               disabled
               endItem={getEndItemBuscarCliente()}
@@ -186,7 +222,7 @@ const List: NextPage<Props> = (props: Props) => {
           <Grid item xs={12} sm={12} md={7} lg={8}>
             <TextField
               label={`${
-                cpfCnpjPessoa.length > 14 ? 'Razão Social' : 'Nome'
+                cpfCnpjPessoa.length > 14 ? "Razão Social" : "Nome"
               } do cliente`}
               value={nomePessoa}
               setValue={setNomePessoa}
@@ -196,52 +232,59 @@ const List: NextPage<Props> = (props: Props) => {
         </Grid>
       </Paper>
     );
-  }
+  };
 
   return (
-      <Box>
-        <PageHeader title="Instrumentos " btnLabel="Novo" btnFunc={handleNewInstrument} />
-        {usuarioId && getCamposBuscaCliente()}
-        <CustomTable
-          isLoading={isLoading}
-          columns={colunas}
-          rows={linhas}
-          editFunction={handleEditInstrument}
+    <Box>
+      <PageHeader
+        title="Instrumentos "
+        btnLabel="Novo"
+        btnFunc={handleNewInstrument}
+      />
+      {usuarioId && getCamposBuscaCliente()}
+      <CustomTable
+        isLoading={isLoading}
+        columns={colunas}
+        rows={linhas}
+        editFunction={handleEditInstrument}
+        deleteFunction={handleDeleteInstrument}
+      />
+      {deletingInstrument && (
+        <CustomDialog
+          title="Excluir instrumento"
+          text={`Confirma a exclusão do instrumento ${deletingInstrument.descricao}?`}
+          isOpen={Boolean(deletingInstrument)}
+          onClose={handleCloseDialog}
+          onConfirm={handleConfirmDeleteInstrument}
         />
-        {deletingInstrument && (
-          <CustomDialog
-            title="Excluir instrumento"
-            text={`Confirma a exclusão do instrumento ${deletingInstrument.nome}?`}
-            isOpen={Boolean(deletingInstrument)}
-            onClose={handleCloseDialog}
-            onConfirm={()=>{}}
-          />
-        )}
-        {consultandoPessoa && (
-          <ConsultaPessoas
-            isOpen={consultandoPessoa}
-            onClose={() => setConsultandoPessoa(false)}
-            setSelectedId={(pesId) => {
-              setUuidPessoa(pesId);
-              getDataPessoa(pesId);
-            }}
-          />
-        )}
-      </Box>
+      )}
+      {consultandoPessoa && (
+        <ConsultaPessoas
+          isOpen={consultandoPessoa}
+          onClose={() => setConsultandoPessoa(false)}
+          setSelectedId={(pesId) => {
+            setUuidPessoa(pesId);
+            getDataPessoa(pesId);
+          }}
+        />
+      )}
+    </Box>
   );
-}
+};
 
 export default List;
 
-export const getServerSideProps : GetServerSideProps = async ({ req, query }) => {
-
+export const getServerSideProps: GetServerSideProps = async ({
+  req,
+  query,
+}) => {
   const colunas = [];
-  colunas.push(getColumn('id', 'Id', 0, 'center', null, true));
-  colunas.push(getColumn('tag', 'TAG', 50, 'left'));
-  colunas.push(getColumn('descricao', 'Descrição', 100, 'left'));
-  colunas.push(getColumn('dtCalibracao', 'Última Calibração', 50, 'center'));
-  colunas.push(getColumn('vctoCalibracao', 'Vencimento', 50, 'center'));
-  colunas.push(getColumn('ativo', 'Status', 30, 'center'));
+  colunas.push(getColumn("id", "Id", 0, "center", null, true));
+  colunas.push(getColumn("tag", "TAG", 50, "left"));
+  colunas.push(getColumn("descricao", "Descrição", 100, "left"));
+  colunas.push(getColumn("dtCalibracao", "Última Calibração", 50, "center"));
+  colunas.push(getColumn("vctoCalibracao", "Vencimento", 50, "center"));
+  colunas.push(getColumn("ativo", "Status", 30, "center"));
 
   const { pessoaId } = query;
   const jwt = GetDataFromJwtToken(req.cookies.token);
@@ -249,8 +292,8 @@ export const getServerSideProps : GetServerSideProps = async ({ req, query }) =>
   return {
     props: {
       usuarioId: jwt?.usuarioId || null,
-      pessoaId: jwt?.pessoaId ? jwt.pessoaId : (pessoaId || null),
-      colunas
-    }
-  }
-}
+      pessoaId: jwt?.pessoaId ? jwt.pessoaId : pessoaId || null,
+      colunas,
+    },
+  };
+};

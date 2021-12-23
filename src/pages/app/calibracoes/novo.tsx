@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useToasts } from "react-toast-notifications";
+import { useRouter } from "next/router";
 
-import { makeStyles, Box, Paper, Grid, Hidden } from "@material-ui/core";
+import { makeStyles, Box, Paper, Grid } from "@material-ui/core";
 import SearchIcon from "@material-ui/icons/SearchRounded";
 import CloseIcon from "@material-ui/icons/CloseRounded";
 import UploadIcon from "@material-ui/icons/AttachFileRounded";
@@ -16,16 +17,16 @@ import DatePicker from "../../../components/FormControl/DatePicker";
 import { GetServerSideProps, NextPage } from "next";
 import api from "../../../util/Api";
 import {
+  ConvertBlobToFile,
   FormatarCpfCnpj,
   GetDataFromJwtToken,
   ZerosLeft,
 } from "../../../util/functions";
 import ConsultaPessoas from "../../../components/CustomDialog/ConsultaPessoas";
 import ConsultaInstrumentos from "../../../components/CustomDialog/ConsultaInstrumentos";
-import { Calibracao } from ".prisma/client";
 import SaveRoundedIcon from "@material-ui/icons/SaveRounded";
 import CustomButton from "../../../components/CustomButton";
-import { format } from "date-fns";
+import { addHours, format } from "date-fns";
 
 const useStyles = makeStyles((theme) => ({
   themeError: {
@@ -47,12 +48,15 @@ const useStyles = makeStyles((theme) => ({
 type Props = {
   usuarioId: string;
   pessoaId: string;
+  instrumentoId: string;
+  calibracaoId: string;
 };
 
 const List: NextPage<Props> = (props: Props) => {
   const classes = useStyles();
   const { addToast } = useToasts();
-  const { usuarioId, pessoaId } = props;
+  const router = useRouter();
+  const { usuarioId, pessoaId, instrumentoId, calibracaoId } = props;
 
   const [uuidPessoa, setUuidPessoa] = useState<string>(pessoaId);
   const [codPessoa, setCodPessoa] = useState<number>(null);
@@ -60,7 +64,7 @@ const List: NextPage<Props> = (props: Props) => {
   const [nomePessoa, setNomePessoa] = useState<string>("");
   const [consultandoPessoa, setConsultandoPessoa] = useState<boolean>(false);
 
-  const [uuidInstrumento, setUuidInstrumento] = useState<string>("");
+  const [uuidInstrumento, setUuidInstrumento] = useState<string>(instrumentoId);
   const [tagInstrumento, setTagInstrumento] = useState<string>("");
   const [descricaoInstrumento, setDescricaoInstrumento] = useState<string>("");
   const [consultandoInstrumento, setConsultandoInstrumento] =
@@ -157,7 +161,6 @@ const List: NextPage<Props> = (props: Props) => {
 
   const salvarCalibracao = async () => {
     setSaving(true);
-    const editing = false;
 
     if (!uuidPessoa || !uuidInstrumento) {
       addToast("Selecione o cliente e o instrumento!", {
@@ -183,9 +186,9 @@ const List: NextPage<Props> = (props: Props) => {
         if (arquivoCertificado?.file)
           formData.append("pdfCertificado", arquivoCertificado?.file);
 
-        if (editing) {
+        if (!!calibracaoId) {
           response = await api.put(
-            `/pessoas/${uuidPessoa}/instrumentos/${uuidInstrumento}/calibracoes/${editing}`,
+            `/pessoas/${uuidPessoa}/instrumentos/${uuidInstrumento}/calibracoes/${calibracaoId}`,
             formData
           );
         } else {
@@ -197,12 +200,18 @@ const List: NextPage<Props> = (props: Props) => {
 
         if (!response?.data?.error) {
           addToast(
-            `Calibração ${false ? "alterada" : "cadastrada"} com sucesso!`,
+            `Calibração ${
+              !!calibracaoId ? "alterada" : "cadastrada"
+            } com sucesso!`,
             {
               appearance: "success",
             }
           );
           limparCamposInstrumento();
+
+          if (!!calibracaoId) {
+            router.push("/app/calibracoes/historico?pessoaId=" + uuidPessoa);
+          }
         } else {
           throw new Error(response.data.error);
         }
@@ -392,10 +401,68 @@ const List: NextPage<Props> = (props: Props) => {
     );
   };
 
+  useEffect(() => {
+    async function getData() {
+      try {
+        const response = await api.get(
+          `/pessoas/${uuidPessoa}/instrumentos/${uuidInstrumento}/calibracoes/${calibracaoId}`
+        );
+
+        if (!response?.data?.error) {
+          const dados = response.data;
+          if (dados) {
+            // Pessoa
+            setCodPessoa(dados.instrumento?.pessoa?.codigo);
+            setStateCpfCnpjPessoa(dados.instrumento?.pessoa?.cpf_cnpj);
+            setNomePessoa(dados.instrumento?.pessoa?.nome);
+
+            // Instrumento
+            setTagInstrumento(dados.instrumento?.tag);
+            setDescricaoInstrumento(dados.instrumento?.descricao);
+
+            // Calibracao
+            setDataCalibracao(addHours(new Date(dados.data_calibracao), 3));
+            setLaboratorio(dados.laboratorio);
+            setNumeroCertificado(dados.numero_certificado);
+
+            const certificado = await api.get(
+              `/pessoas/${uuidPessoa}/instrumentos/${uuidInstrumento}/calibracoes/${calibracaoId}/certificado`,
+              { responseType: "blob" }
+            );
+
+            if (certificado?.status === 200) {
+              const file = ConvertBlobToFile(
+                certificado.data,
+                `Certificado-${calibracaoId}.pdf`
+              );
+
+              setArquivoCertificado({
+                file: file,
+                preview: URL.createObjectURL(file),
+              });
+            } else if (!(certificado?.status === 403)) {
+              throw new Error(certificado.data.error);
+            }
+          } else {
+            router.push("/app/calibracoes/historico");
+          }
+        } else {
+          throw new Error(response.data.error);
+        }
+      } catch (err) {
+        addToast(err.message, { appearance: "error" });
+      }
+    }
+
+    if (calibracaoId) {
+      getData();
+    }
+  }, []);
+
   return (
     <Box>
       <PageHeader
-        title="Nova Calibração"
+        title={`${!!calibracaoId ? "Editar" : "Nova"} Calibração`}
         btnLabel={uuidInstrumento ? "Salvar" : ""}
         btnIcon={<SaveRoundedIcon />}
         btnFunc={salvarCalibracao}
@@ -434,14 +501,17 @@ export default List;
 export const getServerSideProps: GetServerSideProps = async ({
   req,
   query,
+  params,
 }) => {
-  const { pessoaId } = query;
+  const { pessoaId, instrumentoId } = query;
   const jwt = GetDataFromJwtToken(req.cookies.token);
 
   return {
     props: {
       usuarioId: jwt?.usuarioId || null,
       pessoaId: jwt?.pessoaId ? jwt.pessoaId : pessoaId || null,
+      instrumentoId: instrumentoId || null,
+      calibracaoId: params?.id || null,
     },
   };
 };

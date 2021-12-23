@@ -62,7 +62,7 @@ export default async function CamposExportar(
 
       let dados = [];
       if (relatorio === NomeRelatorio.listaClientes && !pessoaId) {
-        dados = await prisma.$queryRaw(`
+        dados = await prisma.$queryRawUnsafe(`
         select
           ${sqlColunas}
         from
@@ -74,7 +74,7 @@ export default async function CamposExportar(
           clientes.id
         `);
       } else if (relatorio === NomeRelatorio.listaInstrumentos) {
-        dados = await prisma.$queryRaw(`
+        dados = await prisma.$queryRawUnsafe(`
         select
           ${sqlColunas}
         from 
@@ -89,7 +89,7 @@ export default async function CamposExportar(
           instrumentos.descricao
         `);
       } else if (relatorio === NomeRelatorio.listaCalibracoes) {
-        dados = await prisma.$queryRaw(`
+        dados = await prisma.$queryRawUnsafe(`
         select
           ${sqlColunas}
         from

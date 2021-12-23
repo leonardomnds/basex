@@ -1,50 +1,51 @@
-import { Pessoa } from '.prisma/client';
-import bcrypt from 'bcrypt';
-import { NextApiRequest, NextApiResponse } from 'next';
+import { Pessoa } from ".prisma/client";
+import bcrypt from "bcrypt";
+import { NextApiRequest, NextApiResponse } from "next";
 
-import prisma from '../../../prisma/PrismaInstance';
-import cors from '../../../util/Cors';
+import prisma from "../../../prisma/PrismaInstance";
+import cors from "../../../util/Cors";
 
-import { SomenteNumeros, ValidateAuth  } from "../../../util/functions";
+import { SomenteNumeros, ValidateAuth } from "../../../util/functions";
 
-export default async function Pessoas(req: NextApiRequest, res: NextApiResponse) {
+export default async function Pessoas(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   try {
-
     await cors(req, res);
 
-    const usuarioId = ValidateAuth(req, 'user');
+    const usuarioId = ValidateAuth(req, "user");
 
     if (!usuarioId) {
-      res.status(401).json({error: 'Acesso não autorizado!'});
+      res.status(401).json({ error: "Acesso não autorizado!" });
       return;
-    }  
-    
+    }
+
     switch (req.method) {
-      case 'POST':
-        const pessoaSalvar : Pessoa = req.body;
+      case "POST":
+        const pessoaSalvar: Pessoa = req.body;
         pessoaSalvar.usuario_id = usuarioId;
 
         const retPost = await salvarPessoa(pessoaSalvar);
 
         if (retPost.error) {
-          res.status(retPost.code).json({error: retPost.error});
+          res.status(retPost.code).json({ error: retPost.error });
           return;
         }
 
         res.status(201).json(retPost.pessoa);
         return;
 
-      case 'GET':
+      case "GET":
         const json = await listarPessoas();
         res.status(200).json(json);
         return;
 
       default:
-        res.status(405).json({error: 'Método não suportado!'});
+        res.status(405).json({ error: "Método não suportado!" });
     }
-
   } catch (err) {
-    res.status(500).json({error: err.message});
+    res.status(500).json({ error: err.message });
   }
 }
 
@@ -61,33 +62,38 @@ const listarPessoas = async () => {
       ativo: true,
     },
     orderBy: {
-      codigo: 'asc'
-    }
+      codigo: "asc",
+    },
   });
   return people;
-}
+};
 
 export const salvarPessoa = async (pessoa: Pessoa) => {
-
   const id = pessoa?.id || null;
   delete pessoa.id;
 
   const existe = await prisma.pessoa.findUnique({
     where: {
-      cpf_cnpj: pessoa.cpf_cnpj
+      cpf_cnpj: pessoa.cpf_cnpj,
     },
     select: {
-      id: true
-    }
+      id: true,
+    },
   });
 
   if (existe && existe.id !== id) {
-    return { code: 422, error: 'Já existe um cliente cadastrado com esse CPF/CNPJ!'};
+    return {
+      code: 422,
+      error: "Já existe um cliente cadastrado com esse CPF/CNPJ!",
+    };
   }
 
   if (!pessoa?.senha_acesso) {
-    pessoa.senha_acesso = SomenteNumeros(pessoa?.cpf_cnpj || '0000').substring(0,4)
-  } else if (pessoa?.senha_acesso === '****') {
+    pessoa.senha_acesso = SomenteNumeros(pessoa?.cpf_cnpj || "0000").substring(
+      0,
+      4
+    );
+  } else if (pessoa?.senha_acesso === "****") {
     delete pessoa.senha_acesso;
   }
 
@@ -106,20 +112,20 @@ export const salvarPessoa = async (pessoa: Pessoa) => {
       data: pessoa,
       select: getPessoaJsonReturn(),
       where: {
-        id
-      }
+        id,
+      },
     });
   } else {
     pessoa.ativo = true;
     pessoa.data_cadastro = new Date();
-    
+
     const ultimoCodigo = await prisma.pessoa.aggregate({
-      max: {
+      _max: {
         codigo: true,
-      }
+      },
     });
 
-    pessoa.codigo = ultimoCodigo.max.codigo + 1;
+    pessoa.codigo = ultimoCodigo._max.codigo + 1;
 
     person = await prisma.pessoa.create({
       data: pessoa,
@@ -128,8 +134,7 @@ export const salvarPessoa = async (pessoa: Pessoa) => {
   }
 
   return { pessoa: person };
-
-}
+};
 
 export const getPessoaJsonReturn = () => {
   return {
@@ -159,7 +164,7 @@ export const getPessoaJsonReturn = () => {
         id: true,
         usuario: true,
         nome: true,
-      }
-    }
-  }
-}
+      },
+    },
+  };
+};

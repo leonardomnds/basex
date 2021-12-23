@@ -366,7 +366,7 @@ export default ListaCalibracoes;
 export const getServerSideProps: GetServerSideProps = async ({ req }) => {
   const jwt = GetDataFromJwtToken(req.cookies.token);
 
-  const laboratorios = await prisma.$queryRaw(`
+  const laboratorios: any[] = await prisma.$queryRawUnsafe(`
   SELECT
     value,
     text

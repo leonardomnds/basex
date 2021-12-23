@@ -289,7 +289,7 @@ const ListaInstrumentos: NextPage<Props> = (props: Props) => {
               textItemZero="Todos"
             />
           </Grid>
-          <Grid item xs={12} sm={6} md={4}>
+          {/* <Grid item xs={12} sm={6} md={4}>
             <Select
               label="Modelo"
               value={modelo}
@@ -298,7 +298,7 @@ const ListaInstrumentos: NextPage<Props> = (props: Props) => {
               itemZero
               textItemZero="Todos"
             />
-          </Grid>
+          </Grid> */}
           <Grid item xs={12} sm={6} md={4}>
             <Select
               label="Status"
@@ -312,6 +312,9 @@ const ListaInstrumentos: NextPage<Props> = (props: Props) => {
               ]}
             />
           </Grid>
+          <Hidden xsDown>
+            <Grid item xs={12} sm={6} md={4}></Grid>
+          </Hidden>
           <Grid item xs={6} sm={5} md={3} lg={3}>
             <DatePicker
               label="Calibração de"
@@ -410,7 +413,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
   const jwt = GetDataFromJwtToken(req.cookies.token);
 
   const getData = async (column: string) => {
-    const json = await prisma.$queryRaw(`
+    const json: any[] = await prisma.$queryRawUnsafe(`
     SELECT
 	    value,
 	    text
