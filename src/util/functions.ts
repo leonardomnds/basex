@@ -1,17 +1,17 @@
-import cookie from 'js-cookie';
-import { Base64 } from 'js-base64';
-import jwt from 'jsonwebtoken';
-import { NextApiRequest } from 'next';
-import { NomeRelatorio } from '../reports/nomesRelatorios';
-import { format } from 'date-fns';
-import xlsx from 'xlsx';
+import cookie from "js-cookie";
+import { Base64 } from "js-base64";
+import jwt from "jsonwebtoken";
+import { NextApiRequest } from "next";
+import { NomeRelatorio } from "../reports/nomesRelatorios";
+import { format } from "date-fns";
+import xlsx from "xlsx";
 
 export const SomenteNumeros = (str: string) => {
-  let onlyNumbers = '';
-  const value = str || '';
+  let onlyNumbers = "";
+  const value = str || "";
   for (let i = 0; i < value.length; i += 1) {
     const char = value.substring(i, i + 1);
-    if ('0123456789'.includes(char)) {
+    if ("0123456789".includes(char)) {
       onlyNumbers += char;
     }
   }
@@ -21,11 +21,11 @@ export const SomenteNumeros = (str: string) => {
 export const FormatarCpfCnpj = (str: string) => {
   const doc = SomenteNumeros(str);
 
-  let parte1 = '';
-  let parte2 = '';
-  let parte3 = '';
-  let parte4 = '';
-  let parte5 = '';
+  let parte1 = "";
+  let parte2 = "";
+  let parte3 = "";
+  let parte4 = "";
+  let parte5 = "";
 
   if (doc.length <= 11) {
     // CPF
@@ -65,7 +65,7 @@ export const FormatarCpfCnpj = (str: string) => {
     }
   }
 
-  return parte1 + parte2 + parte3 + parte4 + parte5 || '';
+  return parte1 + parte2 + parte3 + parte4 + parte5 || "";
 };
 
 export const FormatarCnpj = (str: string) => {
@@ -107,8 +107,8 @@ export const FormatarCep = (str: string) => {
 export const FormatarTelefone = (str: string) => {
   const fone = SomenteNumeros(str);
   let parte1 = fone.substring(0, 2);
-  let parte2 = '';
-  let parte3 = '';
+  let parte2 = "";
+  let parte3 = "";
 
   if (fone.length <= 10) {
     parte2 = fone.substring(2, 6);
@@ -136,7 +136,7 @@ export const FormatarStringToMoney = (str: string) => {
   const { length } = valor;
 
   if (length === 0) {
-    return '0,00';
+    return "0,00";
   }
   if (length === 1) {
     return `0,0${valor}`;
@@ -152,23 +152,23 @@ export const FormatarStringToMoney = (str: string) => {
 };
 
 export const StringToDouble = (str: string) => {
-  return parseFloat(str.replace(',', '.'));
+  return parseFloat(str.replace(",", "."));
 };
 
 export const StringToCurrency = (str: string) => {
-  return `R$ ${str.replace('.', ',')}`;
+  return `R$ ${str.replace(".", ",")}`;
 };
 
 export const DoubleToCurrency = (value: number, digits: number = 2) => {
-  return `R$ ${value.toLocaleString('pt-br', {
+  return `R$ ${value.toLocaleString("pt-br", {
     minimumFractionDigits: digits,
     maximumFractionDigits: digits,
   })}`;
 };
 
 export const ZerosLeft = (value: string | number, digits: number = 0) => {
-  const str = value ? value.toString() : '';
-  const pad = Array(digits + 1).join('0');
+  const str = value ? value.toString() : "";
+  const pad = Array(digits + 1).join("0");
   return pad.substring(0, pad.length - str.length) + str;
 };
 
@@ -181,96 +181,109 @@ export const ToBase64 = (value: any) =>
   });
 
 export const GetTokenFromCookie = () => {
-  const token = cookie.get('token');
+  const token = cookie.get("token");
   return token;
-}
+};
 
 export const GetAxiosConfig = () => {
   const token = GetTokenFromCookie();
   return {
     headers: {
-      Authotization: 'Bearer '+token
-    }
-  }
-}
+      Authotization: "Bearer " + token,
+    },
+  };
+};
 
 export const GetDataFromJwtToken = (token: string) => {
   if (token) {
-    const bearerLength = 'Bearer '.length;
-    
-    if (token && !token.toLowerCase().startsWith('bearer ')) {
+    const bearerLength = "Bearer ".length;
+
+    if (token && !token.toLowerCase().startsWith("bearer ")) {
       return jwt.decode(token, process.env.JWT_KEY);
     } else if (token && token.length > bearerLength) {
       return jwt.decode(token.slice(bearerLength), process.env.JWT_KEY);
     }
   }
   return null;
-}
+};
 
-export const ValidateAuth = (req: NextApiRequest, type: 'user' | 'person' | 'adm') => {
+export const ValidateAuth = (
+  req: NextApiRequest,
+  type: "user" | "person" | "adm"
+) => {
   let idAuth: string = null;
   const jwtData = GetDataFromJwtToken(req?.headers?.authorization);
   if (jwtData) {
-    if (type === 'user' || (type === 'adm' && jwtData['usuarioAdm'])) {
-      idAuth = jwtData['usuarioId'];
-    } else if (type === 'person') {
-      idAuth = jwtData['pessoaId'];
+    if (type === "user" || (type === "adm" && jwtData["usuarioAdm"])) {
+      idAuth = jwtData["usuarioId"];
+    } else if (type === "person") {
+      idAuth = jwtData["pessoaId"];
     }
-  }  
+  }
   return idAuth;
-}
+};
 
 export const AbrirRelatorio = (relatorio: NomeRelatorio, filters?: string) => {
   let url = `/app/pdf?ref=${relatorio.toString()}`;
-  if (filters?.length > 0) url += '&filters='+encodeURI(Base64.btoa(filters));
-  const win = window.open(url, '_blank');
+  if (filters?.length > 0) url += "&filters=" + encodeURI(Base64.btoa(filters));
+  const win = window.open(url, "_blank");
   if (win) win.focus();
-}
+};
 
-export const PascalCase = (str: string = '', qtdeNotCapitalize: number = 0) => {
-  let word = ''
-  const words = (` ${str} `).split(' ');
+export const PascalCase = (str: string = "", qtdeNotCapitalize: number = 0) => {
+  let word = "";
+  const words = ` ${str} `.split(" ");
 
   words.forEach((w) => {
     if (w.trim().length > qtdeNotCapitalize) {
-      word += w.charAt(0).toUpperCase() + w.substr(1).toLowerCase() + ' ';
+      word += w.charAt(0).toUpperCase() + w.substr(1).toLowerCase() + " ";
     } else {
-      word += w.toLowerCase() + ' ';
+      word += w.toLowerCase() + " ";
     }
   });
 
   return word;
-}
+};
 
 const FormatToExport = (key, value) => {
   try {
     if (value === null || value === undefined) {
-      return '';
-    }  
+      return "";
+    }
 
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       // Validando se é uma data
-      if ((value.length === 10 || value.length === 25 || value.length === 29)
-        && value.indexOf('-') === 4
-        && value.lastIndexOf('-') === 7
+      if (
+        (value.length === 10 || value.length === 25 || value.length === 29) &&
+        value.indexOf("-") === 4 &&
+        value.lastIndexOf("-") === 7
       ) {
-        return format(new Date(value.substring(0,10)), 'dd/MM/yyyy');
+        return format(new Date(value.substring(0, 10)), "dd/MM/yyyy");
       }
 
       // Removendo caracteres que possam quebrar o arquivo CSV gerado
-      return value.split(';').join(' ').split('\r\n').join(' ').split('\n').join(' ').split('\t').join(' ').trim();
-    } else if (key.includes('.ativo') && typeof value === 'number') {
+      return value
+        .split(";")
+        .join(" ")
+        .split("\r\n")
+        .join(" ")
+        .split("\n")
+        .join(" ")
+        .split("\t")
+        .join(" ")
+        .trim();
+    } else if (key.includes(".ativo") && typeof value === "number") {
       return value === 1 ? "Sim" : "Não";
     }
   } catch (err) {
     return value;
   }
   return value;
-}
+};
 
 export const JsonToCSV = async (json: Object[]) => {
   // Caractere que separa cada campo
-  const separator = ';';
+  const separator = ";";
 
   // Nomes das colunas
   const header = Object.keys(json[0]);
@@ -278,16 +291,22 @@ export const JsonToCSV = async (json: Object[]) => {
   const csv = [
     header.join(separator),
     ...json.map((row) => {
-      return header.map((collName) => {
-        return FormatToExport(collName, row[collName]);
-      }).join(separator)
-    })
-  ].join('\r\n');
+      return header
+        .map((collName) => {
+          return FormatToExport(collName, row[collName]);
+        })
+        .join(separator);
+    }),
+  ].join("\r\n");
 
   return csv;
-}
+};
 
-export const JsonToXLSX = async (json: Object[], filePath: string, sheetName?: string) => {
+export const JsonToXLSX = async (
+  json: Object[],
+  filePath: string,
+  sheetName?: string
+) => {
   // Nomes das colunas
   const header = Object.keys(json[0]);
 
@@ -299,7 +318,7 @@ export const JsonToXLSX = async (json: Object[], filePath: string, sheetName?: s
     oneRow = [];
 
     header.forEach((coluna) => {
-      oneRow.push(FormatToExport(coluna, item[coluna]))
+      oneRow.push(FormatToExport(coluna, item[coluna]));
     });
 
     allRows.push(oneRow);
@@ -308,15 +327,15 @@ export const JsonToXLSX = async (json: Object[], filePath: string, sheetName?: s
   try {
     // Criando planilha Excel
     const workBook = xlsx.utils.book_new();
-    const workSheet = xlsx.utils.aoa_to_sheet([header, ... allRows]);
-    
+    const workSheet = xlsx.utils.aoa_to_sheet([header, ...allRows]);
+
     // Criando arquivo na pasta passada por parâmetro
-    xlsx.utils.book_append_sheet(workBook, workSheet, sheetName || 'Dados');
+    xlsx.utils.book_append_sheet(workBook, workSheet, sheetName || "Dados");
     xlsx.writeFile(workBook, filePath);
   } catch (err) {
     throw new Error(err.message);
   }
-}
+};
 
 export const ConvertBlobToFile = (blob: Blob, fileName: string) => {
   let b: any = blob;
@@ -326,4 +345,14 @@ export const ConvertBlobToFile = (blob: Blob, fileName: string) => {
 
   // Cast to a File() type
   return <File>blob;
-}
+};
+
+export const FormatUtcDate = (date: Date | string) => {
+  if (typeof date === "string") {
+    date = new Date(date);
+  }
+
+  date = new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+
+  return format(date, "dd/MM/yyy");
+};

@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { useToasts } from "react-toast-notifications";
-import { addHours, format } from "date-fns";
 
-import { makeStyles, Box, Paper, Tabs, Tab, Grid } from "@material-ui/core";
+import { makeStyles, Box, Paper, Grid } from "@material-ui/core";
 import SearchIcon from "@material-ui/icons/SearchRounded";
 import CloseIcon from "@material-ui/icons/CloseRounded";
 
@@ -18,6 +17,7 @@ import CustomDialog from "../../../../components/CustomDialog";
 import { GetServerSideProps, NextPage } from "next";
 import api from "../../../../util/Api";
 import {
+  FormatUtcDate,
   FormatarCpfCnpj,
   GetDataFromJwtToken,
   ZerosLeft,
@@ -162,11 +162,9 @@ const List: NextPage<Props> = (props: Props) => {
                   i.id,
                   i.tag,
                   i.descricao,
-                  i.ultima_calibracao
-                    ? format(new Date(i.ultima_calibracao), "dd/MM/yyyy")
-                    : "",
+                  i.ultima_calibracao ? FormatUtcDate(i.ultima_calibracao) : "",
                   i.vencimento_calibracao
-                    ? format(new Date(i.vencimento_calibracao), "dd/MM/yyyy")
+                    ? FormatUtcDate(i.vencimento_calibracao)
                     : "",
                   i.ativo ? "Ativo" : "Inativo",
                 ],
@@ -252,7 +250,14 @@ const List: NextPage<Props> = (props: Props) => {
       {deletingInstrument && (
         <CustomDialog
           title="Excluir instrumento"
-          text={`Confirma a exclusão do instrumento ${deletingInstrument.descricao}?`}
+          text={`
+            Confirma a exclusão do instrumento ${deletingInstrument.descricao}?
+            ${
+              deletingInstrument.dtCalibracao
+                ? "Suas calibrações também serão eliminadas, e não é possível reverter esta ação."
+                : ""
+            }
+          `}
           isOpen={Boolean(deletingInstrument)}
           onClose={handleCloseDialog}
           onConfirm={handleConfirmDeleteInstrument}

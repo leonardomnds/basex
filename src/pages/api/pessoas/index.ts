@@ -24,7 +24,6 @@ export default async function Pessoas(
     switch (req.method) {
       case "POST":
         const pessoaSalvar: Pessoa = req.body;
-        pessoaSalvar.usuario_id = usuarioId;
 
         const retPost = await salvarPessoa(pessoaSalvar);
 
@@ -105,7 +104,6 @@ export const salvarPessoa = async (pessoa: Pessoa) => {
 
   if (id) {
     delete pessoa.codigo;
-    delete pessoa.usuario_id;
     delete pessoa.data_cadastro;
 
     person = await prisma.pessoa.update({
@@ -159,12 +157,5 @@ export const getPessoaJsonReturn = () => {
     data_cadastro: true,
     grupo: true,
     categoria: true,
-    usuario: {
-      select: {
-        id: true,
-        usuario: true,
-        nome: true,
-      },
-    },
   };
 };
