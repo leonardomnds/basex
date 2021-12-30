@@ -188,7 +188,6 @@ const NewPeople: NextPage<Props> = (props) => {
           categoria_id: categoria || null,
           ativo: isAtivo,
           data_cadastro: null,
-          usuario_id: null,
           expiracao_url_senha: null,
           email_recuperacao: null,
           url_senha: null,

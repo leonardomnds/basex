@@ -19,7 +19,6 @@ model Usuario {
   avatar Bytes? @db.LongBlob
   url_senha String? @db.VarChar(100)
   expiracao_url_senha DateTime?
-  pessoas Pessoa[]
   @@map("usuarios")
 }
 
@@ -65,8 +64,6 @@ model Pessoa {
   url_senha String? @db.VarChar(100)
   expiracao_url_senha DateTime?
   email_recuperacao String? @db.VarChar(255)
-  usuario_id String @db.VarChar(100)
-  usuario Usuario @relation(fields: [usuario_id], references: [id])
   intrumentos Instrumento[]
   @@map("pessoas")
 }

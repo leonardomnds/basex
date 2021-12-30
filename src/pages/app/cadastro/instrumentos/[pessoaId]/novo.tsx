@@ -23,7 +23,7 @@ import api from "../../../../../util/Api";
 
 import { GetServerSideProps, NextPage } from "next";
 import { Instrumento } from ".prisma/client";
-import { SomenteNumeros } from "../../../../../util/functions";
+import { FormatUtcDate, SomenteNumeros } from "../../../../../util/functions";
 import CustomTable, {
   getColumn,
   getRow,
@@ -173,12 +173,7 @@ const NewInstrument: NextPage<Props> = (props: Props) => {
               getRow(
                 [
                   c.id,
-                  c.data_calibracao
-                    ? format(
-                        addHours(new Date(c.data_calibracao), 3),
-                        "dd/MM/yyyy"
-                      )
-                    : "",
+                  c.data_calibracao ? FormatUtcDate(c.data_calibracao) : "",
                   c.numero_certificado,
                   c.laboratorio,
                 ],

@@ -18,6 +18,6 @@ export default {
         i.ativo,
         i.tempo_calibracao
     ) As T
-    `
-  }
-}
+    `;
+  },
+};

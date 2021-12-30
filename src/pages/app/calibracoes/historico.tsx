@@ -22,6 +22,7 @@ import api from "../../../util/Api";
 import {
   ConvertBlobToFile,
   FormatarCpfCnpj,
+  FormatUtcDate,
   GetDataFromJwtToken,
   ZerosLeft,
 } from "../../../util/functions";
@@ -188,12 +189,7 @@ const List: NextPage<Props> = (props: Props) => {
                 [
                   c.id,
                   c.instrumento.id,
-                  c.data_calibracao
-                    ? format(
-                        addHours(new Date(c.data_calibracao), 3),
-                        "dd/MM/yyyy"
-                      )
-                    : "",
+                  c.data_calibracao ? FormatUtcDate(c.data_calibracao) : "",
                   c.instrumento?.tag || "",
                   c.instrumento?.descricao || "",
                   c.numero_certificado,
