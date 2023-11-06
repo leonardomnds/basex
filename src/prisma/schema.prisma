@@ -98,6 +98,7 @@ model Calibracao {
   data_calibracao DateTime @db.Date
   numero_certificado String @db.VarChar(100)
   pdfCertificado Bytes? @db.LongBlob
+  pdfCertificadoBase64 String? @db.LongText
   laboratorio String? @db.VarChar(100)
   data_cadastro DateTime @default(now())
   @@map("instrumentos_calibracoes")
