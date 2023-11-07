@@ -17,29 +17,42 @@ export default async function Certificado(req: NextApiRequest, res: NextApiRespo
       const calibracao = await prisma.calibracao.findUnique({
         select: {
           pdfCertificado: true,
+          pdfCertificadoBase64: true,
         },
         where: {
           id
         }
       })
 
-      if (calibracao && calibracao?.pdfCertificado) {
-        fs.writeFile(filePath, calibracao.pdfCertificado, async (writeErr) => {
-          if (writeErr) throw new Error(writeErr.message);
-          fs.readFile(filePath, async (readErr, file) => {
-            if (readErr) throw new Error(readErr.message);
-            fs.unlink(filePath, () => {})
-            res.setHeader('Content-disposition', 'attachment; filename='+filePath.slice(filePath.lastIndexOf('/')+1));
-            res.setHeader('Content-Type', 'application/pdf');
-            res.status(200).send(file);
-            return;
+      const renderError = () => res.status(403).json({ error: 'Calibração não possui certificado anexado!'});
+
+      if (calibracao) {
+        let { pdfCertificado, pdfCertificadoBase64 } = calibracao;
+
+        if (pdfCertificadoBase64) {
+          pdfCertificado = Buffer.from(pdfCertificadoBase64.split(",")[1], 'base64');
+        }
+
+        if (pdfCertificado) {
+          fs.writeFile(filePath, pdfCertificado, async (writeErr) => {
+            if (writeErr) throw new Error(writeErr.message);
+            fs.readFile(filePath, async (readErr, file) => {
+              if (readErr) throw new Error(readErr.message);
+              fs.unlink(filePath, () => {})
+              res.setHeader('Content-Type', 'application/pdf');
+              res.setHeader('Content-disposition', `attachment; filename=${id}.pdf`);
+              res.status(200).send(file);
+              return;
+            });
           });
-        });
+        } else {
+          renderError();
+          return;
+        }
       } else {
-        res.status(403).json({ error: 'Calibração não possui certificado anexado!'});
+        renderError();
         return;
       }
-
     } else {
       res.status(405).json({error: 'Método não suportado!'});
       return;

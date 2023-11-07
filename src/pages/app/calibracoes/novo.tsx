@@ -18,6 +18,7 @@ import { GetServerSideProps, NextPage } from "next";
 import api from "../../../util/Api";
 import {
   ConvertBlobToFile,
+  ConvertFileToBase64,
   FormatarCpfCnpj,
   GetDataFromJwtToken,
   ZerosLeft,
@@ -85,6 +86,12 @@ const List: NextPage<Props> = (props: Props) => {
     } else {
       addToast("O anexo deve ser um PDF", { appearance: "warning" });
     }
+  };
+
+  const fileToBase64 = (file): Promise<string> | string => {
+    if (!arquivoCertificado?.file) { return ''; }
+
+    return ConvertFileToBase64(file) as Promise<string>;
   };
 
   const [isSaving, setSaving] = useState<boolean>(false);
@@ -183,8 +190,12 @@ const List: NextPage<Props> = (props: Props) => {
         if (numeroCertificado)
           formData.append("numero_certificado", numeroCertificado);
         if (laboratorio) formData.append("laboratorio", laboratorio);
-        if (arquivoCertificado?.file)
-          formData.append("pdfCertificado", arquivoCertificado?.file);
+
+        console.log({ arquivoCertificado })
+
+        if (arquivoCertificado?.file) {
+          formData.append("pdfCertificadoBase64", await fileToBase64(arquivoCertificado.file) as string);
+        }
 
         if (!!calibracaoId) {
           response = await api.put(
